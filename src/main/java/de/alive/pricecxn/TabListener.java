@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class TabListener {
 
     private String notInValue;
-    private int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
+    private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
 
     private static final int MAX_REFRESH = 15;
 
@@ -39,9 +39,7 @@ public abstract class TabListener {
             if(client.getCurrentServerEntry() == null) return;
             if(!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, 5).thenRun(() -> {
-                System.out.println("refreshed");
-            });
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent);
         });
     }
 
