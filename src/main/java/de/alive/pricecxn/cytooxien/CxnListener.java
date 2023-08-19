@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import de.alive.pricecxn.ServerListener;
+import de.alive.pricecxn.cytooxien.listener.*;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Formatting;
@@ -9,12 +10,17 @@ import java.util.List;
 
 public class CxnListener extends ServerListener {
 
-    private ThemeServerChecker themeChecker;
+    private final ThemeServerChecker themeChecker;
 
     public CxnListener() {
         super(List.of("Cytooxien"), List.of("beta"));
 
         this.themeChecker = new ThemeServerChecker(List.of("Du befindest dich auf"), this.isOnServer());
+
+        InventoryListener auctionListener = new AuctionHouseListener(this.isOnServer());
+        InventoryListener itemListener = new ItemShopListener(this.isOnServer());
+        InventoryListener nookListener = new TomNookListener(this.isOnServer());
+        InventoryListener tradeListener = new TradeListener(this.isOnServer());
 
     }
 
