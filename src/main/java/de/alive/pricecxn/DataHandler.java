@@ -3,6 +3,7 @@ package de.alive.pricecxn;
 import com.google.gson.*;
 import de.alive.pricecxn.utils.Http;
 
+import javax.xml.crypto.Data;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -21,36 +22,46 @@ public class DataHandler {
 
     private Map<String, List<String>> data = null;
 
+    /**
+     * This constructor is used to create a DataHandler
+     * @param serverChecker The ServerChecker that should be used to check if the server is reachable
+     * @param uri The uri of the server
+     * @param columnNames The names of the columns that should be returned
+     * @param keyColumnName The name of the column that should be used as key
+     * @param refreshInterval The interval in which the data should be refreshed in milliseconds
+     */
     public DataHandler(ServerChecker serverChecker, String uri, List<String> columnNames, String keyColumnName, int refreshInterval) {
-
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
         this.columnNames = columnNames;
         this.keyColumnName = keyColumnName;
-
-        refresh();
     }
 
+    /**
+     * This method is used to refresh the data
+     * @param isForced If the refresh is forced, the data will be refreshed even if it is up-to-date
+     * @return A CompletableFuture which returns null if the refresh was successful
+     */
     public CompletableFuture<Void> refresh(boolean isForced) {
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
-        if(!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
+        if (!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
             System.err.println("Data is already up-to-date");
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
-        // If the server is not connected, we can return the CompletableFuture
-        if(!this.serverChecker.isConnected()) {
-            System.err.println("Server isn't reachable");
-            return null;
-        }
+        // Check the server connection asynchronously
+        this.serverChecker.isConnected().thenCompose(isConnected -> {
+            if (!isConnected) {
+                System.err.println("Server isn't reachable");
+                return CompletableFuture.completedFuture(null);
+            }
 
-        // else request the data
-        CompletableFuture<Map<String, List<String>>> importFuture = importSettingsAsync(this.uri, this.columnNames, this.keyColumnName);
-
-        importFuture.thenAccept(data -> {
+            // Request the data asynchronously
+            return getServerDataAsync(this.uri, this.columnNames, this.keyColumnName);
+        }).thenAccept(data -> {
             this.data = data;
             this.lastUpdate = System.currentTimeMillis();
             future.complete(null); // Marking the CompletableFuture as completed
@@ -63,11 +74,22 @@ public class DataHandler {
         return future;
     }
 
+    /**
+     * This method is used to refresh the data only if it is not up-to-date
+     * @return A CompletableFuture which returns null if the refresh was successful
+     */
     public CompletableFuture<Void> refresh() {
         return refresh(false);
     }
 
-    public static CompletableFuture<Map<String, List<String>>> importSettingsAsync(String url, List<String> columnNames, String keyColumnName) {
+    /**
+     * This method is used to get the data async from the server
+     * @param url The url to the server
+     * @param columnNames The names of the columns that should be returned
+     * @param keyColumnName The name of the column that should be used as key
+     * @return A CompletableFuture which returns the data as a Map with the key as the key and the values as a List
+     */
+    private CompletableFuture<Map<String, List<String>>> getServerDataAsync(String url, List<String> columnNames, String keyColumnName) {
         CompletableFuture<Map<String, List<String>>> future = new CompletableFuture<>();
 
         Http.GET(url, "", response -> response, jsonString -> {
@@ -111,5 +133,9 @@ public class DataHandler {
         });
 
         return future;
+    }
+
+    public Map<String, List<String>> getData() {
+        return data;
     }
 }

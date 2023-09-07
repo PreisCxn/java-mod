@@ -2,6 +2,8 @@ package de.alive.pricecxn;
 
 import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This class is used to check if the player is on a specific server.
  */
 public abstract class ServerListener {
-
     private static final String DEFAULT_IGNORED_IP = "beta";
     private static final String DEFAULT_IP = "cytooxien";
 
@@ -53,6 +54,10 @@ public abstract class ServerListener {
             this.onServer.set(false);
             if(doMethod) this.onServerLeave();
         });
+    }
+
+    public void refreshOnTabChange(){
+
     }
 
     /**

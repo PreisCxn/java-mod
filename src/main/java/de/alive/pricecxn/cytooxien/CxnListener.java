@@ -6,28 +6,34 @@ import de.alive.pricecxn.ServerListener;
 import de.alive.pricecxn.cytooxien.listener.*;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CxnListener extends ServerListener {
 
-    private static final String PRICE_CXN_URI = "";
+    private static final List<String> DEFAULT_IPS = List.of("cytooxien");
+    private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
+
     private final ThemeServerChecker themeChecker;
     private final List<InventoryListener> listeners;
     private final ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
 
     public CxnListener() {
-        super(List.of("Cytooxien"), List.of("beta"));
+        super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
 
-        this.themeChecker = new ThemeServerChecker(List.of("Du befindest dich auf"), this.isOnServer());
-        this.serverChecker = new ServerChecker(CxnListener.PRICE_CXN_URI);
-
+        //getting Data from server
+        this.serverChecker = new ServerChecker();
         data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
 
+        //setting up theme checker and listeners
+        this.themeChecker = new ThemeServerChecker(this, List.of("Du befindest dich auf"), this.isOnServer());
         listeners = List.of(
                 new AuctionHouseListener(this.isOnServer()),
                 new ItemShopListener(this.isOnServer()),
@@ -37,10 +43,20 @@ public class CxnListener extends ServerListener {
 
     }
 
+    //refreshes the data after mode change
+    @Override
+    public void refreshOnTabChange(){
+        data.get("pricecxn.data.item_data").refresh();
+    }
+
     @Override
     public void onServerJoin() {
         themeChecker.refreshAsync().thenRun(() -> {
+
+
+
             System.out.println("Cytooxien joined : " + this.isOnServer().get());
+            MinecraftClient.getInstance().player.sendMessage(Text.translatable("test.translatable.cxnListener").formatted(Formatting.RED));
             MinecraftClient.getInstance().player.sendMessage(StringUtil.getColorizedString("Cytooxien joined : " + this.isOnServer().get() + " : " + themeChecker.getMode().toString(), Formatting.AQUA));
         });
     }
@@ -49,4 +65,9 @@ public class CxnListener extends ServerListener {
     public void onServerLeave() {
         System.out.println("Cytooxien left : " + this.isOnServer().get());
     }
+
+    public DataHandler getData(String key) {
+        return data.get(key);
+    }
+
 }

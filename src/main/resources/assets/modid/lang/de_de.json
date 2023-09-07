@@ -1,0 +1,10 @@
+{
+  "cxn_listener.test": "Test",
+
+  "cxn_listener.server_connection.error": "Verbindung zum Server fehlgeschlagen.",
+  "cxn_listener.server_connection.success": "Verbindung zum Server hergestellt.",
+
+  "cxn_listener.data_handler.refresh": "%s Daten wurden aktualisiert.",
+
+  "cxn_listener.theme_checker.changed": "Modus zu %s geändert."
+}

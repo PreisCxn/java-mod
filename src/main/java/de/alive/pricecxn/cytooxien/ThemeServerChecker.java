@@ -1,10 +1,16 @@
 package de.alive.pricecxn.cytooxien;
 
+import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.ServerListener;
 import de.alive.pricecxn.TabListener;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,13 +20,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ThemeServerChecker extends TabListener {
 
+    private static final List<String> DEFAULT_SEARCHES = List.of("Du befindest dich auf");
+
     private Modes mode = Modes.NOTHING;
 
     private final AtomicBoolean onServer;
 
-    public ThemeServerChecker(@NotNull List<String> searches, @NotNull AtomicBoolean onServer) {
-        super(searches);
+    private final ServerListener serverListener;
+
+    public ThemeServerChecker(@NotNull ServerListener serverListener, @Nullable List<String> searches, @NotNull AtomicBoolean onServer) {
+        super(searches == null ? DEFAULT_SEARCHES : searches);
         this.onServer = onServer;
+        this.serverListener = serverListener;
     }
 
     //check for the mode from the tab list
@@ -40,7 +51,10 @@ public class ThemeServerChecker extends TabListener {
 
         setNotInValue(this.mode.toString());
 
+        serverListener.refreshOnTabChange();
+
         MinecraftClient.getInstance().player.sendMessage(StringUtil.getColorizedString("New Mode: " + this.mode.toString(), Formatting.AQUA));
+        MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
     }
 
     @Override

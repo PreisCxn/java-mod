@@ -1,0 +1,10 @@
+{
+  "cxn_listener.test": "Test",
+
+  "cxn_listener.server_connection.error": "",
+  "cxn_listener.server_connection.success": "",
+
+  "cxn_listener.data_handler.refresh": "",
+
+  "cxn_listener.theme_checker.changed": ""
+}
