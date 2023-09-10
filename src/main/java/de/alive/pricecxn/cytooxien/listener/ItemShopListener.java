@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.PriceCxnMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
@@ -7,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class ItemShopListener extends InventoryListener {
     /**
@@ -26,16 +29,16 @@ public class ItemShopListener extends InventoryListener {
 
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("ItemShopListener.onInventoryOpen");
+        printDebug("ItemShop open");
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("ItemShopListener.onInventoryClose");
+        printDebug("ItemShop close");
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("ItemShopListener.onInventoryUpdate");
+        printDebug("ItemShop updated");
     }
 }

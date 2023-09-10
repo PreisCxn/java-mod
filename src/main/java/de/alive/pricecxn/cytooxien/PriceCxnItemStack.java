@@ -1,5 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
+import net.minecraft.item.ItemStack;
+
 import java.util.List;
 
 public class PriceCxnItemStack {
@@ -8,4 +10,7 @@ public class PriceCxnItemStack {
     private static final List<String> BID_SEARCH = List.of( "Gebotsbetrag: " );
     private static final List<String> BUY_SEARCH = List.of( "Sofortkauf: ");
 
+    public PriceCxnItemStack(ItemStack item) {
+
+    }
 }

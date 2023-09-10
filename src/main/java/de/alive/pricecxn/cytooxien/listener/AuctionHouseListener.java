@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+
 public class AuctionHouseListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> itemStacks = new ArrayList<>();
@@ -34,7 +36,7 @@ public class AuctionHouseListener extends InventoryListener {
 
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryOpen", true);
+        printDebug("AuctionHouse open");
 
         itemStacks.clear();
 
@@ -42,12 +44,12 @@ public class AuctionHouseListener extends InventoryListener {
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryClose", true);
+        printDebug("AuctionHouse close");
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryOpen", true);
+        printDebug("AuctionHouse updated");
     }
 
 }

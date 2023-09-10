@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+
 public class TomNookListener extends InventoryListener {
      /**
      * This constructor is used to listen to a specific inventory
@@ -26,16 +28,16 @@ public class TomNookListener extends InventoryListener {
 
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TomNookListener.onInventoryOpen");
+        printDebug("TomNook open");
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TomNookListener.onInventoryClose");
+        printDebug("TomNook close");
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TomNookListener.onInventoryUpdate");
+        printDebug("TomNook updated");
     }
 }

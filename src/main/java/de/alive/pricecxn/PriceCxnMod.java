@@ -51,6 +51,7 @@ public class PriceCxnMod implements ModInitializer {
 
 	public static void printDebug(String message){
 		printDebug(message, false);
+		printDebug(message, true);
 	}
 
 

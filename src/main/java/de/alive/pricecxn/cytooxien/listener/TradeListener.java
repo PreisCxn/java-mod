@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+
 public class TradeListener extends InventoryListener {
     /**
      * This constructor is used to listen to a specific inventory
@@ -26,16 +28,16 @@ public class TradeListener extends InventoryListener {
 
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TradeListener.onInventoryOpen");
+        printDebug("Trade open");
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TradeListener.onInventoryClose");
+        printDebug("Trade close");
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("TradeListener.onInventoryUpdate");
+        printDebug("Trade updated");
     }
 }
