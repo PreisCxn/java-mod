@@ -1,14 +1,23 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class AuctionHouseListener extends InventoryListener {
+
+    private final List<PriceCxnItemStack> itemStacks = new ArrayList<>();
+
+
     /**
      * This constructor is used to listen to a specific inventory
      *
@@ -25,16 +34,20 @@ public class AuctionHouseListener extends InventoryListener {
 
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("AuctionHouseListener.onInventoryOpen");
+        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryOpen", true);
+
+        itemStacks.clear();
+
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("AuctionHouseListener.onInventoryClose");
+        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryClose", true);
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
-        System.out.println("AuctionHouseListener.onInventoryUpdate");
+        PriceCxnMod.printDebug("AuctionHouseListener.onInventoryOpen", true);
     }
+
 }
