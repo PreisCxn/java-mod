@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -22,7 +23,7 @@ public abstract class InventoryListener {
     private final int inventorySize; //Anzahl an Slots
     private final Executor executor = Executors.newSingleThreadExecutor();
 
-    private final List<Slot> slots = new ArrayList<>();
+    private final List<String> slotNbt = new ArrayList<>();
 
     private final AtomicBoolean active;
 
@@ -117,10 +118,12 @@ public abstract class InventoryListener {
         if(!isInventoryTitle(client, inventoryTitles)) return false;
 
         for (int i = 0; i < this.inventorySize; i++){
-            if(!Objects.equals(slots.get(i).getStack().getName().toString(), handler.getSlot(i).getStack().getName().toString())){
+
+            if(handler.getSlot(i).getStack().getNbt() != null && !slotNbt.contains(Objects.requireNonNull(handler.getSlot(i).getStack().getNbt()).toString())){
                 initSlots(handler);
                 return true;
             }
+
         }
 
         return false;
@@ -137,10 +140,12 @@ public abstract class InventoryListener {
     private void initSlots(@Nullable ScreenHandler handler){
         if(handler == null) return;
 
-        this.slots.clear();
+        this.slotNbt.clear();
 
         for (int i = 0; i < this.inventorySize; i++){
-            slots.add(handler.getSlot(i));
+            if(handler.getSlot(i).getStack().getNbt() != null) {
+                slotNbt.add(handler.getSlot(i).getStack().getNbt().toString());
+            }
         }
     }
 
