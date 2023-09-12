@@ -32,6 +32,10 @@ public class ThemeServerChecker extends TabListener {
         this.serverListener = serverListener;
     }
 
+    public ThemeServerChecker(@NotNull ServerListener serverListener, @NotNull AtomicBoolean onServer) {
+        this(serverListener, SearchDataAccess.THEME_SERVER_SEARCH, onServer);
+    }
+
     //check for the mode from the tab list
     @Override
     protected void handleData(@NotNull String data) {
