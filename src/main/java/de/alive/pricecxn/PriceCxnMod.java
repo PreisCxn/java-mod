@@ -29,7 +29,6 @@ public class PriceCxnMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 
-		LOGGER.info("Hello Fabric world!");
 	}
 
 	public static void doDebug(Consumer<MinecraftClient> function){
