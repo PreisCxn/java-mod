@@ -3,7 +3,7 @@
 	"package": "de.alive.pricecxn.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+
 	],
 	"injectors": {
 		"defaultRequire": 1
