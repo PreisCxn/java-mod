@@ -20,17 +20,11 @@ public abstract class TabListener {
 
     private static final int MAX_REFRESH = 15;
 
-    public static final List<String> DEFAULT_TABSEARCH = List.of("");
+    private DataAccess searches;
 
-    private List<String> searches;
-
-    public TabListener(@Nullable List<String> searches){
-        this.searches = searches == null ? TabListener.DEFAULT_TABSEARCH : searches;
+    public TabListener(@NotNull DataAccess searches){
+        this.searches = searches;
         init();
-    }
-
-    public TabListener(){
-        this(TabListener.DEFAULT_TABSEARCH);
     }
 
     private void init(){
@@ -61,7 +55,7 @@ public abstract class TabListener {
                     })
                     .filter(Objects::nonNull)
                     .forEach(value -> {
-                        this.searches.stream()
+                        this.searches.getData().stream()
                                 .filter(search -> value.toString().contains(search))
                                 .forEach(search -> {
                                     if(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())) return;
@@ -124,10 +118,10 @@ public abstract class TabListener {
     }
 
     public List<String> getSearches() {
-        return searches;
+        return searches.getData();
     }
 
-    public void setSearches(List<String> searches) {
+    public void setDataAccess(DataAccess searches) {
         this.searches = searches;
     }
 

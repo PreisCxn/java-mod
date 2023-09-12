@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
+import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.ServerListener;
 import de.alive.pricecxn.TabListener;
@@ -28,8 +29,8 @@ public class ThemeServerChecker extends TabListener {
 
     private final ServerListener serverListener;
 
-    public ThemeServerChecker(@NotNull ServerListener serverListener, @Nullable List<String> searches, @NotNull AtomicBoolean onServer) {
-        super(searches == null ? DEFAULT_SEARCHES : searches);
+    public ThemeServerChecker(@NotNull ServerListener serverListener, @NotNull DataAccess searches, @NotNull AtomicBoolean onServer) {
+        super(searches);
         this.onServer = onServer;
         this.serverListener = serverListener;
     }

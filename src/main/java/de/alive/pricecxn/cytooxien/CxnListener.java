@@ -34,7 +34,7 @@ public class CxnListener extends ServerListener {
 
 
         //setting up theme checker and listeners
-        this.themeChecker = new ThemeServerChecker(this, SearchDataAccess.THEME_SERVER_SEARCH.getData(), this.isOnServer());
+        this.themeChecker = new ThemeServerChecker(this, SearchDataAccess.THEME_SERVER_SEARCH, this.isOnServer());
         listeners = List.of(
                 new AuctionHouseListener(this.isOnServer()),
                 new ItemShopListener(this.isOnServer()),
