@@ -1,6 +1,6 @@
 # Price Cytooxien Mod
 
-###### By \_Alive_ 
+###### By \_Alive_
 
 Fabric Mod to display the prices of the https://preiscxn.de side in the item tooltips.
  - Gathers information to keep the prices up to date.
@@ -14,4 +14,5 @@ Fabric Mod to display the prices of the https://preiscxn.de side in the item too
 - Download the latest Fabric-API version (https://www.curseforge.com/minecraft/mc-mods/fabric-api) and put it also into your mods folder
 - Start or restart your Minecraft and join the cytooxien.de network
 
-
+## Special thanks
+Thanks to TeddyBear_2004 for supporting the mod and programming the HTTP-Communication-System and the JSON-Converter for the nbtTags.
