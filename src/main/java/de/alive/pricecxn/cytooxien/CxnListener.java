@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+
 public class CxnListener extends ServerListener {
 
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
@@ -46,7 +48,7 @@ public class CxnListener extends ServerListener {
 
     //refreshes the data after mode change
     @Override
-    public void refreshOnTabChange(){
+    public void onTabChange(){
         data.get("pricecxn.data.item_data").refresh();
     }
 
@@ -54,11 +56,9 @@ public class CxnListener extends ServerListener {
     public void onServerJoin() {
         themeChecker.refreshAsync().thenRun(() -> {
 
-
-
-            System.out.println("Cytooxien joined : " + this.isOnServer().get());
+            printDebug("joined Cytooxien: " + this.isOnServer().get());
             MinecraftClient.getInstance().player.sendMessage(Text.translatable("test.translatable.cxnListener").formatted(Formatting.RED));
-            MinecraftClient.getInstance().player.sendMessage(StringUtil.getColorizedString("Cytooxien joined : " + this.isOnServer().get() + " : " + themeChecker.getMode().toString(), Formatting.AQUA));
+
         });
     }
 

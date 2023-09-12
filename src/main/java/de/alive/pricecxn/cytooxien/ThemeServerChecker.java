@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+
 /**
  * This class is used to check the theme server for the current mode.
  */
@@ -53,9 +55,9 @@ public class ThemeServerChecker extends TabListener {
 
         setNotInValue(this.mode.toString());
 
-        serverListener.refreshOnTabChange();
+        serverListener.onTabChange();
 
-        MinecraftClient.getInstance().player.sendMessage(StringUtil.getColorizedString("New Mode: " + this.mode.toString(), Formatting.AQUA));
+        printDebug("New Mode: " + this.mode.toString());
         MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
     }
 

@@ -2,8 +2,6 @@ package de.alive.pricecxn;
 
 import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.text.Style;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +54,7 @@ public abstract class ServerListener {
         });
     }
 
-    public void refreshOnTabChange(){
+    public void onTabChange(){
 
     }
 
