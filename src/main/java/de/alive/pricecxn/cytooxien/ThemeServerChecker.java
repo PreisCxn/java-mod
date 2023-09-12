@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,14 +29,18 @@ public class ThemeServerChecker extends TabListener {
 
     private final ServerListener serverListener;
 
-    public ThemeServerChecker(@NotNull ServerListener serverListener, @NotNull DataAccess searches, @NotNull AtomicBoolean onServer) {
+    public ThemeServerChecker(@Nullable ServerListener serverListener, @NotNull DataAccess searches, @NotNull AtomicBoolean onServer) {
         super(searches);
         this.onServer = onServer;
         this.serverListener = serverListener;
     }
 
-    public ThemeServerChecker(@NotNull ServerListener serverListener, @NotNull AtomicBoolean onServer) {
+    public ThemeServerChecker(@Nullable ServerListener serverListener, @NotNull AtomicBoolean onServer) {
         this(serverListener, SearchDataAccess.THEME_SERVER_SEARCH, onServer);
+    }
+
+    public ThemeServerChecker(@NotNull AtomicBoolean onServer) {
+        this(null, SearchDataAccess.THEME_SERVER_SEARCH, onServer);
     }
 
     //check for the mode from the tab list
@@ -55,7 +60,8 @@ public class ThemeServerChecker extends TabListener {
 
         setNotInValue(this.mode.toString());
 
-        serverListener.onTabChange();
+        if(serverListener != null)
+            serverListener.onTabChange();
 
         printDebug("New Mode: " + this.mode.toString());
         MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
