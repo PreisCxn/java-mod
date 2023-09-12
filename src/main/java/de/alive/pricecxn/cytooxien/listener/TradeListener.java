@@ -1,5 +1,7 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.cytooxien.SearchDataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
@@ -18,12 +20,12 @@ public class TradeListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public TradeListener(@Nullable List<String> inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
-        super(inventoryTitles == null ? List.of("Handel") : inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+    public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
+        super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
     }
 
     public TradeListener(@Nullable AtomicBoolean active) {
-        this(null, 0, active);
+        this(SearchDataAccess.INV_TRADE_SEARCH, 0, active);
     }
 
     @Override

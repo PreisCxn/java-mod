@@ -1,11 +1,11 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,12 @@ public class AuctionHouseListener extends InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public AuctionHouseListener(@Nullable List<String> inventoryTitles, int inventorySize, AtomicBoolean active) {
-        super(inventoryTitles == null ? List.of("Auktionshaus") : inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+    public AuctionHouseListener(@NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean active) {
+        super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
     }
 
     public AuctionHouseListener(AtomicBoolean active) {
-        this(null, 0, active);
+        this(SearchDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.cytooxien.SearchDataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +21,12 @@ public class ItemShopListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public ItemShopListener(@Nullable List<String> inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
-        super(inventoryTitles == null ? List.of("Spieler-Shop") : inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
+    public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
+        super(inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
     }
 
     public ItemShopListener(@Nullable AtomicBoolean active) {
-        this(null, 0, active);
+        this(SearchDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 
     @Override

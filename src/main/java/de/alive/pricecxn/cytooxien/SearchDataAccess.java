@@ -6,6 +6,14 @@ import de.alive.pricecxn.DataAccess;
 import java.util.List;
 
 public enum SearchDataAccess implements DataAccess {
+
+    //Inventory Searches
+    INV_AUCTION_HOUSE_SEARCH("", List.of("Auktionshaus")),
+    INV_ITEM_SHOP_SEARCH("", List.of("Spieler-Shop")),
+    INV_NOOK_SEARCH("", List.of("Shop")),
+    INV_TRADE_SEARCH("", List.of("Handel")),
+
+    //ItemData Searches
     TIMESTAMP_SEARCH("", List.of("Ende: ")),
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: ")),

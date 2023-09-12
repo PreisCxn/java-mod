@@ -31,20 +31,20 @@ public class DataHandler {
      * @param keyColumnName The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval, @Nullable DataAccess... data) {
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval, @Nullable DataAccess... dataAccess) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
         this.columnNames = columnNames;
         this.keyColumnName = keyColumnName;
-        if(data != null) {
-            for (DataAccess search : data)
-                search.setDataHandler(this);
+        if(dataAccess != null) {
+            for (DataAccess access : dataAccess)
+                if(access != null) access.setDataHandler(this);
         }
     }
 
     public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval) {
-        this(serverChecker, uri,columnNames, keyColumnName, refreshInterval, null);
+        this(serverChecker, uri,columnNames, keyColumnName, refreshInterval, (DataAccess) null);
     }
 
     /**

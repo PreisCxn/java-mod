@@ -1,5 +1,7 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -19,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class InventoryListener {
 
-    private final List<String> inventoryTitles;
+    private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
     private final Executor executor = Executors.newSingleThreadExecutor();
 
@@ -35,7 +37,7 @@ public abstract class InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize The size of the inventories to listen to (in slots)
      */
-    public InventoryListener(@NotNull List<String> inventoryTitles, int inventorySize, @Nullable AtomicBoolean active){
+    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active){
 
         this.inventorySize = inventorySize;
         this.inventoryTitles = inventoryTitles;
@@ -60,7 +62,7 @@ public abstract class InventoryListener {
             if(client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().equals("")) return;
 
 
-            if(!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles)){
+            if(!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())){
                 ScreenHandler handler = client.player.currentScreenHandler;
                 initSlotsAsync(handler).thenRun(() -> {
                     this.isOpen = true;
@@ -115,7 +117,7 @@ public abstract class InventoryListener {
     private boolean hadItemsChange(@NotNull MinecraftClient client, @Nullable ScreenHandler handler){
         if(client.player == null) return false;
         if(handler == null) return false;
-        if(!isInventoryTitle(client, inventoryTitles)) return false;
+        if(!isInventoryTitle(client, inventoryTitles.getData())) return false;
 
         for (int i = 0; i < this.inventorySize; i++){
 
