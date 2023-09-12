@@ -2,8 +2,9 @@ package de.alive.pricecxn;
 
 import com.google.gson.*;
 import de.alive.pricecxn.utils.Http;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.xml.crypto.Data;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,12 +31,20 @@ public class DataHandler {
      * @param keyColumnName The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(ServerChecker serverChecker, String uri, List<String> columnNames, String keyColumnName, int refreshInterval) {
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval, @Nullable DataAccess... data) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
         this.columnNames = columnNames;
         this.keyColumnName = keyColumnName;
+        if(data != null) {
+            for (DataAccess search : data)
+                search.setDataHandler(this);
+        }
+    }
+
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval) {
+        this(serverChecker, uri,columnNames, keyColumnName, refreshInterval, null);
     }
 
     /**
@@ -137,5 +146,9 @@ public class DataHandler {
 
     public Map<String, List<String>> getData() {
         return data;
+    }
+
+    public void setDataAccess(DataAccess dataAccess){
+        dataAccess.setDataHandler(this);
     }
 }

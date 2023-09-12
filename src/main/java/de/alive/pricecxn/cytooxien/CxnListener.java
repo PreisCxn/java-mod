@@ -6,11 +6,9 @@ import de.alive.pricecxn.ServerListener;
 import de.alive.pricecxn.cytooxien.listener.*;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +29,12 @@ public class CxnListener extends ServerListener {
         //getting Data from server
         this.serverChecker = new ServerChecker();
         data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
+        data.put("pricecxn.data", new DataHandler(serverChecker, "", List.of(""), "", 0, SearchDataAccess.TIMESTAMP_SEARCH));
+
+
 
         //setting up theme checker and listeners
-        this.themeChecker = new ThemeServerChecker(this, List.of("Du befindest dich auf"), this.isOnServer());
+        this.themeChecker = new ThemeServerChecker(this, SearchDataAccess.THEME_SERVER_SEARCH.getData(), this.isOnServer());
         listeners = List.of(
                 new AuctionHouseListener(this.isOnServer()),
                 new ItemShopListener(this.isOnServer()),

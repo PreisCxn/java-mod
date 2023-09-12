@@ -1,9 +1,8 @@
 package de.alive.pricecxn.cytooxien.listener;
 
-import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.cytooxien.SearchDataAccess;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
@@ -39,6 +37,8 @@ public class AuctionHouseListener extends InventoryListener {
         printDebug("AuctionHouse open");
 
         itemStacks.clear();
+
+        PriceCxnItemStack testitem = new PriceCxnItemStack(handler.getSlot(1).getStack(), SearchDataAccess.BID_SEARCH, SearchDataAccess.BUY_SEARCH);
 
     }
 
