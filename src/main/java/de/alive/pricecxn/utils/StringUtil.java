@@ -46,6 +46,8 @@ public class StringUtil {
      * @return The converted list
      */
     public static String[] listToLowerCase(@Nullable String[] list) {
+        if(list == null) return null;
+
         String[] newList = new String[list.length];
         for (int i = 0; i < list.length; i++) {
             if(list[i] != null)

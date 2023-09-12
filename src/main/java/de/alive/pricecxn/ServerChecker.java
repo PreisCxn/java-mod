@@ -13,11 +13,7 @@ public class ServerChecker {
 
     private static final String DEFAULT_CHECK_URI = "localhost:8080";
     private static final int DEFAULT_CHECK_INTERVAL = 1000;
-
     private boolean connected = false;
-
-    private final long lastCkeck = 0;
-
     private final String uri;
     private final int checkInterval;
     private long lastCheck = 0;
