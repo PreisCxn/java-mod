@@ -33,9 +33,4 @@ public enum SearchDataAccess implements DataAccess {
         this.dataHandler = dataHandler;
     }
 
-    //Standard
-    //id für datahandler
-    //Namen
-
-
 }
