@@ -41,17 +41,22 @@ public class PriceCxnMod implements ModInitializer {
 		function.accept(client);
 	}
 
-	public static void printDebug(String message, boolean overlay){
+	public static void printDebug(String message, boolean overlay, boolean sysOut){
 		doDebug((client) -> {
 			MutableText text = MutableText.of(new LiteralTextContent(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
 			client.player.sendMessage(text, overlay);
-			System.out.println("[PCXN-DEBUG] : " + message);
+			if(sysOut)
+				System.out.println("[PCXN-DEBUG] : " + message);
 		});
 	}
 
+	public static void printDebug(String message, boolean overlay){
+		printDebug(message, overlay, true);
+	}
+
 	public static void printDebug(String message){
-		printDebug(message, false);
-		printDebug(message, true);
+		printDebug(message, false, true);
+		printDebug(message, true, false);
 	}
 
 
