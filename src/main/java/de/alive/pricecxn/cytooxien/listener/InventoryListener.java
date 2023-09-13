@@ -1,8 +1,6 @@
 package de.alive.pricecxn.cytooxien.listener;
 
 import de.alive.pricecxn.DataAccess;
-import de.alive.pricecxn.DataHandler;
-import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -13,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,15 +18,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class InventoryListener {
 
+    private static final int REFRESH_INTERVAL = 200;
+
     private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
     private final Executor executor = Executors.newSingleThreadExecutor();
 
-    private final List<String> slotNbt = new ArrayList<>();
+    private final List<Integer> slotNbt = new ArrayList<>();
 
     private final AtomicBoolean active;
 
     private boolean isOpen = false;
+
+    private long lastUpdate = 0;
 
     /**
      *  This constructor is used to listen to a specific inventory
@@ -66,6 +67,7 @@ public abstract class InventoryListener {
                 ScreenHandler handler = client.player.currentScreenHandler;
                 initSlotsAsync(handler).thenRun(() -> {
                     this.isOpen = true;
+                    lastUpdate = System.currentTimeMillis();
                     onInventoryOpen(client, handler);
                 });
                 return;
@@ -74,6 +76,7 @@ public abstract class InventoryListener {
             hadItemsChangeAsync(client, client.player.currentScreenHandler)
                     .thenAccept(hasChanged -> {
                         if (hasChanged) {
+                            lastUpdate = System.currentTimeMillis();
                             onInventoryUpdate(client, client.player.currentScreenHandler);
                         }
                     });
@@ -115,13 +118,14 @@ public abstract class InventoryListener {
     }
 
     private boolean hadItemsChange(@NotNull MinecraftClient client, @Nullable ScreenHandler handler){
+        if(lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
         if(client.player == null) return false;
         if(handler == null) return false;
         if(!isInventoryTitle(client, inventoryTitles.getData())) return false;
 
         for (int i = 0; i < this.inventorySize; i++){
 
-            if(handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueString(handler.getSlot(i)))){
+            if(handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueHash(handler.getSlot(i)))){
                 initSlots(handler);
                 return true;
             }
@@ -146,13 +150,13 @@ public abstract class InventoryListener {
 
         for (int i = 0; i < this.inventorySize; i++){
             if(handler.getSlot(i).getStack() != null) {
-                slotNbt.add(getSlotUniqueString(handler.getSlot(i)));
+                slotNbt.add(getSlotUniqueHash(handler.getSlot(i)));
             }
         }
     }
 
-    private String getSlotUniqueString(@NotNull Slot slot){
-        return slot.getStack().getNbt() == null ? slot.getStack().getName().toString() : slot.getStack().getNbt().toString();
+    private int getSlotUniqueHash(@NotNull Slot slot){
+        return slot.getStack().getNbt() == null ? slot.getStack().getName().hashCode() : slot.getStack().getNbt().hashCode();
     }
 
 
