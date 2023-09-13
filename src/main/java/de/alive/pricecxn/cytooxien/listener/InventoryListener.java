@@ -121,7 +121,7 @@ public abstract class InventoryListener {
 
         for (int i = 0; i < this.inventorySize; i++){
 
-            if(handler.getSlot(i).getStack().getNbt() != null && !slotNbt.contains(Objects.requireNonNull(handler.getSlot(i).getStack().getNbt()).toString())){
+            if(handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueString(handler.getSlot(i)))){
                 initSlots(handler);
                 return true;
             }
@@ -145,10 +145,14 @@ public abstract class InventoryListener {
         this.slotNbt.clear();
 
         for (int i = 0; i < this.inventorySize; i++){
-            if(handler.getSlot(i).getStack().getNbt() != null) {
-                slotNbt.add(handler.getSlot(i).getStack().getNbt().toString());
+            if(handler.getSlot(i).getStack() != null) {
+                slotNbt.add(getSlotUniqueString(handler.getSlot(i)));
             }
         }
+    }
+
+    private String getSlotUniqueString(@NotNull Slot slot){
+        return slot.getStack().getNbt() == null ? slot.getStack().getName().toString() : slot.getStack().getNbt().toString();
     }
 
 
