@@ -8,14 +8,18 @@ import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class AuctionHouseListener extends InventoryListener {
 
-    private final List<PriceCxnItemStack> itemStacks = new ArrayList<>();
+    private final List<PriceCxnItemStack> items = new ArrayList<>();
+
+    private final Map<String, SearchDataAccess> searchData = new HashMap<>();
 
 
     /**
@@ -26,6 +30,12 @@ public class AuctionHouseListener extends InventoryListener {
      */
     public AuctionHouseListener(@NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean active) {
         super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+
+        searchData.put("sellerName", SearchDataAccess.SELLER_SEARCH);
+        searchData.put("timestamp", SearchDataAccess.TIMESTAMP_SEARCH);
+        searchData.put("bidPrice", SearchDataAccess.BID_SEARCH);
+        searchData.put("buyPrice", SearchDataAccess.BUY_SEARCH);
+
     }
 
     public AuctionHouseListener(AtomicBoolean active) {
@@ -36,9 +46,9 @@ public class AuctionHouseListener extends InventoryListener {
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse open");
 
-        itemStacks.clear();
+        items.clear();
 
-        PriceCxnItemStack testitem = new PriceCxnItemStack(handler.getSlot(1).getStack(), SearchDataAccess.BID_SEARCH, SearchDataAccess.BUY_SEARCH);
+        PriceCxnItemStack testitem = new PriceCxnItemStack(handler.getSlot(1).getStack(), new HashMap<>());
 
     }
 

@@ -1,6 +1,8 @@
 package de.alive.pricecxn.utils;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -67,6 +69,23 @@ public class StringUtil {
         List<String> lowercaseList = new ArrayList<>(list);
         lowercaseList.replaceAll(String::toLowerCase);
         return lowercaseList;
+    }
+
+    public static List<String> getNbtTags(ItemStack stack){
+        if(stack == null) return null;
+
+        List<String> result = new ArrayList<>();
+
+        NbtCompound tag = stack.getNbt();
+        if (tag == null) {
+            return null;
+        } else {
+            for (String key : tag.getKeys()) {
+                result.add(key + ": " + tag.get(key));
+            }
+        }
+
+        return result;
     }
 
 }
