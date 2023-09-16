@@ -19,9 +19,9 @@ public class PriceCxnItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
-    public static final String ITEM_NAME = "itemName";
-    public static final String AMOUNT = "amount";
-    public static final String COMMENT = "comment";
+    public static final String ITEM_NAME_KEY = "itemName";
+    public static final String AMOUNT_KEY = "amount";
+    public static final String COMMENT_KEY = "comment";
 
     private final ItemStack item;
     private final Map<String, DataAccess> searchData;
@@ -42,26 +42,16 @@ public class PriceCxnItemStack {
         - amount
         - comment (nbts)
          */
-        data.addProperty(ITEM_NAME, item.getItem().getTranslationKey());
-        data.addProperty(AMOUNT, String.valueOf(item.getCount()));
-        data.add(COMMENT, nbtToJson(this.item));
+        data.addProperty(ITEM_NAME_KEY, item.getItem().getTranslationKey());
+        data.addProperty(AMOUNT_KEY, String.valueOf(item.getCount()));
+        data.add(COMMENT_KEY, nbtToJson(this.item));
 
         /*
         zusätzlich suche nach den keys in searchData:
          */
 
-        /*
-        if (searchData != null) {
-            searchData.forEach((key, dataAccess) -> {
-                System.out.println(dataAccess.getData());
-                data.addProperty(key, toolTipSearch(dataAccess));
-            });
-        }
-
-         */
-
-        if (searchData != null) {
-            for (Map.Entry<String, DataAccess> entry : searchData.entrySet()) {
+        if (this.searchData != null) {
+            for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
 
                 DataAccess access = entry.getValue();
 
@@ -73,8 +63,6 @@ public class PriceCxnItemStack {
                     data.addProperty(entry.getKey(), searchResult);
             }
         }
-
-        System.out.println("finished");
 
     }
 
