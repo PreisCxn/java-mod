@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.alive.pricecxn.DataAccess;
@@ -23,13 +24,13 @@ public class PriceCxnItemStack {
     public static final String COMMENT = "comment";
 
     private final ItemStack item;
-    private final Map<String, SearchDataAccess> searchData;
+    private final Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
 
     private final List<String> toolTips;
 
-    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, SearchDataAccess> searchData) {
+    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
 
         this.searchData = searchData;
         this.item = item;
@@ -49,10 +50,28 @@ public class PriceCxnItemStack {
         zusätzlich suche nach den keys in searchData:
          */
 
-        if (this.searchData != null) {
-            this.searchData.forEach((key, dataAccess) -> {
+        /*
+        if (searchData != null) {
+            searchData.forEach((key, dataAccess) -> {
+                System.out.println(dataAccess.getData());
                 data.addProperty(key, toolTipSearch(dataAccess));
             });
+        }
+
+         */
+
+        if (searchData != null) {
+            for (Map.Entry<String, DataAccess> entry : searchData.entrySet()) {
+
+                DataAccess access = entry.getValue();
+
+                String searchResult = access.hasProcessData() ? access.getProcessData().apply(this.toolTipSearch(access)) : this.toolTipSearch(access);
+
+                if(searchResult == null){
+                    data.add(entry.getKey(), JsonNull.INSTANCE);
+                } else
+                    data.addProperty(entry.getKey(), searchResult);
+            }
         }
 
         System.out.println("finished");
@@ -98,6 +117,7 @@ public class PriceCxnItemStack {
     }
 
     private @Nullable String toolTipSearch(@NotNull DataAccess access) {
+        System.out.println(this.toolTips);
         String result;
         for (String prefix : access.getData()) {
             result = StringUtil.getFirstSuffixStartingWith(this.toolTips, prefix);

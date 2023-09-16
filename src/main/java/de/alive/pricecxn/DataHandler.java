@@ -144,7 +144,7 @@ public class DataHandler {
         return future;
     }
 
-    public Map<String, List<String>> getData() {
+    public @Nullable Map<String, List<String>> getData() {
         return data;
     }
 

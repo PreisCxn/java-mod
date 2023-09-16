@@ -2,8 +2,12 @@ package de.alive.pricecxn.cytooxien;
 
 import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.DataAccess;
+import io.netty.util.internal.StringUtil;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public enum SearchDataAccess implements DataAccess {
 
@@ -23,15 +27,22 @@ public enum SearchDataAccess implements DataAccess {
     private String id;
     private List<String> backupData;
 
-    private DataHandler dataHandler;
+    private DataHandler dataHandler = null;
 
-    SearchDataAccess(String id, List<String> backupData) {
+    private Function<String, String> processData = null;
+
+    SearchDataAccess(String id, List<String> backupData, @Nullable Function<String, String> processData) {
         this.id = id;
         this.backupData = backupData;
+        this.processData = processData;
+    }
+
+    SearchDataAccess(String id, List<String> backupData) {
+        this(id, backupData, null);
     }
 
     public List<String> getData(){
-        if(dataHandler == null || !dataHandler.getData().containsKey(id))
+        if(dataHandler == null || dataHandler.getData() == null || !dataHandler.getData().containsKey(id))
             return backupData;
         else
             return dataHandler.getData().get(id);
@@ -41,4 +52,11 @@ public enum SearchDataAccess implements DataAccess {
         this.dataHandler = dataHandler;
     }
 
+    public Function<String, String> getProcessData() {
+        return processData;
+    }
+
+    public boolean hasProcessData(){
+        return processData != null;
+    }
 }
