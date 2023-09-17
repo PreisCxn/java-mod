@@ -6,13 +6,11 @@ import com.google.gson.JsonPrimitive;
 import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.utils.TimeUtil;
-import io.netty.util.internal.StringUtil;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public enum SearchDataAccess implements DataAccess {
@@ -46,13 +44,13 @@ public enum SearchDataAccess implements DataAccess {
     SECOND_SEARCH("", List.of("Sekunde")),
     NOW_SEARCH("", List.of("Jetzt"));
 
-    private String id;
-    private List<String> backupData;
+    private final String id;
+    private final List<String> backupData;
 
     private DataHandler dataHandler = null;
 
-    private Function<JsonElement, JsonElement> processData = null;
-    private Function<Pair<JsonElement, JsonElement>, Boolean> equalData = null;
+    private final Function<JsonElement, JsonElement> processData;
+    private final Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
 
     SearchDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
         this.id = id;

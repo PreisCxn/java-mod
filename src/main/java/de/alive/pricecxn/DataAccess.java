@@ -1,7 +1,6 @@
 package de.alive.pricecxn;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import net.minecraft.util.Pair;
 
 import java.util.List;
