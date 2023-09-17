@@ -3,6 +3,8 @@ package de.alive.pricecxn.utils;
 import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
 
+import java.util.Optional;
+
 public class TimeUtil {
 
     private static final DataAccess MINUTE_SEARCH = SearchDataAccess.MINUTE_SEARCH;
@@ -10,21 +12,53 @@ public class TimeUtil {
     private static final DataAccess HOUR_SEARCH = SearchDataAccess.HOUR_SEARCH;
     private static final DataAccess SECOND_SEARCH = SearchDataAccess.SECOND_SEARCH;
 
+    public static Optional<Long> getStartTimeStamp(String timerString) {
+        Optional<Integer> hours = getHours(timerString);
+        Optional<Integer> minutes = getMinutes(timerString);
+
+        if(minutes.isEmpty() || hours.isEmpty())
+            return Optional.empty();
+
+        if(StringUtil.containsString(timerString, SECOND_SEARCH.getData()))
+            return Optional.empty();
+
+        long elapsedSeconds = (hours.get() * 3600L + minutes.get() * 60L) * 1000;
+        long day = 86400000;
+        elapsedSeconds = day - elapsedSeconds;
+        long startTimeStamp = System.currentTimeMillis() - elapsedSeconds;
+
+        startTimeStamp = (startTimeStamp / (60 * 1000)) * (60 * 1000);
+
+        return Optional.of(startTimeStamp);
+    }
+
     /**
      * Extrahiert die Minuten aus dem Timer-String.
      *
      * @param timerString Der Timer-String.
      * @return Die Minuten als Integer.
      */
-    public static int getMinutes(String timerString) {
+    public static Optional<Integer> getMinutes(String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
-            return -1;
+            return Optional.empty();
 
         String[] parts = timerString.split(" ");
         if (parts.length > 2) {
-            return Integer.parseInt(parts[2]);
+            try {
+                int minutes = Integer.parseInt(parts[2]);
+                return Optional.of(minutes);
+            } catch (NumberFormatException e){
+                return Optional.empty();
+            }
         } else {
-            return StringUtil.containsString(parts[1], MINUTE_SEARCH.getData()) ? Integer.parseInt(parts[0]) : 0;
+            if(!StringUtil.containsString(parts[1], MINUTE_SEARCH.getData())) return Optional.of(0);
+
+            try{
+                int minutes = Integer.parseInt(parts[0]);
+                return Optional.of(minutes);
+            } catch (NumberFormatException e){
+                return Optional.empty();
+            }
         }
     }
 
@@ -34,16 +68,28 @@ public class TimeUtil {
      * @param timerString Der Timer-String.
      * @return Die Stunden als Integer.
      */
-    public static Integer getHours(String timerString) {
+    public static Optional<Integer> getHours(String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
-            return null;
+            return Optional.empty();
 
         String[] parts = timerString.split(" ");
 
         if (parts.length > 2) {
-            return Integer.parseInt(parts[0]);
+            try {
+                int hours = Integer.parseInt(parts[0]);
+                return Optional.of(hours);
+            } catch (NumberFormatException e){
+                return Optional.empty();
+            }
         } else {
-            return StringUtil.containsString(parts[1], HOUR_SEARCH.getData()) ? Integer.parseInt(parts[0]) : 0;
+            if(!StringUtil.containsString(parts[1], HOUR_SEARCH.getData())) return Optional.of(0);
+
+            try{
+                int hours = Integer.parseInt(parts[0]);
+                return Optional.of(hours);
+            } catch (NumberFormatException e){
+                return Optional.empty();
+            }
         }
     }
 
