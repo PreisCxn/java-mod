@@ -146,6 +146,7 @@ public class PriceCxnItemStack {
         AtomicBoolean isEqual = new AtomicBoolean(true);
 
         this.searchData.forEach((key, value) -> {
+            if(!isEqual.get()) return;
             if (value.hasEqualData()) {
                 if (!value.getEqualData().apply(new Pair<>(item.getData().get(key), this.getData().get(key))))
                     isEqual.set(false);
