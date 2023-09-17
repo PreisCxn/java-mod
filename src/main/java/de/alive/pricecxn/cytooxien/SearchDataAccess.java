@@ -1,10 +1,13 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.utils.TimeUtil;
 import io.netty.util.internal.StringUtil;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,10 +25,16 @@ public enum SearchDataAccess implements DataAccess {
 
     //ItemData Searches
     TIMESTAMP_SEARCH("", List.of("Ende: "),
-            (result) -> TimeUtil
-                    .getStartTimeStamp(result)
-                    .map(String::valueOf)
-                    .orElse(null), null),
+            (result) -> {
+                    Optional<Long> timeStamp = TimeUtil.getStartTimeStamp(result.getAsString());
+
+                    if(timeStamp.isEmpty())
+                        return JsonNull.INSTANCE;
+                    else
+                        return new JsonPrimitive(timeStamp.get());
+            },
+            (equal) -> TimeUtil
+                    .timestampsEqual(equal.getLeft().getAsLong(), equal.getRight().getAsLong(), 10)),
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: ")),
     BUY_SEARCH("", List.of("Sofortkauf: ")),
@@ -42,10 +51,10 @@ public enum SearchDataAccess implements DataAccess {
 
     private DataHandler dataHandler = null;
 
-    private Function<String, String> processData = null;
-    private Function<JsonElement, Boolean> equalData = null;
+    private Function<JsonElement, JsonElement> processData = null;
+    private Function<Pair<JsonElement, JsonElement>, Boolean> equalData = null;
 
-    SearchDataAccess(String id, List<String> backupData, @Nullable Function<String, String> processData, @Nullable Function<JsonElement, Boolean> equalData) {
+    SearchDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
@@ -67,11 +76,11 @@ public enum SearchDataAccess implements DataAccess {
         this.dataHandler = dataHandler;
     }
 
-    public Function<String, String> getProcessData() {
+    public Function<JsonElement, JsonElement> getProcessData() {
         return processData;
     }
 
-    public Function<JsonElement, Boolean> getEqualData() {
+    public Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData() {
         return equalData;
     }
 

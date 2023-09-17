@@ -2,6 +2,7 @@ package de.alive.pricecxn;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.util.Pair;
 
 import java.util.List;
 import java.util.function.Function;
@@ -15,7 +16,7 @@ public interface DataAccess {
     boolean hasProcessData();
     boolean hasEqualData();
 
-    Function<String, String> getProcessData();
-    Function<JsonElement, Boolean> getEqualData();
+    Function<JsonElement, JsonElement> getProcessData();
+    Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData();
 
 }

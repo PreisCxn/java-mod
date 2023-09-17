@@ -1,13 +1,12 @@
 package de.alive.pricecxn.cytooxien;
 
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,13 +54,18 @@ public class PriceCxnItemStack {
             for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
 
                 DataAccess access = entry.getValue();
+                JsonElement result = JsonNull.INSTANCE;
+                String searchResult = this.toolTipSearch(access);
 
-                String searchResult = access.hasProcessData() ? access.getProcessData().apply(this.toolTipSearch(access)) : this.toolTipSearch(access);
+                if (searchResult != null) {
+                    if (entry.getValue().hasProcessData()) {
+                        result = access.getProcessData().apply(new JsonPrimitive(searchResult));
+                    } else {
+                        result = new JsonPrimitive(searchResult);
+                    }
+                }
 
-                if(searchResult == null){
-                    data.add(entry.getKey(), JsonNull.INSTANCE);
-                } else
-                    data.addProperty(entry.getKey(), searchResult);
+                data.add(entry.getKey(), result);
             }
         }
 
@@ -120,7 +124,7 @@ public class PriceCxnItemStack {
         JsonObject hash = this.data.deepCopy();
 
         this.searchData.forEach((key, value) -> {
-            if(value.hasEqualData()){
+            if (value.hasEqualData()) {
                 hash.remove(key);
             }
         });
@@ -130,17 +134,18 @@ public class PriceCxnItemStack {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof PriceCxnItemStack)) return false;
+        if (!(obj instanceof PriceCxnItemStack)) return false;
 
         PriceCxnItemStack item = (PriceCxnItemStack) obj;
 
-        if(item.getSearchData().equals(this.searchData)) return false;
+        if (item.getSearchData().equals(this.searchData)) return false;
 
         AtomicBoolean isEqual = new AtomicBoolean(true);
 
         this.searchData.forEach((key, value) -> {
-            if(value.hasEqualData()) {
-                if(!value.getEqualData().apply(this.data.get(key))) isEqual.set(false);
+            if (value.hasEqualData()) {
+                if (!value.getEqualData().apply(new Pair<>(item.getData().get(key), this.getData().get(key))))
+                    isEqual.set(false);
             }
         });
 
