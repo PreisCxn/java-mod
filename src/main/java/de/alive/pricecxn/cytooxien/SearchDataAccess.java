@@ -22,7 +22,13 @@ public enum SearchDataAccess implements DataAccess {
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: ")),
     BUY_SEARCH("", List.of("Sofortkauf: ")),
-    THEME_SERVER_SEARCH("", List.of("Du befindest dich auf"));
+    THEME_SERVER_SEARCH("", List.of("Du befindest dich auf")),
+
+    //Time Searches
+    HOUR_SEARCH("", List.of("Stunde")),
+    MINUTE_SEARCH("", List.of("Minute")),
+    SECOND_SEARCH("", List.of("Sekunde")),
+    NOW_SEARCH("", List.of("Jetzt"));
 
     private String id;
     private List<String> backupData;

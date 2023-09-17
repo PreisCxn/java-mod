@@ -19,7 +19,7 @@ public class AuctionHouseListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
-    private final Map<String, SearchDataAccess> searchData = new HashMap<>();
+    private final Map<String, DataAccess> searchData = new HashMap<>();
 
 
     /**
@@ -47,19 +47,23 @@ public class AuctionHouseListener extends InventoryListener {
         printDebug("AuctionHouse open");
 
         items.clear();
-
-        PriceCxnItemStack testitem = new PriceCxnItemStack(handler.getSlot(1).getStack(), new HashMap<>());
+        items.add(new PriceCxnItemStack(handler.getSlot(11).getStack(), this.searchData));
 
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse close");
+        if(!items.isEmpty())
+            System.out.println(items.get(0).getData());
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse updated");
+
+        items.clear();
+        items.add(new PriceCxnItemStack(handler.getSlot(11).getStack(), this.searchData));
     }
 
 }

@@ -43,7 +43,7 @@ public class PriceCxnItemStack {
         - comment (nbts)
          */
         data.addProperty(ITEM_NAME_KEY, item.getItem().getTranslationKey());
-        data.addProperty(AMOUNT_KEY, String.valueOf(item.getCount()));
+        data.addProperty(AMOUNT_KEY, item.getCount());
         data.add(COMMENT_KEY, nbtToJson(this.item));
 
         /*
