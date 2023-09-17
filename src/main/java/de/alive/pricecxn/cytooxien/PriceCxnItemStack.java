@@ -57,6 +57,9 @@ public class PriceCxnItemStack {
                 JsonElement result = JsonNull.INSTANCE;
                 String searchResult = this.toolTipSearch(access);
 
+                System.out.println(access.getData());
+                System.out.println(searchResult);
+
                 if (searchResult != null) {
                     if (entry.getValue().hasProcessData()) {
                         result = access.getProcessData().apply(new JsonPrimitive(searchResult));
@@ -138,7 +141,7 @@ public class PriceCxnItemStack {
 
         PriceCxnItemStack item = (PriceCxnItemStack) obj;
 
-        if (item.getSearchData().equals(this.searchData)) return false;
+        if (!item.getSearchData().equals(this.searchData)) return false;
 
         AtomicBoolean isEqual = new AtomicBoolean(true);
 

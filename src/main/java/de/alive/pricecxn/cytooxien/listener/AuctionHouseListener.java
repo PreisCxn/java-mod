@@ -47,15 +47,17 @@ public class AuctionHouseListener extends InventoryListener {
         printDebug("AuctionHouse open");
 
         items.clear();
-        items.add(new PriceCxnItemStack(handler.getSlot(11).getStack(), this.searchData));
+        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
+        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
 
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse close");
-        if(!items.isEmpty())
+        if(!items.isEmpty()) {
             System.out.println(items.get(0).getData());
+        }
     }
 
     @Override
@@ -63,7 +65,8 @@ public class AuctionHouseListener extends InventoryListener {
         printDebug("AuctionHouse updated");
 
         items.clear();
-        items.add(new PriceCxnItemStack(handler.getSlot(11).getStack(), this.searchData));
+        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
+        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
     }
 
 }
