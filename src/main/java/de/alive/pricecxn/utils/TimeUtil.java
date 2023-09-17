@@ -47,7 +47,18 @@ public class TimeUtil {
         }
     }
 
-
-
+    /**
+     * Überprüft, ob zwei Zeitstempel innerhalb eines Zeitfensters (in Minuten) gleich sind.
+     *
+     * @param timestamp1     Der erste Zeitstempel in Millisekunden.
+     * @param timestamp2     Der zweite Zeitstempel in Millisekunden.
+     * @param windowMinutes  Das Zeitfenster in Minuten.
+     * @return true, wenn die Zeitstempel innerhalb des Zeitfensters gleich sind, andernfalls false.
+     */
+    public static boolean timestampsEqual(long timestamp1, long timestamp2, int windowMinutes) {
+        final long timeWindow = (long) windowMinutes * 60 * 1000; // 1 Minuten in Millisekunden
+        long timeDifference = Math.abs(timestamp1 - timestamp2);
+        return timeDifference <= timeWindow;
+    }
 
 }
