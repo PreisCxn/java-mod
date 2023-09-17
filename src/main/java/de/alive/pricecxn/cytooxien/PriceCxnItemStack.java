@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 public class PriceCxnItemStack {
@@ -116,7 +117,34 @@ public class PriceCxnItemStack {
 
     @Override
     public int hashCode() {
-        return this.data.hashCode();
+        JsonObject hash = this.data.deepCopy();
+
+        this.searchData.forEach((key, value) -> {
+            if(value.hasEqualData()){
+                hash.remove(key);
+            }
+        });
+
+        return hash.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof PriceCxnItemStack)) return false;
+
+        PriceCxnItemStack item = (PriceCxnItemStack) obj;
+
+        if(item.getSearchData().equals(this.searchData)) return false;
+
+        AtomicBoolean isEqual = new AtomicBoolean(true);
+
+        this.searchData.forEach((key, value) -> {
+            if(value.hasEqualData()) {
+                if(!value.getEqualData().apply(this.data.get(key))) isEqual.set(false);
+            }
+        });
+
+        return isEqual.get() && item.hashCode() == this.hashCode();
     }
 
     @Override
@@ -126,5 +154,9 @@ public class PriceCxnItemStack {
 
     public JsonObject getData() {
         return data;
+    }
+
+    public Map<String, DataAccess> getSearchData() {
+        return searchData;
     }
 }

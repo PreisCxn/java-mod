@@ -1,11 +1,14 @@
 package de.alive.pricecxn.cytooxien;
 
+import com.google.gson.JsonElement;
 import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.utils.TimeUtil;
 import io.netty.util.internal.StringUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -18,7 +21,11 @@ public enum SearchDataAccess implements DataAccess {
     INV_TRADE_SEARCH("", List.of("Handel")),
 
     //ItemData Searches
-    TIMESTAMP_SEARCH("", List.of("Ende: ")),
+    TIMESTAMP_SEARCH("", List.of("Ende: "),
+            (result) -> TimeUtil
+                    .getStartTimeStamp(result)
+                    .map(String::valueOf)
+                    .orElse(null), null),
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: ")),
     BUY_SEARCH("", List.of("Sofortkauf: ")),
@@ -36,15 +43,17 @@ public enum SearchDataAccess implements DataAccess {
     private DataHandler dataHandler = null;
 
     private Function<String, String> processData = null;
+    private Function<JsonElement, Boolean> equalData = null;
 
-    SearchDataAccess(String id, List<String> backupData, @Nullable Function<String, String> processData) {
+    SearchDataAccess(String id, List<String> backupData, @Nullable Function<String, String> processData, @Nullable Function<JsonElement, Boolean> equalData) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
+        this.equalData = equalData;
     }
 
     SearchDataAccess(String id, List<String> backupData) {
-        this(id, backupData, null);
+        this(id, backupData, null, null);
     }
 
     public List<String> getData(){
@@ -62,7 +71,16 @@ public enum SearchDataAccess implements DataAccess {
         return processData;
     }
 
+    public Function<JsonElement, Boolean> getEqualData() {
+        return equalData;
+    }
+
     public boolean hasProcessData(){
         return processData != null;
     }
+
+    public boolean hasEqualData(){
+        return equalData != null;
+    }
+
 }
