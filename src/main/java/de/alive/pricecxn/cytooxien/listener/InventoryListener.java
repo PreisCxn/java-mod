@@ -22,7 +22,7 @@ public abstract class InventoryListener {
 
     private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
-    private final Executor executor = Executors.newSingleThreadExecutor();
+    protected final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final List<Integer> slotNbt = new ArrayList<>();
 
@@ -136,11 +136,11 @@ public abstract class InventoryListener {
     }
 
     public CompletableFuture<Boolean> hadItemsChangeAsync(MinecraftClient client, ScreenHandler handler) {
-        return CompletableFuture.supplyAsync(() -> hadItemsChange(client, handler), executor);
+        return CompletableFuture.supplyAsync(() -> hadItemsChange(client, handler), EXECUTOR);
     }
 
     public CompletableFuture<Void> initSlotsAsync(ScreenHandler handler) {
-        return CompletableFuture.runAsync(() -> initSlots(handler), executor);
+        return CompletableFuture.runAsync(() -> initSlots(handler), EXECUTOR);
     }
 
     private void initSlots(@Nullable ScreenHandler handler){
