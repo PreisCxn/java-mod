@@ -75,7 +75,6 @@ public class DataHandler {
             this.lastUpdate = System.currentTimeMillis();
             future.complete(null); // Marking the CompletableFuture as completed
         }).exceptionally(ex -> {
-            ex.printStackTrace();
             future.completeExceptionally(ex); // Marking the CompletableFuture as completed exceptionally
             return null;
         });

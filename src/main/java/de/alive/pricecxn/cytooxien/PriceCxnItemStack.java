@@ -57,9 +57,6 @@ public class PriceCxnItemStack {
                 JsonElement result = JsonNull.INSTANCE;
                 String searchResult = this.toolTipSearch(access);
 
-                System.out.println(access.getData());
-                System.out.println(searchResult);
-
                 if (searchResult != null) {
                     if (entry.getValue().hasProcessData()) {
                         result = access.getProcessData().apply(new JsonPrimitive(searchResult));
@@ -91,21 +88,35 @@ public class PriceCxnItemStack {
 
                 JsonObject valueJson = null;
 
+                //test if only Delete Pattern is needed
                 try {
                     valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
                 } catch (IllegalStateException e) {
-
                     nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
 
+                    //test if JsonArray
+                    try{
+                        JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
+                        json.add(key, array);
+                        continue;
+                    } catch (IllegalStateException ignored){}
+
+                    //test if JsonKey is missing
                     try {
                         valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
                     } catch (IllegalStateException e2) {
-                        json.addProperty(key, Objects.requireNonNull(nbt.get(key)).asString());
+                        //else add as normal String
+                        json.addProperty(key, Optional.ofNullable(nbt.get(key)).map(NbtElement::asString).orElse("null"));
                     }
 
+                } catch (JsonParseException e){
+                    //else add as normal String
+                    json.addProperty(key, Optional.ofNullable(nbt.get(key)).map(NbtElement::asString).orElse("null"));
                 }
 
-                if (valueJson != null) json.add(key, valueJson);
+                if (valueJson != null) {
+                    json.add(key, valueJson);
+                }
             }
         }
 
@@ -113,7 +124,6 @@ public class PriceCxnItemStack {
     }
 
     private @Nullable String toolTipSearch(@NotNull DataAccess access) {
-        System.out.println(this.toolTips);
         String result;
         for (String prefix : access.getData()) {
             result = StringUtil.getFirstSuffixStartingWith(this.toolTips, prefix);
@@ -126,34 +136,37 @@ public class PriceCxnItemStack {
     public int hashCode() {
         JsonObject hash = this.data.deepCopy();
 
-        this.searchData.forEach((key, value) -> {
-            if (value.hasEqualData()) {
-                hash.remove(key);
+        for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
+            if (entry.getValue().hasEqualData()) {
+                hash.remove(entry.getKey());
             }
-        });
+        }
 
         return hash.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof PriceCxnItemStack)) return false;
+    public boolean equals(Object o) {
+        return (o == this) || (o instanceof PriceCxnItemStack
+                && ((PriceCxnItemStack) o).getEqualData().equals(this.getEqualData()));
+    }
 
-        PriceCxnItemStack item = (PriceCxnItemStack) obj;
+    public boolean deepEquals(Object o) {
+        if(o == this) return true;
+        if(!(o instanceof PriceCxnItemStack item)) return false;
 
-        if (!item.getSearchData().equals(this.searchData)) return false;
+        for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
+            if (entry.getValue().hasEqualData()) {
 
-        AtomicBoolean isEqual = new AtomicBoolean(true);
+                JsonElement el1 = item.getData().get(entry.getKey());
+                JsonElement el2 = this.getData().get(entry.getKey());
 
-        this.searchData.forEach((key, value) -> {
-            if(!isEqual.get()) return;
-            if (value.hasEqualData()) {
-                if (!value.getEqualData().apply(new Pair<>(item.getData().get(key), this.getData().get(key))))
-                    isEqual.set(false);
+                if (!entry.getValue().getEqualData().apply(new Pair<>(el1, el2)))
+                    return false;
             }
-        });
+        }
 
-        return isEqual.get() && item.hashCode() == this.hashCode();
+        return true;
     }
 
     @Override
@@ -163,6 +176,21 @@ public class PriceCxnItemStack {
 
     public JsonObject getData() {
         return data;
+    }
+
+    private JsonObject getEqualData() {
+        JsonObject hash = this.data.deepCopy();
+
+        if(hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
+            hash.get(COMMENT_KEY).getAsJsonObject().remove("display");
+
+        for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
+            if (entry.getValue().hasEqualData()) {
+                hash.remove(entry.getKey());
+            }
+        }
+
+        return hash;
     }
 
     public Map<String, DataAccess> getSearchData() {

@@ -1,13 +1,15 @@
 package de.alive.pricecxn.cytooxien.listener;
 
+import com.google.gson.JsonArray;
 import de.alive.pricecxn.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ import static de.alive.pricecxn.PriceCxnMod.printDebug;
 public class AuctionHouseListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
+    private final Pair<Integer, Integer> itemRange = new Pair<>(10, 35);
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
@@ -50,43 +53,71 @@ public class AuctionHouseListener extends InventoryListener {
         printDebug("AuctionHouse open");
 
         items.clear();
-        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
-        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
-
+        updateItemsAsync(handler, this.itemRange);
     }
 
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse close");
+
+        JsonArray array = new JsonArray();
+
         if(!items.isEmpty()) {
-            System.out.println(items.get(0).getData());
+            for (PriceCxnItemStack item : items) {
+                array.add(item.getData());
+            }
         }
+
+        System.out.println("AuctionHouse: " + array.size() + " items");
+        System.out.println(array);
     }
 
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse updated");
-
-        items.clear();
-        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
-        items.add(new PriceCxnItemStack(handler.getSlot(34).getStack(), this.searchData));
+        updateItemsAsync(handler, this.itemRange);
     }
 
-    private @NotNull CompletableFuture<Pair<Boolean, List<Integer>>> hadItemChange(@NotNull ScreenHandler handler, @Nullable Pair<Integer, Integer> slotRange) {
+    private void updateItemsAsync(ScreenHandler handler, Pair<Integer, Integer> range){
+        CompletableFuture.supplyAsync(() -> {
+            for (int i = range.getLeft(); i < range.getRight(); i++) {
+                Slot slot = handler.getSlot(i);
+                if (slot.getStack().isEmpty()) continue;
 
-        return CompletableFuture.supplyAsync(() -> {
-            Pair<Integer, Integer> slots = slotRange == null ? new Pair<>(0, handler.slots.size()) : slotRange;
+                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), this.searchData);
 
-            for(int i = slots.getLeft(); i < slots.getRight(); i++) {
-                if(handler.getSlot(i).getStack().isEmpty()) continue;
-                if(handler.getSlot(i).getStack().getItem().getTranslationKey().equals("item.minecraft.air")) continue;
-                if(handler.getSlot(i).getStack().getCount() == 0) continue;
+                boolean add = true;
 
+                synchronized (this.items) {
+                    for (PriceCxnItemStack item : items) {
+                        if (item.equals(newItem)) {
+                            if (!TimeUtil.timestampsEqual(item.getData().get("timestamp").getAsLong(), newItem.getData().get("timestamp").getAsLong(), 5))
+                                continue;
+
+                            add = false;
+                            if (!item.deepEquals(newItem)) {
+                                if (!item.getData().get("timestamp").equals(newItem.getData().get("timestamp"))) {
+                                    item.getData().remove("timestamp");
+                                    item.getData().add("timestamp", newItem.getData().get("timestamp"));
+                                }
+                                if (!item.getData().get("bidPrice").equals(newItem.getData().get("bidPrice"))) {
+                                    item.getData().remove("bidPrice");
+                                    item.getData().add("bidPrice", newItem.getData().get("bidPrice"));
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if (add)
+                        this.items.add(newItem);
+                }
 
             }
 
-            return new Pair<>(false, new ArrayList<>());
+            return null;
         }, EXECUTOR);
+
     }
 
 }

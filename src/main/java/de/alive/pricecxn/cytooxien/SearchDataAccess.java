@@ -22,19 +22,20 @@ public enum SearchDataAccess implements DataAccess {
     INV_TRADE_SEARCH("", List.of("Handel")),
 
     //ItemData Searches
-    TIMESTAMP_SEARCH("", List.of("Ende: "),
-            (result) -> {
-                    Optional<Long> timeStamp = TimeUtil.getStartTimeStamp(result.getAsString());
+    TIMESTAMP_SEARCH("", List.of("Ende: "), (result) -> {
+        Optional<Long> timeStamp = TimeUtil.getStartTimeStamp(result.getAsString());
 
-                    if(timeStamp.isEmpty())
-                        return JsonNull.INSTANCE;
-                    else
-                        return new JsonPrimitive(timeStamp.get());
-            },
-            (equal) -> TimeUtil
-                    .timestampsEqual(equal.getLeft().getAsLong(), equal.getRight().getAsLong(), 10)),
+        if (timeStamp.isEmpty()) return JsonNull.INSTANCE;
+        else return new JsonPrimitive(timeStamp.get());
+    }, (equal) -> {
+        if (equal.getLeft() == JsonNull.INSTANCE && equal.getRight() == JsonNull.INSTANCE) return true;
+        if (!equal.getLeft().isJsonPrimitive() || !equal.getRight().isJsonPrimitive()) return false;
+        if (!equal.getLeft().getAsJsonPrimitive().isNumber() || !equal.getRight().getAsJsonPrimitive().isNumber()) return false;
+        return TimeUtil.timestampsEqual(equal.getLeft().getAsLong(), equal.getRight().getAsLong(), 3);
+    }),
     SELLER_SEARCH("", List.of("Verkäufer: ")),
-    BID_SEARCH("", List.of("Gebotsbetrag: ")),
+    BID_SEARCH("", List.of("Gebotsbetrag: "), null,
+            (equal) -> equal.getLeft().getAsString().equals(equal.getRight().getAsString())),
     BUY_SEARCH("", List.of("Sofortkauf: ")),
     THEME_SERVER_SEARCH("", List.of("Du befindest dich auf")),
 
@@ -63,11 +64,10 @@ public enum SearchDataAccess implements DataAccess {
         this(id, backupData, null, null);
     }
 
-    public List<String> getData(){
-        if(dataHandler == null || dataHandler.getData() == null || !dataHandler.getData().containsKey(id))
+    public List<String> getData() {
+        if (dataHandler == null || dataHandler.getData() == null || !dataHandler.getData().containsKey(id))
             return backupData;
-        else
-            return dataHandler.getData().get(id);
+        else return dataHandler.getData().get(id);
     }
 
     public void setDataHandler(DataHandler dataHandler) {
@@ -82,11 +82,11 @@ public enum SearchDataAccess implements DataAccess {
         return equalData;
     }
 
-    public boolean hasProcessData(){
+    public boolean hasProcessData() {
         return processData != null;
     }
 
-    public boolean hasEqualData(){
+    public boolean hasEqualData() {
         return equalData != null;
     }
 
