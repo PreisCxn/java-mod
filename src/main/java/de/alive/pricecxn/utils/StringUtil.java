@@ -57,14 +57,7 @@ public class StringUtil {
         return null;
     }
 
-    public static boolean containsString(String string, List<String> searches){
-        for(String search : searches){
-            if(string.contains(search))
-                return true;
-        }
-
-        return false;
+    public static boolean containsString(String string, List<String> searches) {
+        return searches.stream().anyMatch(string::contains);
     }
-
-
 }
