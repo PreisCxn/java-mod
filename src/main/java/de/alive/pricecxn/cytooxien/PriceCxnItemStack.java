@@ -39,7 +39,6 @@ public class PriceCxnItemStack {
 
         this.item = item;
         this.toolTips = StringUtil.getToolTips(this.item);
-        System.out.println(this.toolTips);
 
         /*
         wird immer gesucht:
