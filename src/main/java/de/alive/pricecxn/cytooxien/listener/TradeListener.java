@@ -84,7 +84,7 @@ public class TradeListener extends InventoryListener {
         traderControls.updateAsync(handler, this.searchData, false);
     }
 
-    private Optional<JsonElement> processPrices(JsonArray selfInv, JsonArray traderInv, JsonArray selfControls, JsonArray traderControls){
+    private Optional<JsonElement> processData(JsonArray selfInv, JsonArray traderInv, JsonArray selfControls, JsonArray traderControls){
 
         if(selfControls.isJsonNull() || traderControls.isJsonNull() || selfInv.isJsonNull() || traderInv.isJsonNull()) return Optional.empty();
         if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
