@@ -13,10 +13,7 @@ import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,7 +40,7 @@ public class TradeListener extends InventoryListener {
      */
     public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
         super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
-
+        //ICH LIEBE MEINE FREUNDIN SO SEHR <3 (AlinaTmr aka Alina aka Schatz aka Prinzessin)
         this.searchData.put("buyPrice", SearchDataAccess.TRADE_BUY_SEARCH);
     }
 
@@ -70,6 +67,10 @@ public class TradeListener extends InventoryListener {
         array.add("selfControls",selfControls.getData());
         array.add("traderControls",traderControls.getData());
 
+        if(array.get("self").getAsJsonArray().asList().isEmpty()) {
+
+        }
+
         System.out.println(array);
 
     }
@@ -81,6 +82,49 @@ public class TradeListener extends InventoryListener {
         traderInventory.forEach(row -> row.updateAsync(handler, null, true));
         selfControls.updateAsync(handler, this.searchData, false);
         traderControls.updateAsync(handler, this.searchData, false);
+    }
+
+    private Optional<JsonElement> processPrices(JsonArray selfInv, JsonArray traderInv, JsonArray selfControls, JsonArray traderControls){
+
+        if(selfControls.isJsonNull() || traderControls.isJsonNull() || selfInv.isJsonNull() || traderInv.isJsonNull()) return Optional.empty();
+        if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
+        if(selfInv.isEmpty() == traderInv.isEmpty()) return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
+        if (!isAccepted(traderControls) && !isAccepted(selfControls)) return Optional.empty();
+
+        if(selfInv.isEmpty()){
+            if (buyPriceIsNull(selfControls) || !buyPriceIsNull(traderControls)) return Optional.empty();
+
+
+
+        } else {
+            if (buyPriceIsNull(traderControls) || !buyPriceIsNull(selfControls)) return Optional.empty();
+
+
+
+        }
+
+        return null;
+    }
+
+    private boolean buyPriceIsNull(JsonArray array) {
+        Optional<JsonElement> element = array.asList()
+                .stream()
+                .filter(JsonElement::isJsonObject)
+                .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.player_head"))
+                .filter(e -> e.getAsJsonObject().get("buyPrice").getAsString().equals("0,00"))
+                .findFirst();
+
+        return element.isPresent();
+    }
+
+    private boolean isAccepted(JsonArray array) {
+        Optional<JsonElement> element = array.asList()
+                .stream()
+                .filter(JsonElement::isJsonObject)
+                .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.lime_concrete"))
+                .findFirst();
+
+        return element.isEmpty();
     }
 
     private record TradeStackRow(Pair<Integer, Integer> slotRange, List<PriceCxnItemStack> slots) {

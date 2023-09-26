@@ -1,5 +1,9 @@
 package de.alive.pricecxn.utils;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
@@ -60,4 +64,11 @@ public class StringUtil {
     public static boolean containsString(String string, List<String> searches) {
         return searches.stream().anyMatch(string::contains);
     }
+
+    public static JsonElement removeLastChar(JsonElement element) {
+        if (!element.isJsonPrimitive()) return JsonNull.INSTANCE;
+        String string = element.getAsString();
+        return new JsonPrimitive(string.substring(0, string.length() - 1));
+    }
+
 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +48,7 @@ public enum SearchDataAccess implements DataAccess {
     SHOP_SELL_SEARCH("", List.of("Verkaufen: ")),
 
     //ItemData Searches Trade
-    TRADE_BUY_SEARCH("", List.of("» "), null, (equal) -> true),
+    TRADE_BUY_SEARCH("", List.of("» "), StringUtil::removeLastChar, (equal) -> true),
 
     //Time Searches
     HOUR_SEARCH("", List.of("Stunde")),
