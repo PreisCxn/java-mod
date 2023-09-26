@@ -36,11 +36,15 @@ public enum SearchDataAccess implements DataAccess {
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: "), null,
             (equal) -> equal.getLeft().getAsString().equals(equal.getRight().getAsString())),
-    INSTANT_BUY_SEARCH("", List.of("Sofortkauf: ")),
+    AH_BUY_SEARCH("", List.of("Sofortkauf: ")),
     THEME_SERVER_SEARCH("", List.of("Du befindest dich auf")),
 
     //ItemData Searches NookShop
-    PRICE_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
+    NOOK_BUY_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
+
+    //ItemData Searches ItemShop
+    SHOP_BUY_SEARCH("", List.of("Kaufen: ")),
+    SHOP_SELL_SEARCH("", List.of("Verkaufen: ")),
 
     //Time Searches
     HOUR_SEARCH("", List.of("Stunde")),

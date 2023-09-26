@@ -36,7 +36,7 @@ public class TomNookListener extends InventoryListener {
     public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
         super(inventoryTitles, inventorySize <= 0 ? 1*9 : inventorySize, active);
 
-        searchData.put("buyPrice", SearchDataAccess.PRICE_SEARCH);
+        searchData.put("buyPrice", SearchDataAccess.NOOK_BUY_SEARCH);
     }
 
     public TomNookListener(@Nullable AtomicBoolean active) {

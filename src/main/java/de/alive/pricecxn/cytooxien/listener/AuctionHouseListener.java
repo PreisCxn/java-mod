@@ -37,7 +37,7 @@ public class AuctionHouseListener extends InventoryListener {
         searchData.put("sellerName", SearchDataAccess.SELLER_SEARCH);
         searchData.put("timestamp", SearchDataAccess.TIMESTAMP_SEARCH);
         searchData.put("bidPrice", SearchDataAccess.BID_SEARCH);
-        searchData.put("buyPrice", SearchDataAccess.INSTANT_BUY_SEARCH);
+        searchData.put("buyPrice", SearchDataAccess.AH_BUY_SEARCH);
 
     }
 
