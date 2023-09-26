@@ -1,16 +1,20 @@
 package de.alive.pricecxn.cytooxien.listener;
 
 import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.utils.TimeUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -22,7 +26,7 @@ public abstract class InventoryListener {
 
     private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
-    protected final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+    protected static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final List<Integer> slotNbt = new ArrayList<>();
 
@@ -33,12 +37,12 @@ public abstract class InventoryListener {
     private long lastUpdate = 0;
 
     /**
-     *  This constructor is used to listen to a specific inventory
+     * This constructor is used to listen to a specific inventory
      *
      * @param inventoryTitles The titles of the inventories to listen to
-     * @param inventorySize The size of the inventories to listen to (in slots)
+     * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active){
+    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
 
         this.inventorySize = inventorySize;
         this.inventoryTitles = inventoryTitles;
@@ -48,22 +52,23 @@ public abstract class InventoryListener {
     }
 
     //setup of Listeners
-    private void init(){
+    private void init() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if(active != null && !active.get()) return;
+            if (active != null && !active.get()) return;
             if (client.player == null) return;
             if (client.player.currentScreenHandler == null) return;
 
-            if(this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
+            if (this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
                 this.isOpen = false;
                 onInventoryClose(client, client.player.currentScreenHandler);
             }
 
-            if(client.currentScreen == null) return;
-            if(client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().equals("")) return;
+            if (client.currentScreen == null) return;
+            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().equals(""))
+                return;
 
 
-            if(!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())){
+            if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
                 ScreenHandler handler = client.player.currentScreenHandler;
                 initSlotsAsync(handler).thenRun(() -> {
                     this.isOpen = true;
@@ -86,46 +91,49 @@ public abstract class InventoryListener {
 
     /**
      * This method is called when the inventory is opened
-     * @param client The MinecraftClient
+     *
+     * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
     protected abstract void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
     /**
      * This method is called when the inventory is closed
-     * @param client The MinecraftClient
+     *
+     * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
     protected abstract void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
     /**
      * This method is called when the inventory is updated
-     * @param client The MinecraftClient
+     *
+     * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
     protected abstract void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
-    private boolean isInventoryTitle(@NotNull MinecraftClient client, @Nullable List<String> inventoryTitles){
-        if(client.currentScreen == null) return false;
-        if(inventoryTitles == null) return false;
+    private boolean isInventoryTitle(@NotNull MinecraftClient client, @Nullable List<String> inventoryTitles) {
+        if (client.currentScreen == null) return false;
+        if (inventoryTitles == null) return false;
 
-        for(String title : inventoryTitles){
-            if(client.currentScreen.getTitle().getString().equals(title))
+        for (String title : inventoryTitles) {
+            if (client.currentScreen.getTitle().getString().equals(title))
                 return true;
         }
 
         return false;
     }
 
-    private boolean hadItemsChange(@NotNull MinecraftClient client, @Nullable ScreenHandler handler){
-        if(lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
-        if(client.player == null) return false;
-        if(handler == null) return false;
-        if(!isInventoryTitle(client, inventoryTitles.getData())) return false;
+    private boolean hadItemsChange(@NotNull MinecraftClient client, @Nullable ScreenHandler handler) {
+        if (lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
+        if (client.player == null) return false;
+        if (handler == null) return false;
+        if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
 
-        for (int i = 0; i < this.inventorySize; i++){
+        for (int i = 0; i < this.inventorySize; i++) {
 
-            if(handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueHash(handler.getSlot(i)))){
+            if (handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueHash(handler.getSlot(i)))) {
                 initSlots(handler);
                 return true;
             }
@@ -143,21 +151,71 @@ public abstract class InventoryListener {
         return CompletableFuture.runAsync(() -> initSlots(handler), EXECUTOR);
     }
 
-    private void initSlots(@Nullable ScreenHandler handler){
-        if(handler == null) return;
+    private void initSlots(@Nullable ScreenHandler handler) {
+        if (handler == null) return;
 
         this.slotNbt.clear();
 
-        for (int i = 0; i < this.inventorySize; i++){
-            if(handler.getSlot(i).getStack() != null) {
+        for (int i = 0; i < this.inventorySize; i++) {
+            if (handler.getSlot(i).getStack() != null) {
                 slotNbt.add(getSlotUniqueHash(handler.getSlot(i)));
             }
         }
     }
 
-    private int getSlotUniqueHash(@NotNull Slot slot){
+    private int getSlotUniqueHash(@NotNull Slot slot) {
         return slot.getStack().getNbt() == null ? slot.getStack().getName().hashCode() : slot.getStack().getNbt().hashCode();
     }
 
+    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                        @NotNull ScreenHandler handler,
+                                        @NotNull Pair<Integer, Integer> range,
+                                        @Nullable Map<String, DataAccess> searchData) {
+        CompletableFuture.supplyAsync(() -> {
+            for (int i = range.getLeft(); i < range.getRight(); i++) {
+                Slot slot = handler.getSlot(i);
+                if (slot.getStack().isEmpty()) continue;
+
+                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData);
+
+                boolean add = true;
+
+                synchronized (items) {
+                    for (PriceCxnItemStack item : items) {
+                        if (item.equals(newItem)) {
+
+                            if (searchData != null
+                                    && searchData.containsKey("timestamp")
+                                    && !TimeUtil.timestampsEqual(
+                                            item.getData().get("timestamp").getAsLong(),
+                                            newItem.getData().get("timestamp").getAsLong(),
+                                            5)) {
+                                continue;
+                            }
+
+                            add = false;
+                            if (!item.deepEquals(newItem)) {
+                                item.updateData(newItem);
+                            }
+                            break;
+                        }
+                    }
+
+                    if (add)
+                        items.add(newItem);
+                }
+
+            }
+
+            return null;
+        }, EXECUTOR);
+
+    }
+
+    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                        @NotNull ScreenHandler handler,
+                                        @NotNull Pair<Integer, Integer> range){
+        updateItemsAsync(items, handler, range, null);
+    }
 
 }

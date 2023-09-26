@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 public class PriceCxnItemStack {
@@ -24,6 +23,7 @@ public class PriceCxnItemStack {
     public static final String COMMENT_KEY = "comment";
 
     private final ItemStack item;
+
     private final Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
@@ -32,9 +32,14 @@ public class PriceCxnItemStack {
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
 
-        this.searchData = searchData;
+        if(searchData == null)
+            this.searchData = new HashMap<>();
+        else
+            this.searchData = searchData;
+
         this.item = item;
         this.toolTips = StringUtil.getToolTips(this.item);
+        System.out.println(this.toolTips);
 
         /*
         wird immer gesucht:
@@ -50,23 +55,21 @@ public class PriceCxnItemStack {
         zusätzlich suche nach den keys in searchData:
          */
 
-        if (this.searchData != null) {
-            for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
+        for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
 
-                DataAccess access = entry.getValue();
-                JsonElement result = JsonNull.INSTANCE;
-                String searchResult = this.toolTipSearch(access);
+            DataAccess access = entry.getValue();
+            JsonElement result = JsonNull.INSTANCE;
+            String searchResult = this.toolTipSearch(access);
 
-                if (searchResult != null) {
-                    if (entry.getValue().hasProcessData()) {
-                        result = access.getProcessData().apply(new JsonPrimitive(searchResult));
-                    } else {
-                        result = new JsonPrimitive(searchResult);
-                    }
+            if (searchResult != null) {
+                if (entry.getValue().hasProcessData()) {
+                    result = access.getProcessData().apply(new JsonPrimitive(searchResult));
+                } else {
+                    result = new JsonPrimitive(searchResult);
                 }
-
-                data.add(entry.getKey(), result);
             }
+
+            data.add(entry.getKey(), result);
         }
 
     }
@@ -136,6 +139,8 @@ public class PriceCxnItemStack {
     public int hashCode() {
         JsonObject hash = this.data.deepCopy();
 
+        if(this.searchData == null) return hash.hashCode();
+
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
                 hash.remove(entry.getKey());
@@ -191,9 +196,22 @@ public class PriceCxnItemStack {
         }
 
         return hash;
+
     }
 
-    public Map<String, DataAccess> getSearchData() {
+    public void updateData(@NotNull PriceCxnItemStack item){
+        for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
+            if (entry.getValue().hasEqualData()) {
+                if(!item.getSearchData().containsKey(entry.getKey())) continue;
+                if(!item.getSearchData().get(entry.getKey()).hasEqualData()) continue;
+
+                this.data.remove(entry.getKey());
+                this.data.add(entry.getKey(), item.getData().get(entry.getKey()));
+            }
+        }
+    }
+
+    public @NotNull Map<String, DataAccess> getSearchData() {
         return searchData;
     }
 }

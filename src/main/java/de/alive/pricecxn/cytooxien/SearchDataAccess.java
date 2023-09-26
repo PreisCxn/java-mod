@@ -21,7 +21,7 @@ public enum SearchDataAccess implements DataAccess {
     INV_NOOK_SEARCH("", List.of("Shop")),
     INV_TRADE_SEARCH("", List.of("Handel")),
 
-    //ItemData Searches
+    //ItemData Searches AuctionHouse
     TIMESTAMP_SEARCH("", List.of("Ende: "), (result) -> {
         Optional<Long> timeStamp = TimeUtil.getStartTimeStamp(result.getAsString());
 
@@ -36,8 +36,11 @@ public enum SearchDataAccess implements DataAccess {
     SELLER_SEARCH("", List.of("Verkäufer: ")),
     BID_SEARCH("", List.of("Gebotsbetrag: "), null,
             (equal) -> equal.getLeft().getAsString().equals(equal.getRight().getAsString())),
-    BUY_SEARCH("", List.of("Sofortkauf: ")),
+    INSTANT_BUY_SEARCH("", List.of("Sofortkauf: ")),
     THEME_SERVER_SEARCH("", List.of("Du befindest dich auf")),
+
+    //ItemData Searches NookShop
+    PRICE_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
 
     //Time Searches
     HOUR_SEARCH("", List.of("Stunde")),
