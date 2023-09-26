@@ -22,7 +22,7 @@ public class TomNookListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
-    private final Pair<Integer, Integer> itemRange = new Pair<>(0, 9);
+    private final Pair<Integer, Integer> itemRange = new Pair<>(0, 8);
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
@@ -46,6 +46,8 @@ public class TomNookListener extends InventoryListener {
     @Override
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook open");
+
+        items.clear();
         updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }
 

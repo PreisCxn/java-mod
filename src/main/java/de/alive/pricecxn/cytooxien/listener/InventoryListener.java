@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -170,13 +171,14 @@ public abstract class InventoryListener {
     public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
                                         @NotNull ScreenHandler handler,
                                         @NotNull Pair<Integer, Integer> range,
-                                        @Nullable Map<String, DataAccess> searchData) {
+                                        @Nullable Map<String, DataAccess> searchData,
+                                        boolean addComment) {
         CompletableFuture.supplyAsync(() -> {
-            for (int i = range.getLeft(); i < range.getRight(); i++) {
+            for (int i = range.getLeft(); i <= range.getRight(); i++) {
                 Slot slot = handler.getSlot(i);
                 if (slot.getStack().isEmpty()) continue;
 
-                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData);
+                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
 
                 boolean add = true;
 
@@ -187,9 +189,9 @@ public abstract class InventoryListener {
                             if (searchData != null
                                     && searchData.containsKey("timestamp")
                                     && !TimeUtil.timestampsEqual(
-                                            item.getData().get("timestamp").getAsLong(),
-                                            newItem.getData().get("timestamp").getAsLong(),
-                                            5)) {
+                                    item.getData().get("timestamp").getAsLong(),
+                                    newItem.getData().get("timestamp").getAsLong(),
+                                    5)) {
                                 continue;
                             }
 
@@ -212,10 +214,52 @@ public abstract class InventoryListener {
 
     }
 
+    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                         @NotNull ScreenHandler handler,
+                                                         final int slotIndex,
+                                                         @Nullable Map<String, DataAccess> searchData,
+                                                         boolean addComment) {
+        Slot slot = handler.getSlot(slotIndex);
+        if (slot.getStack().isEmpty()) return Optional.empty();
+
+        PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
+        if(item == null) return Optional.of(newItem);
+
+        if (item.equals(newItem)) {
+            if (searchData != null
+                    && searchData.containsKey("timestamp")
+                    && !TimeUtil.timestampsEqual(
+                    item.getData().get("timestamp").getAsLong(),
+                    newItem.getData().get("timestamp").getAsLong(),
+                    5)) {
+                return Optional.empty();
+            } else if(!item.deepEquals(newItem)) {
+                item.updateData(newItem);
+                return Optional.of(item);
+            } else
+                return Optional.empty();
+        }
+
+        return Optional.of(newItem);
+    }
+
+    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                         @NotNull ScreenHandler handler,
+                                                         final int slotIndex) {
+        return updateItem(item, handler, slotIndex, null, true);
+    }
+
     public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
                                         @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range){
+                                        @NotNull Pair<Integer, Integer> range) {
         updateItemsAsync(items, handler, range, null);
+    }
+
+    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                        @NotNull ScreenHandler handler,
+                                        @NotNull Pair<Integer, Integer> range,
+                                        @Nullable Map<String, DataAccess> searchData) {
+        updateItemsAsync(items, handler, range, searchData, true);
     }
 
 }
