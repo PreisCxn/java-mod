@@ -46,6 +46,9 @@ public enum SearchDataAccess implements DataAccess {
     SHOP_BUY_SEARCH("", List.of("Kaufen: ")),
     SHOP_SELL_SEARCH("", List.of("Verkaufen: ")),
 
+    //ItemData Searches Trade
+    TRADE_BUY_SEARCH("", List.of("» "), null, (equal) -> true),
+
     //Time Searches
     HOUR_SEARCH("", List.of("Stunde")),
     MINUTE_SEARCH("", List.of("Minute")),

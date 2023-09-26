@@ -203,8 +203,9 @@ public abstract class InventoryListener {
                         }
                     }
 
-                    if (add)
+                    if (add) {
                         items.add(newItem);
+                    }
                 }
 
             }
