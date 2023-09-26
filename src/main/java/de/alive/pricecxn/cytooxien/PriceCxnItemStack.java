@@ -28,17 +28,20 @@ public class PriceCxnItemStack {
 
     private final JsonObject data = new JsonObject();
 
+    private final String itemName;
+
     private final List<String> toolTips;
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
 
-        if(searchData == null)
+        if (searchData == null)
             this.searchData = new HashMap<>();
         else
             this.searchData = searchData;
 
         this.item = item;
         this.toolTips = StringUtil.getToolTips(this.item);
+        this.itemName = this.item.getItem().getTranslationKey();
 
         /*
         wird immer gesucht:
@@ -46,9 +49,9 @@ public class PriceCxnItemStack {
         - amount
         - comment (nbts)
          */
-        data.addProperty(ITEM_NAME_KEY, item.getItem().getTranslationKey());
+        data.addProperty(ITEM_NAME_KEY, itemName);
         data.addProperty(AMOUNT_KEY, item.getCount());
-        if(addComment)
+        if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
         /*
@@ -102,11 +105,12 @@ public class PriceCxnItemStack {
                     nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
 
                     //test if JsonArray
-                    try{
+                    try {
                         JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
                         json.add(key, array);
                         continue;
-                    } catch (IllegalStateException ignored){}
+                    } catch (IllegalStateException ignored) {
+                    }
 
                     //test if JsonKey is missing
                     try {
@@ -116,7 +120,7 @@ public class PriceCxnItemStack {
                         json.addProperty(key, Optional.ofNullable(nbt.get(key)).map(NbtElement::asString).orElse("null"));
                     }
 
-                } catch (JsonParseException e){
+                } catch (JsonParseException e) {
                     //else add as normal String
                     json.addProperty(key, Optional.ofNullable(nbt.get(key)).map(NbtElement::asString).orElse("null"));
                 }
@@ -143,7 +147,7 @@ public class PriceCxnItemStack {
     public int hashCode() {
         JsonObject hash = this.data.deepCopy();
 
-        if(this.searchData == null) return hash.hashCode();
+        if (this.searchData == null) return hash.hashCode();
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
@@ -161,8 +165,8 @@ public class PriceCxnItemStack {
     }
 
     public boolean deepEquals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof PriceCxnItemStack item)) return false;
+        if (o == this) return true;
+        if (!(o instanceof PriceCxnItemStack item)) return false;
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
@@ -190,7 +194,7 @@ public class PriceCxnItemStack {
     private JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
-        if(hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
+        if (hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
             hash.get(COMMENT_KEY).getAsJsonObject().remove("display");
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
@@ -203,11 +207,43 @@ public class PriceCxnItemStack {
 
     }
 
-    public void updateData(@NotNull PriceCxnItemStack item){
+    public boolean isSameItem(PriceCxnItemStack item) {
+        if (!Objects.equals(this.getItemName(), item.getItemName()))
+            return false; //wenn itemName nicht gleich => false
+
+        //itemName ist gleich
+
+        if (!(this.getData().has(COMMENT_KEY) && item.getData().has(COMMENT_KEY)))
+            return true; //wenn beide keinen Comment => true
+        if (this.getData().has(COMMENT_KEY) != item.getData().has(COMMENT_KEY))
+            return false; //wenn nur einer einen Comment => false
+
+        //beide haben einen Comment
+
+        JsonObject thisComment = this.getData().get(COMMENT_KEY).getAsJsonObject();
+        JsonObject itemComment = item.getData().get(COMMENT_KEY).getAsJsonObject();
+
+        final String bukkitValue = "PublicBukkitValues";
+
+        if (!(thisComment.has(bukkitValue) && itemComment.has(bukkitValue)))
+            return true; //wenn beide keinen PublicBukkitValues haben => true
+        if (thisComment.has(bukkitValue) != itemComment.has(bukkitValue))
+            return false; //wenn nur einer einen PublicBukkitValues hat => false
+
+        //beide haben PublicBukkitValues
+
+        return thisComment.get(bukkitValue).equals(itemComment.get(bukkitValue)); //wenn beide PublicBukkitValues gleich => true
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void updateData(@NotNull PriceCxnItemStack item) {
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
-                if(!item.getSearchData().containsKey(entry.getKey())) continue;
-                if(!item.getSearchData().get(entry.getKey()).hasEqualData()) continue;
+                if (!item.getSearchData().containsKey(entry.getKey())) continue;
+                if (!item.getSearchData().get(entry.getKey()).hasEqualData()) continue;
 
                 this.data.remove(entry.getKey());
                 this.data.add(entry.getKey(), item.getData().get(entry.getKey()));
