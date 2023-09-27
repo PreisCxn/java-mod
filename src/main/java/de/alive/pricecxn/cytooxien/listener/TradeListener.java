@@ -36,7 +36,6 @@ public class TradeListener extends InventoryListener {
      *
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
-     * @param active
      */
     public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
         super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
@@ -88,7 +87,7 @@ public class TradeListener extends InventoryListener {
 
         if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
         if(selfInv.isEmpty() == traderInv.isEmpty()) return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
-        if (!isAccepted(traderControls) && !isAccepted(selfControls)) return Optional.empty();
+        if (notAccepted(traderControls) && notAccepted(selfControls)) return Optional.empty();
 
         List<PriceCxnItemStack> items;
         Optional<String> price;
@@ -133,14 +132,14 @@ public class TradeListener extends InventoryListener {
                 .map(e -> e.getAsJsonObject().get("buyPrice"));
     }
 
-    private boolean isAccepted(JsonArray array) {
+    private boolean notAccepted(JsonArray array) {
         Optional<JsonElement> element = array.asList()
                 .stream()
                 .filter(JsonElement::isJsonObject)
                 .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.lime_concrete"))
                 .findFirst();
 
-        return element.isPresent();
+        return element.isEmpty();
     }
 
     private record TradeStackRow(Pair<Integer, Integer> slotRange, List<PriceCxnItemStack> slots) {
@@ -154,10 +153,6 @@ public class TradeListener extends InventoryListener {
             }
 
             return result;
-        }
-
-        static List<TradeStackRow> from(int startValue) {
-            return from(startValue, INVENTORY_HEIGHT, INVENTORY_WIDTH, INVENTORY_SPACE_BETWEEN);
         }
 
         static TradeStackRow from(int start, int width) {
