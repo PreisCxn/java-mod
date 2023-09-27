@@ -4,7 +4,6 @@ import de.alive.pricecxn.DataHandler;
 import de.alive.pricecxn.ServerChecker;
 import de.alive.pricecxn.ServerListener;
 import de.alive.pricecxn.cytooxien.listener.*;
-import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -57,6 +56,7 @@ public class CxnListener extends ServerListener {
         themeChecker.refreshAsync().thenRun(() -> {
 
             printDebug("joined Cytooxien: " + this.isOnServer().get());
+            assert MinecraftClient.getInstance().player != null;
             MinecraftClient.getInstance().player.sendMessage(Text.translatable("test.translatable.cxnListener").formatted(Formatting.RED));
 
         });

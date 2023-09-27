@@ -65,7 +65,7 @@ public abstract class InventoryListener {
             }
 
             if (client.currentScreen == null) return;
-            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().equals(""))
+            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
                 return;
 
 
@@ -248,12 +248,6 @@ public abstract class InventoryListener {
                                                          @NotNull ScreenHandler handler,
                                                          final int slotIndex) {
         return updateItem(item, handler, slotIndex, null, true);
-    }
-
-    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                        @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range) {
-        updateItemsAsync(items, handler, range, null);
     }
 
     public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
