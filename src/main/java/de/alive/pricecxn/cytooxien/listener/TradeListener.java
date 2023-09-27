@@ -67,11 +67,11 @@ public class TradeListener extends InventoryListener {
         array.add("selfControls",selfControls.getData());
         array.add("traderControls",traderControls.getData());
 
-        if(array.get("self").getAsJsonArray().asList().isEmpty()) {
+        CompletableFuture.runAsync(() -> {
+            Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
+            printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
+        }, EXECUTOR);
 
-        }
-
-        System.out.println(array);
 
     }
 
@@ -84,37 +84,53 @@ public class TradeListener extends InventoryListener {
         traderControls.updateAsync(handler, this.searchData, false);
     }
 
-    private Optional<JsonElement> processData(JsonArray selfInv, JsonArray traderInv, JsonArray selfControls, JsonArray traderControls){
+    private Optional<JsonElement> processData(List<PriceCxnItemStack> selfInv, List<PriceCxnItemStack> traderInv, JsonArray selfControls, JsonArray traderControls){
 
-        if(selfControls.isJsonNull() || traderControls.isJsonNull() || selfInv.isJsonNull() || traderInv.isJsonNull()) return Optional.empty();
         if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
         if(selfInv.isEmpty() == traderInv.isEmpty()) return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
         if (!isAccepted(traderControls) && !isAccepted(selfControls)) return Optional.empty();
 
+        List<PriceCxnItemStack> items;
+        Optional<String> price;
+
         if(selfInv.isEmpty()){
             if (buyPriceIsNull(selfControls) || !buyPriceIsNull(traderControls)) return Optional.empty();
-
-
-
-        } else {
+            items = traderInv;
+            price = getBuyPrice(selfControls).map(JsonElement::getAsString);
+        } else if(traderInv.isEmpty()){
             if (buyPriceIsNull(traderControls) || !buyPriceIsNull(selfControls)) return Optional.empty();
+            items = selfInv;
+            price = getBuyPrice(traderControls).map(JsonElement::getAsString);
+        } else return Optional.empty();
 
+        int amount = items.get(0).getAmount();
 
-
+        for(int i = 1; i < items.size(); i++){
+            if(!items.get(i).isSameItem(items.get(0))) return Optional.empty();
+            amount += items.get(i).getAmount();
         }
 
-        return null;
+        JsonObject result = items.get(0).getData();
+
+        result.remove(PriceCxnItemStack.AMOUNT_KEY);
+        result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
+        price.ifPresent(s -> result.addProperty("buyPrice", s));
+
+        return Optional.of(result);
     }
 
     private boolean buyPriceIsNull(JsonArray array) {
-        Optional<JsonElement> element = array.asList()
+        Optional<JsonElement> get = getBuyPrice(array);
+        return get.map(jsonElement -> jsonElement.getAsString().equals("0,00")).orElse(false);
+    }
+
+    private Optional<JsonElement> getBuyPrice(JsonArray array){
+        return array.asList()
                 .stream()
                 .filter(JsonElement::isJsonObject)
                 .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.player_head"))
-                .filter(e -> e.getAsJsonObject().get("buyPrice").getAsString().equals("0,00"))
-                .findFirst();
-
-        return element.isPresent();
+                .findFirst()
+                .map(e -> e.getAsJsonObject().get("buyPrice"));
     }
 
     private boolean isAccepted(JsonArray array) {
@@ -124,7 +140,7 @@ public class TradeListener extends InventoryListener {
                 .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.lime_concrete"))
                 .findFirst();
 
-        return element.isEmpty();
+        return element.isPresent();
     }
 
     private record TradeStackRow(Pair<Integer, Integer> slotRange, List<PriceCxnItemStack> slots) {
@@ -181,5 +197,14 @@ public class TradeListener extends InventoryListener {
             }
             return array;
         }
+
+        static List<PriceCxnItemStack> getItemStacks(List<TradeStackRow> rows) {
+            List<PriceCxnItemStack> result = new ArrayList<>();
+            for (TradeStackRow row : rows) {
+                result.addAll(row.slots);
+            }
+            return result;
+        }
+
     }
 }

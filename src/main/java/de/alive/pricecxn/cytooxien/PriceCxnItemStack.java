@@ -30,6 +30,8 @@ public class PriceCxnItemStack {
 
     private final String itemName;
 
+    private int amount = 0;
+
     private final List<String> toolTips;
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
@@ -42,6 +44,7 @@ public class PriceCxnItemStack {
         this.item = item;
         this.toolTips = StringUtil.getToolTips(this.item);
         this.itemName = this.item.getItem().getTranslationKey();
+        this.amount = item.getCount();
 
         /*
         wird immer gesucht:
@@ -50,7 +53,7 @@ public class PriceCxnItemStack {
         - comment (nbts)
          */
         data.addProperty(ITEM_NAME_KEY, itemName);
-        data.addProperty(AMOUNT_KEY, item.getCount());
+        data.addProperty(AMOUNT_KEY, amount);
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
@@ -249,6 +252,10 @@ public class PriceCxnItemStack {
                 this.data.add(entry.getKey(), item.getData().get(entry.getKey()));
             }
         }
+    }
+
+    public int getAmount() {
+        return amount;
     }
 
     public @NotNull Map<String, DataAccess> getSearchData() {
