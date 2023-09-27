@@ -64,6 +64,7 @@ public class ThemeServerChecker extends TabListener {
             serverListener.onTabChange();
 
         printDebug("New Mode: " + this.mode.toString());
+        assert MinecraftClient.getInstance().player != null;
         MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
     }
 

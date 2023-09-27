@@ -10,10 +10,10 @@ public class PriceCxnModClient implements ClientModInitializer {
 
     public static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadScheduledExecutor();
 
+    public static final CxnListener CXN_LISTENER = new CxnListener();
+
     @Override
     public void onInitializeClient() {
-
-        CxnListener cxnListener = new CxnListener();
 
     }
 }

@@ -71,4 +71,11 @@ public class CxnListener extends ServerListener {
         return data.get(key);
     }
 
+    public ServerChecker getServerChecker() {
+        return serverChecker;
+    }
+
+    public ThemeServerChecker getThemeChecker() {
+        return themeChecker;
+    }
 }
