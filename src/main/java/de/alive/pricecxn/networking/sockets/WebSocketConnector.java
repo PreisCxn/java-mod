@@ -21,14 +21,18 @@ public class WebSocketConnector {
     private boolean isConnected = false;
 
     private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
-    private List<SocketMessageListener> messageListeners = new ArrayList<>();
-    private List<SocketCloseListener> closeListeners = new ArrayList<>();
+    private final List<SocketMessageListener> messageListeners = new ArrayList<>();
+    private final List<SocketCloseListener> closeListeners = new ArrayList<>();
+    private final List<SocketOpenListener> openListeners = new ArrayList<>();
 
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
         this.isConnected = true;
         connectionFuture.complete(true);
+        for (SocketOpenListener listener : openListeners) {
+            listener.onOpen(session);
+        }
     }
 
     @OnMessage
@@ -94,12 +98,20 @@ public class WebSocketConnector {
         closeListeners.add(listener);
     }
 
+    public void addOpenListener(SocketOpenListener listener) {
+        openListeners.add(listener);
+    }
+
     public void removeMessageListener(SocketMessageListener listener) {
         messageListeners.remove(listener);
     }
 
     public void removeCloseListener(SocketCloseListener listener) {
         closeListeners.remove(listener);
+    }
+
+    public void removeOpenListener(SocketOpenListener listener) {
+        openListeners.remove(listener);
     }
 
 }
