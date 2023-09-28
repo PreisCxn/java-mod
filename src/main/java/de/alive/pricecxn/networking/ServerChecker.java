@@ -44,8 +44,11 @@ public class ServerChecker {
                         this.state = NetworkingState.MAINTENANCE;
                     else
                         this.state = NetworkingState.ONLINE;
+                    connectionFuture.complete(true);
+                } else {
+                    this.state = NetworkingState.OFFLINE;
+                    connectionFuture.complete(false);
                 }
-                connectionFuture.complete(true);
             } catch (JsonSyntaxException ignored){
                 this.state = NetworkingState.OFFLINE;
                 connectionFuture.complete(false);
