@@ -1,5 +1,10 @@
 package de.alive.pricecxn.networking;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import de.alive.pricecxn.networking.sockets.SocketMessageListener;
+import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +22,8 @@ public class ServerChecker {
     private long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
 
+    private NetworkingState state = NetworkingState.OFFLINE;
+
     /**
      * This constructor is used to check if the server is reachable
      *
@@ -26,6 +33,20 @@ public class ServerChecker {
     public ServerChecker(@Nullable String uri, int checkInterval) {
         this.uri = uri == null ? DEFAULT_CHECK_URI : uri;
         this.checkInterval = checkInterval < 0 ? DEFAULT_CHECK_INTERVAL : checkInterval;
+
+        this.websocket.addMessageListener(message -> {
+            try{
+                JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+                if(json.has("maintenance")) {
+                    if(json.get("maintenance").getAsBoolean())
+                        this.state = NetworkingState.MAINTENANCE;
+                    else
+                        this.state = NetworkingState.ONLINE;
+                }
+            } catch (JsonSyntaxException ignored){}
+        });
+        this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
+
         checkConnection();
     }
 
@@ -42,7 +63,15 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> checkConnection() {
-        return this.websocket.connectToWebSocketServer(this.uri);
+        CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri);
+
+        future.thenCompose(isConnected -> {
+            if(isConnected)
+                this.websocket.sendMessage("pcxn?maintenance");
+            return null;
+        });
+
+        return future;
     }
 
     /**
@@ -58,12 +87,15 @@ public class ServerChecker {
         else return CompletableFuture.completedFuture(false);
     }
 
-    public void addSocketListener(SocketListener listener) {
+    public void addSocketListener(SocketMessageListener listener) {
         this.websocket.addMessageListener(listener);
     }
 
-    public void removeSocketListener(SocketListener listener) {
+    public void removeSocketListener(SocketMessageListener listener) {
         this.websocket.removeMessageListener(listener);
     }
 
+    public NetworkingState getState() {
+        return state;
+    }
 }
