@@ -24,8 +24,6 @@ public class CxnListener extends ServerListener {
     private final ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
 
-    private NetworkingState state = NetworkingState.OFFLINE;
-
     private AtomicBoolean active = new AtomicBoolean(false);
 
     public CxnListener() {
@@ -74,10 +72,6 @@ public class CxnListener extends ServerListener {
                 //wenn Min-Version nicht erfüllt, dann deaktiviere Mod und gib Fehlermeldung aus
             //wenn Verbindung nicht erfolgreich, dann deaktiviere Mod und gib Fehlermeldung aus
 
-        if(this.state == NetworkingState.OFFLINE){
-
-        }
-
         themeChecker.refreshAsync().thenRun(() -> {
 
             printDebug("joined Cytooxien: " + this.isOnServer().get());
@@ -93,12 +87,10 @@ public class CxnListener extends ServerListener {
     }
 
     public void activate(){
-        this.state = NetworkingState.ONLINE;
         activateListeners();
     }
 
     public void deactivate(){
-        this.state = NetworkingState.OFFLINE;
         deactivateListeners();
     }
 
@@ -120,9 +112,5 @@ public class CxnListener extends ServerListener {
 
     public ThemeServerChecker getThemeChecker() {
         return themeChecker;
-    }
-
-    public NetworkingState getState() {
-        return state;
     }
 }

@@ -15,8 +15,7 @@ public class ServerChecker {
     private final String uri;
     private final int checkInterval;
     private long lastCheck = 0;
-
-    private final WebSocketConnector WEBSOCKET = new WebSocketConnector();
+    private final WebSocketConnector websocket = new WebSocketConnector();
 
     /**
      * This constructor is used to check if the server is reachable
@@ -43,7 +42,7 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> checkConnection() {
-        return this.WEBSOCKET.connectToWebSocketServer(this.uri);
+        return this.websocket.connectToWebSocketServer(this.uri);
     }
 
     /**
@@ -52,7 +51,7 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> isConnected() {
-        if (this.WEBSOCKET.getIsConnected())
+        if (this.websocket.getIsConnected())
             return CompletableFuture.completedFuture(true);
         else if(this.lastCheck == 0 || System.currentTimeMillis() - this.lastCheck > this.checkInterval)
             return checkConnection();
@@ -60,11 +59,11 @@ public class ServerChecker {
     }
 
     public void addSocketListener(SocketListener listener) {
-        this.WEBSOCKET.addMessageListener(listener);
+        this.websocket.addMessageListener(listener);
     }
 
     public void removeSocketListener(SocketListener listener) {
-        this.WEBSOCKET.removeMessageListener(listener);
+        this.websocket.removeMessageListener(listener);
     }
 
 }
