@@ -1,7 +1,7 @@
 package de.alive.pricecxn.mixin;
 
 import de.alive.pricecxn.PriceCxnModClient;
-import de.alive.pricecxn.ServerChecker;
+import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.cytooxien.ThemeServerChecker;
 import net.minecraft.client.item.TooltipContext;
@@ -35,6 +35,8 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, List<Text> list) {
+
+        if(PriceCxnModClient.CXN_LISTENER == null) return;
 
         ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();

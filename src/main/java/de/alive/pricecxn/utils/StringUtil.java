@@ -32,7 +32,6 @@ public class StringUtil {
      */
     public static List<String> listToLowerCase(@Nullable List<String> list) {
         if (list == null) return null;
-
         List<String> lowercaseList = new ArrayList<>(list);
         lowercaseList.replaceAll(String::toLowerCase);
         return lowercaseList;

@@ -1,12 +1,12 @@
-package de.alive.pricecxn.cytooxien.listener;
+package de.alive.pricecxn.cytooxien.dataobservers;
 
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.listener.InventoryListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +36,7 @@ public class ItemShopListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
+    public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         super(inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
 
         searchData.put("buyPrice", SearchDataAccess.SHOP_BUY_SEARCH);
@@ -44,7 +44,7 @@ public class ItemShopListener extends InventoryListener {
 
     }
 
-    public ItemShopListener(@Nullable AtomicBoolean active) {
+    public ItemShopListener(@Nullable AtomicBoolean... active) {
         this(SearchDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 

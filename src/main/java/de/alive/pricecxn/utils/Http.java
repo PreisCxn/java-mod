@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 public class Http {
 
-    public static final String API_URL = "https://preiscxn.de/api";
+    public static final String API_URL = "";
 
     private static final @NotNull HttpClient client = HttpClient.newHttpClient();
 

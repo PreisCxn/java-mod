@@ -1,4 +1,4 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.listener;
 
 import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;

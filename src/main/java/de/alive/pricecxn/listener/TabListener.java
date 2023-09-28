@@ -1,5 +1,7 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.listener;
 
+import de.alive.pricecxn.networking.DataAccess;
+import de.alive.pricecxn.PriceCxnModClient;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;

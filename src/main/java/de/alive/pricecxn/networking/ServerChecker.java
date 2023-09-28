@@ -1,22 +1,22 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.networking;
 
-import de.alive.pricecxn.utils.Http;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ServerChecker {
 
-    private static final String DEFAULT_CHECK_URI = "localhost:8080";
-    private static final int DEFAULT_CHECK_INTERVAL = 1000;
+    private static final String DEFAULT_CHECK_URI = "ws://localhost:8080";
+    public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final int DEFAULT_CHECK_INTERVAL = 60000;
     private boolean connected = false;
     private final String uri;
     private final int checkInterval;
     private long lastCheck = 0;
+
+    private final WebSocketConnector WEBSOCKET = new WebSocketConnector();
 
     /**
      * This constructor is used to check if the server is reachable
@@ -43,20 +43,7 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> checkConnection() {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-
-        Http.GET(this.uri, response -> {
-            future.complete(true);
-            this.lastCheck = System.currentTimeMillis();
-            return null;
-        }, null);
-
-        future.exceptionally(ex -> {
-            future.complete(false);
-            return null;
-        });
-
-        return future;
+        return this.WEBSOCKET.connectToWebSocketServer(this.uri);
     }
 
     /**
@@ -65,11 +52,19 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> isConnected() {
-        if (this.connected && (System.currentTimeMillis() - this.lastCheck < this.checkInterval) && this.lastCheck > 0)
+        if (this.WEBSOCKET.getIsConnected())
             return CompletableFuture.completedFuture(true);
-        else
+        else if(this.lastCheck == 0 || System.currentTimeMillis() - this.lastCheck > this.checkInterval)
             return checkConnection();
+        else return CompletableFuture.completedFuture(false);
     }
 
+    public void addSocketListener(SocketListener listener) {
+        this.WEBSOCKET.addMessageListener(listener);
+    }
+
+    public void removeSocketListener(SocketListener listener) {
+        this.WEBSOCKET.removeMessageListener(listener);
+    }
 
 }

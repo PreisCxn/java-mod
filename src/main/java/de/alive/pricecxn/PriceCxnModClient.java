@@ -14,6 +14,5 @@ public class PriceCxnModClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-
     }
 }

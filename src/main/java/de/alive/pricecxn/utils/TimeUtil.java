@@ -1,6 +1,6 @@
 package de.alive.pricecxn.utils;
 
-import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
 
 import java.util.Arrays;

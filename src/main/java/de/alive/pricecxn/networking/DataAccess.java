@@ -1,4 +1,4 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.networking;
 
 import com.google.gson.JsonElement;
 import net.minecraft.util.Pair;

@@ -1,9 +1,10 @@
-package de.alive.pricecxn.cytooxien.listener;
+package de.alive.pricecxn.cytooxien.dataobservers;
 
 import com.google.gson.JsonArray;
-import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.listener.InventoryListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Pair;
@@ -33,13 +34,13 @@ public class TomNookListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
+    public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         super(inventoryTitles, inventorySize <= 0 ? 1*9 : inventorySize, active);
 
         searchData.put("buyPrice", SearchDataAccess.NOOK_BUY_SEARCH);
     }
 
-    public TomNookListener(@Nullable AtomicBoolean active) {
+    public TomNookListener(@Nullable AtomicBoolean... active) {
         this(SearchDataAccess.INV_NOOK_SEARCH, 0, active);
     }
 

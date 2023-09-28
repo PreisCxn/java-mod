@@ -1,6 +1,6 @@
-package de.alive.pricecxn.cytooxien.listener;
+package de.alive.pricecxn.listener;
 
-import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -12,10 +12,7 @@ import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -31,7 +28,7 @@ public abstract class InventoryListener {
 
     private final List<Integer> slotNbt = new ArrayList<>();
 
-    private final AtomicBoolean active;
+    private final AtomicBoolean[] active;
 
     private boolean isOpen = false;
 
@@ -43,7 +40,7 @@ public abstract class InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean active) {
+    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
 
         this.inventorySize = inventorySize;
         this.inventoryTitles = inventoryTitles;
@@ -55,7 +52,7 @@ public abstract class InventoryListener {
     //setup of Listeners
     private void init() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (active != null && !active.get()) return;
+            if (active != null && Arrays.stream(active).anyMatch(bool -> !bool.get())) return;
             if (client.player == null) return;
             if (client.player.currentScreenHandler == null) return;
 

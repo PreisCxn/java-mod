@@ -1,4 +1,4 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.networking;
 
 import com.google.gson.*;
 import de.alive.pricecxn.utils.Http;
@@ -44,7 +44,7 @@ public class DataHandler {
     }
 
     public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval) {
-        this(serverChecker, uri,columnNames, keyColumnName, refreshInterval, (DataAccess) null);
+        this(serverChecker, uri, columnNames, keyColumnName, refreshInterval, (DataAccess) null);
     }
 
     /**

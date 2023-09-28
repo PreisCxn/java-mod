@@ -1,7 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
-import de.alive.pricecxn.DataAccess;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
