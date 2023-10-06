@@ -30,15 +30,20 @@ public class WebSocketConnector {
         this.session = session;
         this.isConnected = true;
         connectionFuture.complete(true);
-        for (SocketOpenListener listener : openListeners) {
-            listener.onOpen(session);
+        synchronized (openListeners) {
+            for (SocketOpenListener listener : openListeners) {
+                listener.onOpen(session);
+            }
         }
     }
 
     @OnMessage
-    public void onMessage(String message){
-        for (SocketMessageListener listener : messageListeners) {
-            listener.onMessage(message);
+    public void onMessage(String message) {
+        System.out.println("WebSocket message: " + message);
+        synchronized (messageListeners) {
+            for (SocketMessageListener listener : messageListeners) {
+                listener.onMessage(message);
+            }
         }
     }
 
@@ -46,15 +51,17 @@ public class WebSocketConnector {
     public void onClose() {
         this.isConnected = false;
         connectionFuture = new CompletableFuture<>();
-        for (SocketCloseListener listener : closeListeners) {
-            listener.onClose();
+        synchronized (closeListeners) {
+            for (SocketCloseListener listener : closeListeners) {
+                listener.onClose();
+            }
         }
         System.out.println("WebSocket connection closed");
     }
 
     @OnError
     public void onError(Throwable throwable) {
-        System.err.println("WebSocket error: " + throwable.getMessage());
+        throwable.printStackTrace();
     }
 
     public CompletableFuture<Boolean> connectToWebSocketServer(String serverUri) {
@@ -91,27 +98,39 @@ public class WebSocketConnector {
     }
 
     public void addMessageListener(SocketMessageListener listener) {
-        messageListeners.add(listener);
+        synchronized (messageListeners){
+            messageListeners.add(listener);
+        }
     }
 
     public void addCloseListener(SocketCloseListener listener) {
-        closeListeners.add(listener);
+        synchronized (closeListeners) {
+            closeListeners.add(listener);
+        }
     }
 
     public void addOpenListener(SocketOpenListener listener) {
-        openListeners.add(listener);
+        synchronized (openListeners) {
+            openListeners.add(listener);
+        }
     }
 
     public void removeMessageListener(SocketMessageListener listener) {
-        messageListeners.remove(listener);
+        synchronized (messageListeners) {
+            messageListeners.remove(listener);
+        }
     }
 
     public void removeCloseListener(SocketCloseListener listener) {
-        closeListeners.remove(listener);
+        synchronized (closeListeners){
+            closeListeners.remove(listener);
+        }
     }
 
     public void removeOpenListener(SocketOpenListener listener) {
-        openListeners.remove(listener);
+        synchronized (openListeners) {
+            openListeners.remove(listener);
+        }
     }
 
 }

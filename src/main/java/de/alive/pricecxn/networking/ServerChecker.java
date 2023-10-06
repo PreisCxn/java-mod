@@ -26,6 +26,10 @@ public class ServerChecker {
 
     private NetworkingState state = NetworkingState.OFFLINE;
 
+    private String serverMinVersion = null;
+
+
+
     /**
      * This constructor is used to check if the server is reachable
      *
@@ -39,6 +43,9 @@ public class ServerChecker {
         this.websocket.addMessageListener(message -> {
             try{
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+                if(json.has("minVersion"))
+                    this.serverMinVersion = json.get("minVersion").getAsString();
+
                 if(json.has("maintenance")) {
                     if(json.get("maintenance").getAsBoolean())
                         this.state = NetworkingState.MAINTENANCE;
@@ -46,12 +53,11 @@ public class ServerChecker {
                         this.state = NetworkingState.ONLINE;
                     connectionFuture.complete(true);
                 } else {
-                    this.state = NetworkingState.OFFLINE;
-                    connectionFuture.complete(false);
+                    connectionFuture.complete(state != NetworkingState.OFFLINE);
                 }
+
             } catch (JsonSyntaxException ignored){
-                this.state = NetworkingState.OFFLINE;
-                connectionFuture.complete(false);
+                connectionFuture.complete(state != NetworkingState.OFFLINE);
             }
         });
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
@@ -76,9 +82,10 @@ public class ServerChecker {
         CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri);
 
         future.thenCompose(isConnected -> {
-            if(isConnected)
+            if(isConnected) {
                 this.websocket.sendMessage("pcxn?maintenance");
-            else
+                this.websocket.sendMessage("pcxn?min-version");
+            } else
                 connectionFuture.complete(false);
             return null;
         });
@@ -100,7 +107,9 @@ public class ServerChecker {
     }
 
     public void addSocketListener(SocketMessageListener listener) {
+        System.out.println("test");
         this.websocket.addMessageListener(listener);
+        System.out.println("test2");
     }
 
     public void removeSocketListener(SocketMessageListener listener) {
@@ -109,5 +118,9 @@ public class ServerChecker {
 
     public NetworkingState getState() {
         return state;
+    }
+
+    public String getServerMinVersion() {
+        return serverMinVersion;
     }
 }

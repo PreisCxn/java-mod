@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
+import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.dataobservers.*;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
@@ -11,6 +12,7 @@ import net.minecraft.util.Formatting;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
@@ -35,8 +37,12 @@ public class CxnListener extends ServerListener {
         data.put("pricecxn.data", new DataHandler(serverChecker, "", List.of(""), "", 0, SearchDataAccess.TIMESTAMP_SEARCH));
 
         serverChecker.isConnected().thenCompose(isConnected -> {
-            if(isConnected)
-                System.out.println("connected to server");
+            if(isConnected) {
+                System.out.println("server connected");
+                System.out.println("isVersion: " + isMinVersion());
+                NetworkingState state = serverChecker.getState();
+                System.out.println("State: " + (state == NetworkingState.MAINTENANCE ? "Maintenance" : state == NetworkingState.ONLINE ? "Online" : "Offline"));
+            }
             return null;
         });
 
@@ -112,5 +118,15 @@ public class CxnListener extends ServerListener {
 
     public ThemeServerChecker getThemeChecker() {
         return themeChecker;
+    }
+
+    public boolean isMinVersion(){
+        return PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
+                .filter(value -> PriceCxnMod.getIntVersion(this.serverChecker.getServerMinVersion())
+                        .filter(integer -> value >= integer)
+                        .isPresent())
+                .isPresent();
+
+
     }
 }

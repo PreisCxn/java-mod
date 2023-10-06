@@ -8,9 +8,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class PriceCxnMod implements ModInitializer {
@@ -25,6 +27,8 @@ public class PriceCxnMod implements ModInitializer {
 	public static boolean DEBUG_MODE = true;
 
 	public static final String MOD_NAME = "PriceCxn";
+
+	public static final String MOD_VERSION = "1.0.0";
 
 	@Override
 	public void onInitialize() {
@@ -57,6 +61,16 @@ public class PriceCxnMod implements ModInitializer {
 		printDebug(message, true, false);
 	}
 
+	public static Optional<Integer> getIntVersion(@Nullable String version){
+		if(version == null)
+			return Optional.empty();
+		version = version.replaceAll("\\.", "");
+		try{
+			return Optional.of(Integer.parseInt(version));
+		} catch (NumberFormatException e){
+			return Optional.empty();
+		}
+	}
 
 
 }
