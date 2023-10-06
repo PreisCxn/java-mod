@@ -120,6 +120,9 @@ public class CxnListener extends ServerListener {
         return themeChecker;
     }
 
+    /** Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
+        (Mod Version > Server Min-Version -> true)
+     */
     public boolean isMinVersion(){
         return PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
                 .filter(value -> PriceCxnMod.getIntVersion(this.serverChecker.getServerMinVersion())
