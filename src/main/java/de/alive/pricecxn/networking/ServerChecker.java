@@ -15,7 +15,7 @@ public class ServerChecker {
 
     private static final String DEFAULT_CHECK_URI = "ws://localhost:8080";
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final int DEFAULT_CHECK_INTERVAL = 60000;
+    private static final int DEFAULT_CHECK_INTERVAL = 1;
     private boolean connected = false;
     private final String uri;
     private final int checkInterval;
@@ -43,8 +43,8 @@ public class ServerChecker {
         this.websocket.addMessageListener(message -> {
             try{
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                if(json.has("minVersion"))
-                    this.serverMinVersion = json.get("minVersion").getAsString();
+                if(json.has("min-version"))
+                    this.serverMinVersion = json.get("min-version").getAsString();
 
                 if(json.has("maintenance")) {
                     if(json.get("maintenance").getAsBoolean())
@@ -62,7 +62,7 @@ public class ServerChecker {
         });
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
 
-        checkConnection();
+        //checkConnection();
     }
 
     /**
@@ -78,11 +78,13 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public CompletableFuture<Boolean> checkConnection() {
+        System.out.println("checking connection websocket");
         connectionFuture = new CompletableFuture<>();
         CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri);
 
         future.thenCompose(isConnected -> {
             if(isConnected) {
+                System.out.println("websocket connected");
                 this.websocket.sendMessage("pcxn?maintenance");
                 this.websocket.sendMessage("pcxn?min-version");
             } else
@@ -122,5 +124,9 @@ public class ServerChecker {
 
     public String getServerMinVersion() {
         return serverMinVersion;
+    }
+
+    public WebSocketConnector getWebsocket() {
+        return websocket;
     }
 }

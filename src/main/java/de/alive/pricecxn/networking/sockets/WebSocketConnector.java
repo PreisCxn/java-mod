@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @ClientEndpoint
 public class WebSocketConnector {
@@ -21,9 +22,9 @@ public class WebSocketConnector {
     private boolean isConnected = false;
 
     private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
-    private final List<SocketMessageListener> messageListeners = new ArrayList<>();
-    private final List<SocketCloseListener> closeListeners = new ArrayList<>();
-    private final List<SocketOpenListener> openListeners = new ArrayList<>();
+    private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
+    private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
+    private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
 
     @OnOpen
     public void onOpen(Session session) {
@@ -65,6 +66,7 @@ public class WebSocketConnector {
     }
 
     public CompletableFuture<Boolean> connectToWebSocketServer(String serverUri) {
+        connectionFuture = new CompletableFuture<>();
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
             container.connectToServer(this, new URI(serverUri));
