@@ -41,7 +41,7 @@ public class WebSocketCompletion{
         };
 
         this.connector.addMessageListener(listener);
-        connector.sendMessage(QUERY_STRING + query + (data == null ? "" : "&" + Arrays.toString(data).replace(" ", "")));
+        connector.sendMessage(QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", "")));
 
         timeoutExecutor.schedule(() -> {
             if (!future.isDone()) {

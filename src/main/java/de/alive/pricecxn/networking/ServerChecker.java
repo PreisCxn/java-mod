@@ -23,6 +23,8 @@ public class ServerChecker {
     private final WebSocketConnector websocket = new WebSocketConnector();
 
     private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
+    private CompletableFuture<Void> minVersionFuture = new CompletableFuture<>();
 
     private NetworkingState state = NetworkingState.OFFLINE;
 
@@ -43,18 +45,24 @@ public class ServerChecker {
         this.websocket.addMessageListener(message -> {
             try{
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                if(json.has("min-version"))
+                if(json.has("min-version")) {
                     this.serverMinVersion = json.get("min-version").getAsString();
+                    this.minVersionFuture.complete(null);
+                }
 
                 if(json.has("maintenance")) {
                     if(json.get("maintenance").getAsBoolean())
                         this.state = NetworkingState.MAINTENANCE;
                     else
                         this.state = NetworkingState.ONLINE;
-                    connectionFuture.complete(true);
-                } else {
-                    connectionFuture.complete(state != NetworkingState.OFFLINE);
+                    this.maintenanceFuture.complete(true);
                 }
+
+                minVersionFuture.thenRun(() -> {
+                    maintenanceFuture.thenRun(() -> {
+                        connectionFuture.complete(state != NetworkingState.OFFLINE);
+                    });
+                });
 
             } catch (JsonSyntaxException ignored){
                 connectionFuture.complete(state != NetworkingState.OFFLINE);
@@ -80,6 +88,8 @@ public class ServerChecker {
     public CompletableFuture<Boolean> checkConnection() {
         System.out.println("checking connection websocket");
         connectionFuture = new CompletableFuture<>();
+        maintenanceFuture = new CompletableFuture<>();
+        minVersionFuture = new CompletableFuture<>();
         CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri);
 
         future.thenCompose(isConnected -> {
@@ -109,9 +119,7 @@ public class ServerChecker {
     }
 
     public void addSocketListener(SocketMessageListener listener) {
-        System.out.println("test");
         this.websocket.addMessageListener(listener);
-        System.out.println("test2");
     }
 
     public void removeSocketListener(SocketMessageListener listener) {

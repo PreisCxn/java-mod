@@ -169,7 +169,7 @@ public class CxnListener extends ServerListener {
     public CompletableFuture<Pair<Boolean, ActionNotification>> checkConnection() {
         CompletableFuture<Pair<Boolean, ActionNotification>> future = new CompletableFuture<>();
 
-        AtomicBoolean activeBackup = this.active;
+        AtomicBoolean activeBackup = this.active == null ? null : new AtomicBoolean(this.active.get());
         String minVersionBackup = this.serverChecker.getServerMinVersion();
         NetworkingState stateBackup = this.serverChecker.getState();
 
@@ -182,7 +182,7 @@ public class CxnListener extends ServerListener {
                 // Server nicht erreichbar
                 System.out.println("Server nicht erreichbar");
                 this.active.set(false);
-                future.complete(new Pair<>(stateBackup == NetworkingState.ONLINE ,ActionNotification.SERVER_OFFLINE));
+                future.complete(new Pair<>(activeBackup == null || activeBackup.get(), ActionNotification.SERVER_OFFLINE));
             } else if (!isMinVersion()) {
                 // Version nicht korrekt
                 System.out.println("Version nicht korrekt");
