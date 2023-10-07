@@ -1,10 +1,16 @@
 {
   "cxn_listener.test": "Test",
 
-  "cxn_listener.server_connection.error": "",
-  "cxn_listener.server_connection.success": "",
+  "cxn_listener.mod_started": "The mod started successfully.",
+  "cxn_listener.mod_stopped": "The mod has been disabled.",
+  "cxn_listener.wrong_version": "Outdated mod version. Please update at least to version %s.",
 
-  "cxn_listener.data_handler.refresh": "",
+  "cxn_listener.server_connection.error": "Connection to server could not be established.",
+  "cxn_listener.server_connection.success": "Connection to server successfully established.",
+  "cxn_listener.server_connection.maintenance": "The server is currently undergoing maintenance.",
+  "cxn_listener.server_connection.maintenance_with_permission": "Access to server granted despite maintenance work.",
 
-  "cxn_listener.theme_checker.changed": ""
+  "cxn_listener.data_handler.refresh": "%s data has been updated.",
+
+  "cxn_listener.theme_checker.changed": "Changed mode to  %s."
 }

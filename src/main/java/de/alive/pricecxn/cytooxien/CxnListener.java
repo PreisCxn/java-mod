@@ -8,12 +8,10 @@ import de.alive.pricecxn.networking.*;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
@@ -28,6 +26,8 @@ public class CxnListener extends ServerListener {
     private final Map<String, DataHandler> data = new HashMap<>();
 
     private AtomicBoolean active = null;
+
+    private AtomicBoolean listenerActive = new AtomicBoolean(false);
 
     public CxnListener() {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
@@ -57,10 +57,10 @@ public class CxnListener extends ServerListener {
         //setting up theme checker and listeners
         this.themeChecker = new ThemeServerChecker(this, this.isOnServer());
         listeners = List.of(
-                new AuctionHouseListener(this.isOnServer()),
-                new ItemShopListener(this.isOnServer()),
-                new TomNookListener(this.isOnServer()),
-                new TradeListener(this.isOnServer())
+                new AuctionHouseListener(this.isOnServer(), listenerActive),
+                new ItemShopListener(this.isOnServer(), listenerActive),
+                new TomNookListener(this.isOnServer(), listenerActive),
+                new TradeListener(this.isOnServer(), listenerActive)
         );
 
     }
@@ -75,28 +75,16 @@ public class CxnListener extends ServerListener {
     public void onServerJoin() {
 
         checkConnection().thenCompose(pair -> {
-            System.out.println("checkResult: " + pair.getLeft() + " " + pair.getRight().getMessage());
-            if(pair.getLeft()) {
-                if(MinecraftClient.getInstance().player != null)
-                    MinecraftClient.getInstance().player.sendMessage(Text.of(pair.getRight().getMessage()));
-            }
+            System.out.println("checkResult: " + pair.getLeft() + " " + pair.getRight().getTranslationKey());
+                if(MinecraftClient.getInstance().player != null){
+                    ActionNotification message = pair.getRight();
+                    if(message.hasTextVariables()) {
+                        MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()));
+                    } else
+                        MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey()));
+                }
             return null;
         });
-
-        //isMinVersion
-        //serverChecker.state
-        //isSpecialUser
-
-        //überprüfen ob die Mod bereits aktiv ist
-          //wenn ja, dann mach weiter
-          //wenn nein dann versuche Verbindung zum Server aufzubauen
-            //wenn Verbindung erfolgreich, überprüfe Maintenance Status und Min-Version nummer
-                //wenn Maintenance Status true, überprüfe User Berechtigung
-                    //wenn User Berechtigung nicht erfüllt, dann deaktiviere Mod und gib Fehlermeldung aus
-                    //wenn User Berechtigung hat, dann aktiviere Mod
-                //wenn Min-Version nicht erfüllt, dann deaktiviere Mod und gib Fehlermeldung aus
-            //wenn Verbindung nicht erfolgreich, dann deaktiviere Mod und gib Fehlermeldung aus
-
         /*
 
         themeChecker.refreshAsync().thenRun(() -> {
@@ -116,11 +104,15 @@ public class CxnListener extends ServerListener {
     }
 
     public void activate(){
+
         activateListeners();
+        this.active.set(true);
     }
 
     public void deactivate(){
+
         deactivateListeners();
+        this.active.set(false);
     }
 
     public DataHandler getData(String key) {
@@ -132,11 +124,11 @@ public class CxnListener extends ServerListener {
     }
 
     private void activateListeners(){
-        this.active.set(true);
+        this.listenerActive.set(true);
     }
 
     private void deactivateListeners(){
-        this.active.set(false);
+        this.listenerActive.set(false);
     }
 
     public ThemeServerChecker getThemeChecker() {
@@ -187,6 +179,7 @@ public class CxnListener extends ServerListener {
                 // Version nicht korrekt
                 System.out.println("Version nicht korrekt");
                 this.active.set(false);
+                ActionNotification.WRONG_VERSION.setTextVariables(this.serverChecker.getServerMinVersion());
                 future.complete(new Pair<>(!Objects.equals(minVersionBackup, this.serverChecker.getServerMinVersion()), ActionNotification.WRONG_VERSION));
             } else {
                 NetworkingState state = serverChecker.getState();
@@ -194,7 +187,7 @@ public class CxnListener extends ServerListener {
                     // Server im Online-Modus
                     System.out.println("Server im Online-Modus");
                     this.active.set(true);
-                    future.complete(new Pair<>(!activeBackup.get(), ActionNotification.MOD_STARTED));
+                    future.complete(new Pair<>(activeBackup == null || !activeBackup.get(), ActionNotification.MOD_STARTED));
                 } else if (state == NetworkingState.MAINTENANCE) {
                     isSpecialUser().thenApply(isSpecialUser -> {
                         if (isSpecialUser) {

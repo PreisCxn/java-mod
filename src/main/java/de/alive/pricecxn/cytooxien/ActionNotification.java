@@ -1,19 +1,40 @@
 package de.alive.pricecxn.cytooxien;
 
+import java.util.Arrays;
+
 public enum ActionNotification {
-    SERVER_OFFLINE("Der Server ist offline"),
-    SERVER_MAINTENANCE("Der Server ist im Wartungsmodus"),
-    SERVER_MAINTEANCE_WITH_PERMISSON("Der Server ist im Wartungsmodus, du hast aber die Berechtigung, ihn zu betreten"),
-    WRONG_VERSION("Die Version des Servers ist nicht kompatibel mit der des Mods"),
-    MOD_STARTED("Der Mod wurde gestartet");
+    SERVER_OFFLINE("cxn_listener.server_connection.error"),
+    SERVER_MAINTENANCE("cxn_listener.server_connection.maintenance"),
+    SERVER_MAINTEANCE_WITH_PERMISSON("cxn_listener.server_connection.maintenance_with_permission"),
+    WRONG_VERSION("cxn_listener.wrong_version"),
+    MOD_STARTED("cxn_listener.mod_started"),
+    SERVER_ONLINE("cxn_listener.server_connection.success"),
+    MOD_STOPPED("cxn_listener.mod_stopped");
 
-    private final String message;
+    private final String translationKey;
+    private String[] variables;
 
-    ActionNotification(String message) {
-        this.message = message;
+    ActionNotification(String translationKey) {
+        this.translationKey = translationKey;
+        this.variables = new String[0];
     }
 
-    public String getMessage() {
-        return message;
+    public String getTranslationKey() {
+        return translationKey;
     }
+
+    public void setTextVariables(String... variables) {
+        this.variables = variables;
+    }
+
+    public String[] getTextVariables() {
+        String[] varBackup = Arrays.copyOf(this.variables, this.variables.length);
+        this.variables = new String[0];
+        return varBackup;
+    }
+
+    public boolean hasTextVariables() {
+        return this.variables.length > 0;
+    }
+
 }

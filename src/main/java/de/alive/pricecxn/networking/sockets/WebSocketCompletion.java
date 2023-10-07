@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
-public class WebSocketCompletion{
+public class WebSocketCompletion {
     private static final String QUERY_STRING = "pcxn?";
     private static final int DEFAULT_TIMEOUT = 5000;
 
