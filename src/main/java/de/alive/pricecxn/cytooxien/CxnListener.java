@@ -33,26 +33,8 @@ public class CxnListener extends ServerListener {
     public CxnListener() {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
 
-        //getting Data from server
+        //setting up server checker
         this.serverChecker = new ServerChecker();
-        /*
-        serverChecker.isConnected().thenCompose(isConnected -> {
-            if(isConnected) {
-                System.out.println("server connected");
-                System.out.println("isVersion: " + isMinVersion());
-                NetworkingState state = serverChecker.getState();
-                System.out.println("State: " + (state == NetworkingState.MAINTENANCE ? "Maintenance" : state == NetworkingState.ONLINE ? "Online" : "Offline"));
-            }
-            return null;
-        });
-        */
-        /*
-        serverChecker.addSocketListener(message -> {
-            System.out.println("isVersion: " + isMinVersion());
-            NetworkingState state = serverChecker.getState();
-            System.out.println("State: " + (state == NetworkingState.MAINTENANCE ? "Maintenance" : state == NetworkingState.ONLINE ? "Online" : "Offline"));
-        });
-         */
 
         //setting up theme checker and listeners
         this.themeChecker = new ThemeServerChecker(this, this.isOnServer());
@@ -63,7 +45,7 @@ public class CxnListener extends ServerListener {
                 new TradeListener(this.isOnServer(), listenerActive)
         );
 
-        System.out.println("trying activating");
+        //checking connection and activating mod
         checkConnectionAsync(false).thenRun(() -> {
             System.out.println("Mod active?" + this.active.get());
         });
