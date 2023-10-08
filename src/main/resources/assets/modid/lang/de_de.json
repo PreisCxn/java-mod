@@ -3,7 +3,7 @@
 
   "cxn_listener.mod_started": "Die Mod wurde erfolgreich gestartet.",
   "cxn_listener.mod_stopped": "Die Mod wurde deaktiviert.",
-  "cxn_listener.wrong_version": "Veraltete Version der Mod. Bitte aktualisiere mindestens auf Version: %s.",
+  "cxn_listener.wrong_version": "Veraltete Version der Mod. Bitte aktualisiere mindestens auf Version %s.",
 
   "cxn_listener.server_connection.error": "Verbindung zum Server konnte nicht hergestellt werden.",
   "cxn_listener.server_connection.success": "Verbindung zum Server erfolgreich hergestellt.",

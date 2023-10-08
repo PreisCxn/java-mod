@@ -24,49 +24,56 @@ public abstract class TabListener {
 
     private DataAccess searches;
 
-    public TabListener(@NotNull DataAccess searches){
+    public TabListener(@NotNull DataAccess searches) {
         this.searches = searches;
         init();
     }
 
-    private void init(){
+    private void init() {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if(client == null) return;
-            if(client.getCurrentServerEntry() == null) return;
-            if(!refreshAfterJoinEvent()) return;
+            if (client == null) return;
+            if (client.getCurrentServerEntry() == null) return;
+            if (!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, refreshesAfterJoinEvent);
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent).thenRun(this::onJoinEvent);
         });
     }
 
-    public boolean refresh(@Nullable String notInValue){
-            InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
-            PlayerListHud playerListHud = gameHud.getPlayerListHud();
+    public boolean refresh(@Nullable String notInValue) {
+        System.out.println("refresh");
+        InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
+        if (gameHud == null) return false;
+        PlayerListHud playerListHud = gameHud.getPlayerListHud();
+        if (playerListHud == null) return false;
 
-            AtomicBoolean found = new AtomicBoolean(false);
+        System.out.println("refresh2");
 
-            Arrays.stream(playerListHud.getClass().getDeclaredFields())
-                    .peek(field -> field.setAccessible(true))
-                    .map(field -> {
-                        try {
-                            return field.get(playerListHud);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .forEach(value -> {
-                        this.searches.getData().stream()
-                                .filter(search -> value.toString().contains(search))
-                                .forEach(search -> {
-                                    if(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())) return;
-                                    this.handleData(value.toString());
-                                    found.set(true);
-                                });
-                    });
+        AtomicBoolean found = new AtomicBoolean(false);
 
-            return found.get();
+        Arrays.stream(playerListHud.getClass().getDeclaredFields())
+                .peek(field -> field.setAccessible(true))
+                .map(field -> {
+                    try {
+                        return field.get(playerListHud);
+                    } catch (IllegalAccessException e) {
+                        System.out.println("error");
+                        e.printStackTrace();
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .forEach(value -> {
+                    this.searches.getData().stream()
+                            .filter(search -> value.toString().contains(search))
+                            .forEach(search -> {
+                                if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase()))
+                                    return;
+                                this.handleData(value.toString());
+                                found.set(true);
+                            });
+                });
+
+        return found.get();
     }
 
     public CompletableFuture<Void> refreshAsync(@Nullable String notInValue, @Nullable int maxRefresh) {
@@ -105,18 +112,22 @@ public abstract class TabListener {
 
     /**
      * After every Refresh this method is called with the data from the tab found to decide what to do with it
+     *
      * @param data The String line from the tab
      */
     protected abstract void handleData(@NotNull String data);
 
     /**
      * Decide if the refresh method should be called after the player joins a server or change the server on a network
+     *
      * @return True if the refresh method should be called
      */
     protected abstract boolean refreshAfterJoinEvent();
 
-    protected int getRefreshesAfterJoinEvent(){
-        return MAX_REFRESH/2;
+    public abstract void onJoinEvent();
+
+    protected int getRefreshesAfterJoinEvent() {
+        return MAX_REFRESH / 2;
     }
 
     public List<String> getSearches() {

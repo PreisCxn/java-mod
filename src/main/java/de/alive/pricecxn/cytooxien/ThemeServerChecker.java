@@ -78,6 +78,12 @@ public class ThemeServerChecker extends TabListener {
         return onServer.get();
     }
 
+    @Override
+    public void onJoinEvent() {
+        if (serverListener != null)
+            serverListener.onJoinEvent();
+    }
+
     public Modes getMode() {
         return mode;
     }

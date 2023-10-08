@@ -75,7 +75,7 @@ public class DataHandler {
             this.lastUpdate = System.currentTimeMillis();
             future.complete(null); // Marking the CompletableFuture as completed
         }).exceptionally(ex -> {
-            future.completeExceptionally(ex); // Marking the CompletableFuture as completed exceptionally
+            future.complete(null); // Marking the CompletableFuture as completed exceptionally
             return null;
         });
 
@@ -149,5 +149,17 @@ public class DataHandler {
 
     public void setDataAccess(DataAccess dataAccess){
         dataAccess.setDataHandler(this);
+    }
+
+    public static CompletableFuture<Void> refresh(boolean isForced, DataHandler... dataHandlers){
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        CompletableFuture.allOf(
+                Arrays.stream(dataHandlers)
+                        .map(dataHandler -> dataHandler.refresh(isForced))
+                        .toArray(CompletableFuture[]::new))
+                .thenAccept(Void -> future.complete(null));
+
+        return future;
     }
 }

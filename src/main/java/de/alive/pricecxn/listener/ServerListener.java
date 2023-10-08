@@ -58,6 +58,10 @@ public abstract class ServerListener {
 
     }
 
+    public void onJoinEvent(){
+
+    }
+
     /**
      * This method is called when the player joins the server
      */
