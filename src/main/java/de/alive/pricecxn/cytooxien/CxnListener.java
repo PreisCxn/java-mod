@@ -69,24 +69,13 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onServerJoin() {
-        System.out.println("onServerJoin");
 
         checkConnectionAsync().thenAccept(message -> {
             System.out.println("send info started");
             CxnListener.sendConnectionInformation(message, true);
             System.out.println("send info ended");
         });
-        /*
 
-        themeChecker.refreshAsync().thenRun(() -> {
-
-            printDebug("joined Cytooxien: " + this.isOnServer().get());
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.sendMessage(Text.translatable("test.translatable.cxnListener").formatted(Formatting.RED));
-
-        });
-
-         */
     }
 
     @Override
