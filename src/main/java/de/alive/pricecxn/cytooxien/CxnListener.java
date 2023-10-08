@@ -84,15 +84,15 @@ public class CxnListener extends ServerListener {
     }
 
     public CompletableFuture<Void> activate(boolean themeRefresh){
-        System.out.println("test2");
         if (this.active.get()) return CompletableFuture.completedFuture(null); //return wenn schon aktiviert
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        System.out.println("test3");
-        //daten initialisieren
+        //todo: daten initialisieren -> neue funktion
         data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
         data.put("pricecxn.data", new DataHandler(serverChecker, "", List.of(""), "", 0, SearchDataAccess.TIMESTAMP_SEARCH));
+        //... more data
+
 
         refreshData(true).thenAccept(Void -> {
             if(themeRefresh)
@@ -100,13 +100,9 @@ public class CxnListener extends ServerListener {
             else future.complete(null);
         });
 
-        System.out.println("test4");
-
         activateListeners();
         this.active.set(true);
         isRightVersion = true;
-
-        System.out.println("test5");
 
         return future;
     }
