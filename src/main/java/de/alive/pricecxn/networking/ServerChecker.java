@@ -15,7 +15,7 @@ public class ServerChecker {
 
     private static final String DEFAULT_CHECK_URI = "ws://localhost:8080";
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final int DEFAULT_CHECK_INTERVAL = 1;
+    private static final int DEFAULT_CHECK_INTERVAL = 1; //todo: change back up to 300000
     private boolean connected = false;
     private final String uri;
     private final int checkInterval;
