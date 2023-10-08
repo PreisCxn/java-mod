@@ -6,6 +6,7 @@ import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.networking.*;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
+import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
@@ -53,17 +54,17 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public void onTabChange(){
+    public void onTabChange() {
 
     }
 
     @Override
     public void onJoinEvent() {
-        if(!this.isOnServer().get()) return;
+        if (!this.isOnServer().get()) return;
         boolean activeBackup = this.active.get();
         checkConnectionAsync().thenAccept(CxnListener::sendConnectionInformation).thenRun(() -> {
             System.out.println("test ende");
-            if(activeBackup) refreshData(true);
+            if (activeBackup) refreshData(false);
         });
     }
 
@@ -83,53 +84,79 @@ public class CxnListener extends ServerListener {
         System.out.println("Cytooxien left : " + this.isOnServer().get());
     }
 
-    public CompletableFuture<Void> activate(boolean themeRefresh){
+    public CompletableFuture<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return CompletableFuture.completedFuture(null); //return wenn schon aktiviert
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         //todo: daten initialisieren -> neue funktion
-        data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
-        data.put("pricecxn.data", new DataHandler(serverChecker, "", List.of(""), "", 0, SearchDataAccess.TIMESTAMP_SEARCH));
-        //... more data
+        //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
+        int refreshIntervalTranslation = 1000 * 60 * 30; // 24h
 
+        new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages").getFuture()
+                .thenApply(StringUtil::stringToList)
+                .thenCompose(langList -> {
+                    data.put("cxnprice.translation", new DataHandler(serverChecker, "http://localhost:7070/api/settings/translations", langList, "translation_key", refreshIntervalTranslation,
+                            TranslationDataAccess.TIMESTAMP_SEARCH,
+                            TranslationDataAccess.HOUR_SEARCH,
+                            TranslationDataAccess.MINUTE_SEARCH,
+                            TranslationDataAccess.SECOND_SEARCH,
+                            TranslationDataAccess.NOW_SEARCH,
+                            TranslationDataAccess.AH_BUY_SEARCH,
+                            TranslationDataAccess.THEME_SERVER_SEARCH,
+                            TranslationDataAccess.SELLER_SEARCH,
+                            TranslationDataAccess.BID_SEARCH,
+                            TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH));
+                    return CompletableFuture.completedFuture(null);
+                }).thenAcceptAsync(Null -> {
+                    refreshData(true).thenAccept(Void -> {
+                        if (themeRefresh)
+                            this.themeChecker.refreshAsync().thenRun(() -> future.complete(null));
+                        else future.complete(null);
 
-        refreshData(true).thenAccept(Void -> {
-            if(themeRefresh)
-                this.themeChecker.refreshAsync().thenRun(() -> future.complete(null));
-            else future.complete(null);
-        });
-
-        activateListeners();
-        this.active.set(true);
-        isRightVersion = true;
+                        activateListeners();
+                        this.active.set(true);
+                        isRightVersion = true;
+                    });
+                }).exceptionally(ex -> {
+                    ex.printStackTrace();
+                    deactivate();
+                    future.completeExceptionally(ex);
+                    return null;
+                });
 
         return future;
     }
 
-    private CompletableFuture<Void> refreshData(boolean forced){
+    private CompletableFuture<Void> refreshData(boolean forced) {
+        System.out.println("refreshing data");
         CompletableFuture<Void> future = new CompletableFuture<>();
-        for(Map.Entry<String, DataHandler> entry : data.entrySet()){
-            CompletableFuture.allOf(entry.getValue().refresh(forced)).thenAccept(Void -> future.complete(null));
+        for (Map.Entry<String, DataHandler> entry : data.entrySet()) {
+            System.out.println(entry.getKey() + " refreshing...");
+            CompletableFuture.allOf(entry.getValue().refresh(forced)).thenAccept(Void -> {
+                System.out.println("all finished");
+                future.complete(null);
+                System.out.println("all finished2");
+            });
         }
         return future;
     }
 
-    public void deactivate(){
-        if(!this.active.get()) return; //return wenn schon deaktiviert
+    public void deactivate() {
+        if (!this.active.get()) return; //return wenn schon deaktiviert
 
         deactivateListeners();
         this.active.set(false);
     }
 
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation, boolean force){
+    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation, boolean force) {
 
         System.out.println("sendInfo: " + force + " " + messageInformation.getLeft() + " " + messageInformation.getRight());
 
-        if(force || messageInformation.getLeft()){
-            if(MinecraftClient.getInstance().player != null){
+        if (force || messageInformation.getLeft()) {
+            if (MinecraftClient.getInstance().player != null) {
                 ActionNotification message = messageInformation.getRight();
-                if(message.hasTextVariables()) {
+                if (message.hasTextVariables()) {
                     MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()));
                 } else
                     MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey()));
@@ -137,7 +164,8 @@ public class CxnListener extends ServerListener {
         }
 
     }
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation){
+
+    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation) {
         sendConnectionInformation(messageInformation, false);
     }
 
@@ -150,11 +178,11 @@ public class CxnListener extends ServerListener {
         return serverChecker;
     }
 
-    private void activateListeners(){
+    private void activateListeners() {
         this.listenerActive.set(true);
     }
 
-    private void deactivateListeners(){
+    private void deactivateListeners() {
         this.listenerActive.set(false);
     }
 
@@ -162,10 +190,11 @@ public class CxnListener extends ServerListener {
         return themeChecker;
     }
 
-    /** Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
-        (Mod Version > Server Min-Version -> true)
+    /**
+     * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
+     * (Mod Version > Server Min-Version -> true)
      */
-    public boolean isMinVersion(){
+    public boolean isMinVersion() {
         return PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
                 .filter(value -> PriceCxnMod.getIntVersion(this.serverChecker.getServerMinVersion())
                         .filter(integer -> value >= integer)
@@ -173,11 +202,11 @@ public class CxnListener extends ServerListener {
                 .isPresent();
     }
 
-    public CompletableFuture<Boolean> isSpecialUser(){
+    public CompletableFuture<Boolean> isSpecialUser() {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
-        if(MinecraftClient.getInstance().player == null) future.complete(false);
+        if (MinecraftClient.getInstance().player == null) future.complete(false);
         CompletableFuture<String> websocketFuture = new WebSocketCompletion(serverChecker.getWebsocket(), "isSpecialUser", MinecraftClient.getInstance().player.getUuidAsString()).getFuture();
-        if(websocketFuture.isCompletedExceptionally()) future.complete(false);
+        if (websocketFuture.isCompletedExceptionally()) future.complete(false);
         websocketFuture.thenCompose(version -> {
             future.complete(version.equals("true"));
             return null;
@@ -194,7 +223,7 @@ public class CxnListener extends ServerListener {
 
         System.out.println("starting check! " + activeBackup + " " + isRightVersionBackup + " " + stateBackup);
 
-        if(this.active == null) this.active = new AtomicBoolean(false);
+        if (this.active == null) this.active = new AtomicBoolean(false);
 
         serverChecker.isConnected().thenCompose(isConnected -> {
             System.out.println("isConnected: " + isConnected);

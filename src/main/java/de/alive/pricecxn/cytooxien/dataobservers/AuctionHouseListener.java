@@ -3,7 +3,7 @@ package de.alive.pricecxn.cytooxien.dataobservers;
 import com.google.gson.JsonArray;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
@@ -35,15 +35,15 @@ public class AuctionHouseListener extends InventoryListener {
     public AuctionHouseListener(@NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
         super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
 
-        searchData.put("sellerName", SearchDataAccess.SELLER_SEARCH);
-        searchData.put("timestamp", SearchDataAccess.TIMESTAMP_SEARCH);
-        searchData.put("bidPrice", SearchDataAccess.BID_SEARCH);
-        searchData.put("buyPrice", SearchDataAccess.AH_BUY_SEARCH);
+        searchData.put("sellerName", TranslationDataAccess.SELLER_SEARCH);
+        searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
+        searchData.put("bidPrice", TranslationDataAccess.BID_SEARCH);
+        searchData.put("buyPrice", TranslationDataAccess.AH_BUY_SEARCH); //todo add isBid
 
     }
 
     public AuctionHouseListener(AtomicBoolean... active) {
-        this(SearchDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
+        this(TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override

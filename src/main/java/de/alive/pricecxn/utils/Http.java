@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -35,7 +36,10 @@ public class Http {
 
         return client.sendAsync(get.build(), HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(response -> {
+                    System.out.println("testing");
                     int statusCode = response.statusCode();
+
+                    System.out.println(response.body());
 
                     if (statusCode >= 200 && statusCode < 300) {
                         T apply = stringTFunction.apply(response.body());

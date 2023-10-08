@@ -53,6 +53,7 @@ public class DataHandler {
      * @return A CompletableFuture which returns null if the refresh was successful
      */
     public CompletableFuture<Void> refresh(boolean isForced) {
+        System.out.println("refreshData 1");
         CompletableFuture<Void> future = new CompletableFuture<>();
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
@@ -61,23 +62,33 @@ public class DataHandler {
             return CompletableFuture.completedFuture(null);
         }
 
+        System.out.println("refreshData 2");
+
         // Check the server connection asynchronously
         this.serverChecker.isConnected().thenCompose(isConnected -> {
+            System.out.println("refreshData 3");
             if (!isConnected) {
                 System.err.println("Server isn't reachable");
                 return CompletableFuture.completedFuture(null);
             }
 
+            System.out.println("refreshData 4");
+
             // Request the data asynchronously
             return getServerDataAsync(this.uri, this.columnNames, this.keyColumnName);
         }).thenAccept(data -> {
+            System.out.println("refreshData 5");
             this.data = data;
             this.lastUpdate = System.currentTimeMillis();
             future.complete(null); // Marking the CompletableFuture as completed
         }).exceptionally(ex -> {
+            System.out.println("refreshData 6");
+            ex.printStackTrace();
             future.complete(null); // Marking the CompletableFuture as completed exceptionally
             return null;
         });
+
+        System.out.println("refreshData end");
 
         return future;
     }
@@ -100,8 +111,12 @@ public class DataHandler {
     private CompletableFuture<Map<String, List<String>>> getServerDataAsync(String url, List<String> columnNames, String keyColumnName) {
         CompletableFuture<Map<String, List<String>>> future = new CompletableFuture<>();
 
+        System.out.println("getting Server Data");
+
         Http.GET(url, "", response -> response, jsonString -> {
             Map<String, List<String>> data = null;
+
+            System.out.println("result: " + jsonString);
 
             try {
                 JsonParser parser = new JsonParser();

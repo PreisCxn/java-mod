@@ -17,6 +17,7 @@ import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +36,14 @@ public class StringUtil {
         List<String> lowercaseList = new ArrayList<>(list);
         lowercaseList.replaceAll(String::toLowerCase);
         return lowercaseList;
+    }
+
+    public static List<String> stringToList(String input) {
+        // Teilen Sie den Eingabestring an den Kommas auf
+        String[] words = input.split(",\\s*");
+
+        // Konvertieren Sie das Array in eine Liste
+        return new ArrayList<>(Arrays.asList(words));
     }
 
     public static List<String> getToolTips(ItemStack stack){

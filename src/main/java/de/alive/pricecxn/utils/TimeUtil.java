@@ -1,7 +1,7 @@
 package de.alive.pricecxn.utils;
 
 import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public class TimeUtil {
 
-    private static final DataAccess MINUTE_SEARCH = SearchDataAccess.MINUTE_SEARCH;
-    private static final DataAccess NOW_SEARCH = SearchDataAccess.NOW_SEARCH;
-    private static final DataAccess HOUR_SEARCH = SearchDataAccess.HOUR_SEARCH;
-    private static final DataAccess SECOND_SEARCH = SearchDataAccess.SECOND_SEARCH;
+    private static final DataAccess MINUTE_SEARCH = TranslationDataAccess.MINUTE_SEARCH;
+    private static final DataAccess NOW_SEARCH = TranslationDataAccess.NOW_SEARCH;
+    private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
+    private static final DataAccess SECOND_SEARCH = TranslationDataAccess.SECOND_SEARCH;
 
     public static Optional<Long> getStartTimeStamp(String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))

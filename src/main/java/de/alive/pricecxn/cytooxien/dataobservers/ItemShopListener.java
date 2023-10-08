@@ -3,7 +3,7 @@ package de.alive.pricecxn.cytooxien.dataobservers;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.SearchDataAccess;
+import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
@@ -39,13 +39,13 @@ public class ItemShopListener extends InventoryListener {
     public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         super(inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
 
-        searchData.put("buyPrice", SearchDataAccess.SHOP_BUY_SEARCH);
-        searchData.put("sellPrice", SearchDataAccess.SHOP_SELL_SEARCH);
+        searchData.put("buyPrice", TranslationDataAccess.SHOP_BUY_SEARCH);
+        searchData.put("sellPrice", TranslationDataAccess.SHOP_SELL_SEARCH);
 
     }
 
     public ItemShopListener(@Nullable AtomicBoolean... active) {
-        this(SearchDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
+        this(TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 
     @Override

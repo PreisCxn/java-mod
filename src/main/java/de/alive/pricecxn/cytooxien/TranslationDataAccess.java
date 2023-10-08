@@ -14,16 +14,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public enum SearchDataAccess implements DataAccess {
+public enum TranslationDataAccess implements DataAccess {
 
     //Inventory Searches
-    INV_AUCTION_HOUSE_SEARCH("", List.of("Auktionshaus")),
+    INV_AUCTION_HOUSE_SEARCH("cxnprice.translation.auctions_search.inventory", List.of("Auktionshaus")),
     INV_ITEM_SHOP_SEARCH("", List.of("Spieler-Shop")),
     INV_NOOK_SEARCH("", List.of("Shop")),
     INV_TRADE_SEARCH("", List.of("Handel")),
 
     //ItemData Searches AuctionHouse
-    TIMESTAMP_SEARCH("", List.of("Ende: "), (result) -> {
+    TIMESTAMP_SEARCH("cxnprice.translation.auction_searches.timestamp", List.of("Ende: "), (result) -> {
         Optional<Long> timeStamp = TimeUtil.getStartTimeStamp(result.getAsString());
 
         if (timeStamp.isEmpty()) return JsonNull.INSTANCE;
@@ -34,11 +34,11 @@ public enum SearchDataAccess implements DataAccess {
         if (!equal.getLeft().getAsJsonPrimitive().isNumber() || !equal.getRight().getAsJsonPrimitive().isNumber()) return false;
         return TimeUtil.timestampsEqual(equal.getLeft().getAsLong(), equal.getRight().getAsLong(), 3);
     }),
-    SELLER_SEARCH("", List.of("Verkäufer: ")),
-    BID_SEARCH("", List.of("Gebotsbetrag: "), null,
+    SELLER_SEARCH("cxnprice.translation.auctions_search.seller", List.of("Verkäufer: ")),
+    BID_SEARCH("cxnprice.translation.auctions_search.bid", List.of("Gebotsbetrag: "), null,
             (equal) -> equal.getLeft().getAsString().equals(equal.getRight().getAsString())),
-    AH_BUY_SEARCH("", List.of("Sofortkauf: ")),
-    THEME_SERVER_SEARCH("", List.of("Du befindest dich auf")),
+    AH_BUY_SEARCH("cxnprice.translation.auctions_search.buy", List.of("Sofortkauf: ")),
+    THEME_SERVER_SEARCH("cxnprice.translation.theme_search", List.of("Du befindest dich auf")),
 
     //ItemData Searches NookShop
     NOOK_BUY_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
@@ -51,10 +51,10 @@ public enum SearchDataAccess implements DataAccess {
     TRADE_BUY_SEARCH("", List.of("» "), StringUtil::removeLastChar, (equal) -> true),
 
     //Time Searches
-    HOUR_SEARCH("", List.of("Stunde")),
-    MINUTE_SEARCH("", List.of("Minute")),
-    SECOND_SEARCH("", List.of("Sekunde")),
-    NOW_SEARCH("", List.of("Jetzt"));
+    HOUR_SEARCH("cxnprice.translation.time_search.hour", List.of("Stunde")),
+    MINUTE_SEARCH("cxnprice.translation.time_search.minute", List.of("Minute")),
+    SECOND_SEARCH("cxnprice.translation.time_search.second", List.of("Sekunde")),
+    NOW_SEARCH("cxnprice.translation.time_search.now", List.of("Jetzt"));
 
     private final String id;
     private final List<String> backupData;
@@ -64,14 +64,14 @@ public enum SearchDataAccess implements DataAccess {
     private final Function<JsonElement, JsonElement> processData;
     private final Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
 
-    SearchDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
+    TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
         this.equalData = equalData;
     }
 
-    SearchDataAccess(String id, List<String> backupData) {
+    TranslationDataAccess(String id, List<String> backupData) {
         this(id, backupData, null, null);
     }
 
