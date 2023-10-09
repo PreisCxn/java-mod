@@ -1,4 +1,4 @@
-package de.alive.pricecxn.tests;
+package de.alive.pricecxn.testing;
 
 import org.jetbrains.annotations.NotNull;
 
