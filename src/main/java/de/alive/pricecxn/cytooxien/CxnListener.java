@@ -87,6 +87,7 @@ public class CxnListener extends ServerListener {
     @Override
     public void onServerLeave() {
         System.out.println("Cytooxien left : " + this.isOnServer().get());
+        deactivate();
     }
 
     public CompletableFuture<Void> activate(boolean themeRefresh) {
