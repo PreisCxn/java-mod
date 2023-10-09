@@ -12,6 +12,8 @@ public class DataHandler {
 
     private final ServerChecker serverChecker;
 
+    public static final int TRANSLATION_REFRESH_INTERVAL = 1000 * 60 * 60; // 1 Stunde
+
     private long lastUpdate = 0;
 
     private final String uri;

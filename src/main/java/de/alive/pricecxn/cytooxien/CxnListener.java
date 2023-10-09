@@ -62,20 +62,20 @@ public class CxnListener extends ServerListener {
     public void onJoinEvent() {
         if (!this.isOnServer().get()) return;
         boolean activeBackup = this.active.get();
-        checkConnectionAsync().thenAccept(CxnListener::sendConnectionInformation).thenRun(() -> {
-            System.out.println("test ende");
-            if (activeBackup) refreshData(false);
-        });
+        checkConnectionAsync()
+                .thenAccept(CxnListener::sendConnectionInformation)
+                .thenRun(() -> {
+                    if (activeBackup) refreshData(false);
+                });
     }
 
     @Override
     public void onServerJoin() {
 
-        checkConnectionAsync().thenAccept(message -> {
-            System.out.println("send info started");
-            CxnListener.sendConnectionInformation(message, true);
-            System.out.println("send info ended");
-        });
+        checkConnectionAsync()
+                .thenAccept(message -> {
+                    CxnListener.sendConnectionInformation(message, true);
+                });
 
     }
 
@@ -89,43 +89,60 @@ public class CxnListener extends ServerListener {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        //todo: daten initialisieren -> neue funktion
-        //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
-        int refreshIntervalTranslation = 1000 * 60 * 30; // 24h
+        initData().thenAcceptAsync(Null -> {
+            refreshData(true).thenAccept(Void -> {
+                if (themeRefresh)
+                    this.themeChecker.refreshAsync().thenRun(() -> future.complete(null));
+                else future.complete(null);
 
-        new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages").getFuture()
-                .thenApply(StringUtil::stringToList)
-                .thenCompose(langList -> {
-                    data.put("cxnprice.translation", new DataHandler(serverChecker, "http://localhost:7070/api/settings/translations", langList, "translation_key", refreshIntervalTranslation,
-                            TranslationDataAccess.TIMESTAMP_SEARCH,
-                            TranslationDataAccess.HOUR_SEARCH,
-                            TranslationDataAccess.MINUTE_SEARCH,
-                            TranslationDataAccess.SECOND_SEARCH,
-                            TranslationDataAccess.NOW_SEARCH,
-                            TranslationDataAccess.AH_BUY_SEARCH,
-                            TranslationDataAccess.THEME_SERVER_SEARCH,
-                            TranslationDataAccess.SELLER_SEARCH,
-                            TranslationDataAccess.BID_SEARCH,
-                            TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH));
-                    return CompletableFuture.completedFuture(null);
-                }).thenAcceptAsync(Null -> {
-                    refreshData(true).thenAccept(Void -> {
-                        if (themeRefresh)
-                            this.themeChecker.refreshAsync().thenRun(() -> future.complete(null));
-                        else future.complete(null);
-
-                        activateListeners();
-                        this.active.set(true);
-                        isRightVersion = true;
-                    });
-                }).exceptionally(ex -> {
-                    ex.printStackTrace();
-                    deactivate();
-                    future.completeExceptionally(ex);
-                    return null;
-                });
+                activateListeners();
+                this.active.set(true);
+                isRightVersion = true;
+            });
+        }).exceptionally(ex -> {
+            ex.printStackTrace();
+            deactivate();
+            future.completeExceptionally(ex);
+            return null;
+        });
 
         return future;
+    }
+
+    private CompletableFuture<Void> initData() {
+        System.out.println("initData");
+        if (!this.data.containsKey("pricecxn.data.item_data")) {
+            //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
+        }
+        //...
+
+        if (this.data.containsKey("cxnprice.translation"))
+            return CompletableFuture.completedFuture(null);
+        else
+            return new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages")
+                    .getFuture()
+                    .thenApply(StringUtil::stringToList)
+                    .thenCompose(langList -> {
+                        System.out.println("langList: " + langList);
+                        data.put("cxnprice.translation", new DataHandler(serverChecker,
+                                "http://localhost:7070/api/settings/translations",
+                                langList,
+                                "translation_key",
+                                DataHandler.TRANSLATION_REFRESH_INTERVAL,
+                                TranslationDataAccess.TIMESTAMP_SEARCH,
+                                TranslationDataAccess.HOUR_SEARCH,
+                                TranslationDataAccess.MINUTE_SEARCH,
+                                TranslationDataAccess.SECOND_SEARCH,
+                                TranslationDataAccess.NOW_SEARCH,
+                                TranslationDataAccess.AH_BUY_SEARCH,
+                                TranslationDataAccess.THEME_SERVER_SEARCH,
+                                TranslationDataAccess.SELLER_SEARCH,
+                                TranslationDataAccess.BID_SEARCH,
+                                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH
+                        ));
+                        return CompletableFuture.completedFuture(null);
+                    });
+
     }
 
     private CompletableFuture<Void> refreshData(boolean forced) {
@@ -150,8 +167,6 @@ public class CxnListener extends ServerListener {
     }
 
     public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation, boolean force) {
-
-        System.out.println("sendInfo: " + force + " " + messageInformation.getLeft() + " " + messageInformation.getRight());
 
         if (force || messageInformation.getLeft()) {
             if (MinecraftClient.getInstance().player != null) {
