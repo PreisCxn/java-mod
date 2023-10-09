@@ -1,4 +1,4 @@
-package de.alive.pricecxn.utils;
+package de.alive.pricecxn.networking;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 public class Http {
 
-    public static final String API_URL = "";
+    public static final String API_URL = "http://127.0.0.1:7070/api";
 
     private static final @NotNull HttpClient client = HttpClient.newHttpClient();
 

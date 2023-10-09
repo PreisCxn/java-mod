@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import de.alive.pricecxn.networking.sockets.SocketMessageListener;
+import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,8 +13,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class ServerChecker {
-
-    private static final String DEFAULT_CHECK_URI = "ws://127.0.0.1:8080";
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int DEFAULT_CHECK_INTERVAL = 1; //todo: change back up to 300000
     private boolean connected = false;
@@ -39,7 +38,7 @@ public class ServerChecker {
      * @param checkInterval The interval in which the server is checked in milliseconds
      */
     public ServerChecker(@Nullable String uri, int checkInterval) {
-        this.uri = uri == null ? DEFAULT_CHECK_URI : uri;
+        this.uri = uri == null ? WebSocketConnector.DEFAULT_WEBSOCKET_URI : uri;
         this.checkInterval = checkInterval < 0 ? DEFAULT_CHECK_INTERVAL : checkInterval;
 
         this.websocket.addMessageListener(message -> {
@@ -103,8 +102,8 @@ public class ServerChecker {
             System.out.println("checking connection websocket3");
             if(isConnected) {
                 System.out.println("websocket connected");
-                this.websocket.sendMessage("pcxn?maintenance");
-                this.websocket.sendMessage("pcxn?min-version");
+                this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "maintenance");
+                this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "min-version");
             } else {
                 System.out.println("websocket not connected");
                 connectionFuture.complete(false);

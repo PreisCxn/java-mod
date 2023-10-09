@@ -1,7 +1,6 @@
 package de.alive.pricecxn.networking;
 
 import com.google.gson.*;
-import de.alive.pricecxn.utils.Http;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -121,7 +120,7 @@ public class DataHandler {
 
         System.out.println("getting Server Data");
 
-        Http.GET(url, "", response -> response, jsonString -> {
+        Http.GET(url, response -> response, jsonString -> {
             Map<String, List<String>> data = null;
 
             System.out.println("result: " + jsonString);

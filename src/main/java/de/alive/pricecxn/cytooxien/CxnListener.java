@@ -124,7 +124,7 @@ public class CxnListener extends ServerListener {
         }
 
         if(!this.data.containsKey("pricecxn.data.mod_users")){
-            data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "http://127.0.0.1:7070/api/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
+            data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
         }
         //...
 
@@ -137,7 +137,7 @@ public class CxnListener extends ServerListener {
                     .thenCompose(langList -> {
                         System.out.println("langList: " + langList);
                         data.put("cxnprice.translation", new DataHandler(serverChecker,
-                                "http://127.0.0.1:7070/api/settings/translations",
+                                "/settings/translations",
                                 langList,
                                 "translation_key",
                                 DataHandler.TRANSLATION_REFRESH_INTERVAL,

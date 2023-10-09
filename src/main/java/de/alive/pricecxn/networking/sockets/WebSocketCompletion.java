@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.concurrent.*;
 
 public class WebSocketCompletion {
-    private static final String QUERY_STRING = "pcxn?";
+    public static final String QUERY_STRING = "pcxn?";
     private static final int DEFAULT_TIMEOUT = 5000;
 
     private final CompletableFuture<String> future = new CompletableFuture<>();

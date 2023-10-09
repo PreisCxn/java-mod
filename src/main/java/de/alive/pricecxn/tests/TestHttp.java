@@ -1,6 +1,5 @@
 package de.alive.pricecxn.tests;
 
-import de.alive.pricecxn.utils.Http;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
