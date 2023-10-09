@@ -67,6 +67,7 @@ public abstract class InventoryListener {
 
 
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
+                if(!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
                 initSlotsAsync(handler).thenRun(() -> {
                     this.isOpen = true;
@@ -128,6 +129,7 @@ public abstract class InventoryListener {
         if (client.player == null) return false;
         if (handler == null) return false;
         if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
+        if(!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return false;
 
         for (int i = 0; i < this.inventorySize; i++) {
 

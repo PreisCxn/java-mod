@@ -40,6 +40,8 @@ public enum TranslationDataAccess implements DataAccess {
     AH_BUY_SEARCH("cxnprice.translation.auctions_search.buy", List.of("Sofortkauf: ")),
     THEME_SERVER_SEARCH("cxnprice.translation.theme_search", List.of("Du befindest dich auf")),
 
+    HIGHEST_BIDDER_SEARCH("", List.of("Höchstbietender: "), (result) -> new JsonPrimitive(!result.isJsonNull()), null, new JsonPrimitive(false)),
+
     //ItemData Searches NookShop
     NOOK_BUY_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
 
@@ -64,15 +66,22 @@ public enum TranslationDataAccess implements DataAccess {
     private final Function<JsonElement, JsonElement> processData;
     private final Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
 
-    TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
+    private JsonElement defaultResult = JsonNull.INSTANCE;
+
+    TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
         this.equalData = equalData;
+        this.defaultResult = defaultResult != null ? defaultResult : JsonNull.INSTANCE;
+    }
+
+    TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData) {
+        this(id, backupData, processData, equalData, null);
     }
 
     TranslationDataAccess(String id, List<String> backupData) {
-        this(id, backupData, null, null);
+        this(id, backupData, null, null, null);
     }
 
     public List<String> getData() {
@@ -99,6 +108,10 @@ public enum TranslationDataAccess implements DataAccess {
 
     public boolean hasEqualData() {
         return equalData != null;
+    }
+
+    public JsonElement getDefaultResult() {
+        return defaultResult;
     }
 
 }

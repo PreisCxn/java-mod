@@ -11,6 +11,8 @@ public interface DataAccess {
 
     void setDataHandler(DataHandler dataHandler);
 
+    JsonElement getDefaultResult();
+
     boolean hasProcessData();
     boolean hasEqualData();
 

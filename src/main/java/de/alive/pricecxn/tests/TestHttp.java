@@ -16,7 +16,7 @@ public class TestHttp {
         System.out.println("test");
 
         HttpRequest.Builder get = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api"))
+                .uri(URI.create("http://localhost:8080/api/datahandler"))
                 .GET();
         try {
             client.sendAsync(get.build(), HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {

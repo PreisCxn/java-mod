@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
+import com.google.gson.JsonArray;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.dataobservers.*;
 import de.alive.pricecxn.listener.InventoryListener;
@@ -11,6 +12,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 
+import javax.websocket.*;
+import java.io.IOException;
+import java.net.URI;
+import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,6 +100,9 @@ public class CxnListener extends ServerListener {
                     this.themeChecker.refreshAsync().thenRun(() -> future.complete(null));
                 else future.complete(null);
 
+                System.out.println("DataArray: ");
+                System.out.println(data.get("pricecxn.data.mod_users").getDataArray());
+
                 activateListeners();
                 this.active.set(true);
                 isRightVersion = true;
@@ -114,6 +122,10 @@ public class CxnListener extends ServerListener {
         if (!this.data.containsKey("pricecxn.data.item_data")) {
             //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
         }
+
+        if(!this.data.containsKey("pricecxn.data.mod_users")){
+            data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "http://127.0.0.1:7070/api/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
+        }
         //...
 
         if (this.data.containsKey("cxnprice.translation"))
@@ -125,7 +137,7 @@ public class CxnListener extends ServerListener {
                     .thenCompose(langList -> {
                         System.out.println("langList: " + langList);
                         data.put("cxnprice.translation", new DataHandler(serverChecker,
-                                "http://localhost:7070/api/settings/translations",
+                                "http://127.0.0.1:7070/api/settings/translations",
                                 langList,
                                 "translation_key",
                                 DataHandler.TRANSLATION_REFRESH_INTERVAL,
@@ -303,6 +315,27 @@ public class CxnListener extends ServerListener {
 
     public CompletableFuture<Pair<Boolean, ActionNotification>> checkConnectionAsync() {
         return CompletableFuture.supplyAsync(() -> this.checkConnection(true), ServerChecker.EXECUTOR).thenCompose(result -> result);
+    }
+
+    public Optional<List<String>> getModUsers(){
+        List<String> stringList = new ArrayList<>();
+
+        JsonArray array = this.data.get("pricecxn.data.mod_users").getDataArray();
+
+        if(array == null) return Optional.empty();
+
+        array.asList().forEach(element -> {
+            if(!element.isJsonNull())
+                stringList.add(element.getAsString());
+        });
+
+        if(stringList.isEmpty()) return Optional.empty();
+
+        return Optional.of(stringList);
+    }
+
+    public AtomicBoolean isActive() {
+        return active;
     }
 
 }

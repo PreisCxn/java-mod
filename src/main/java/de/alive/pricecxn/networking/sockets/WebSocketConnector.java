@@ -66,17 +66,45 @@ public class WebSocketConnector {
     }
 
     public CompletableFuture<Boolean> connectToWebSocketServer(String serverUri) {
-        connectionFuture = new CompletableFuture<>();
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         try {
-            container.connectToServer(this, new URI(serverUri));
+            System.out.println("connecting...123");
+            connectionFuture = new CompletableFuture<>();
+            System.out.println("test22131");
+            WebSocketContainer container = null;
+            try {
+                container = ContainerProvider.getWebSocketContainer();
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                this.isConnected = false;
+                connectionFuture.complete(false);
+                System.out.println("connecting1...");
+            }
+            System.out.println("connecting2...");
+            if (container == null) {
+                this.isConnected = false;
+                connectionFuture.complete(false);
+                System.out.println("connecting2.1...");
+                return connectionFuture;
+            }
+            try {
+                container.connectToServer(this, new URI(serverUri));
+                System.out.println("connecting3...");
+            } catch (Exception e) {
+                System.out.println("connecting4...");
+                System.err.println(e.getMessage());
+                this.isConnected = false;
+                connectionFuture.complete(false);
+                System.out.println("connecting5...");
+            }
+
+            return connectionFuture;
         } catch (Exception e) {
             System.err.println(e.getMessage());
             this.isConnected = false;
             connectionFuture.complete(false);
+            System.out.println("connecting6...");
+            return connectionFuture;
         }
-
-        return connectionFuture;
     }
 
     public void sendMessage(String message) {

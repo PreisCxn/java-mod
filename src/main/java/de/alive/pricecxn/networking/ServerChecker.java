@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 public class ServerChecker {
 
-    private static final String DEFAULT_CHECK_URI = "ws://localhost:8080";
+    private static final String DEFAULT_CHECK_URI = "ws://127.0.0.1:8080";
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int DEFAULT_CHECK_INTERVAL = 1; //todo: change back up to 300000
     private boolean connected = false;
@@ -90,15 +90,26 @@ public class ServerChecker {
         connectionFuture = new CompletableFuture<>();
         maintenanceFuture = new CompletableFuture<>();
         minVersionFuture = new CompletableFuture<>();
-        CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri);
+        CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri).exceptionally(throwable -> {
+            System.out.println("websocket connection failed");
+            this.state = NetworkingState.OFFLINE;
+            connectionFuture.complete(false);
+            return false;
+        });
+
+        System.out.println("checking connection websocket2");
 
         future.thenCompose(isConnected -> {
+            System.out.println("checking connection websocket3");
             if(isConnected) {
                 System.out.println("websocket connected");
                 this.websocket.sendMessage("pcxn?maintenance");
                 this.websocket.sendMessage("pcxn?min-version");
-            } else
+            } else {
+                System.out.println("websocket not connected");
                 connectionFuture.complete(false);
+            }
+            System.out.println("checking connection websocket4");
             return null;
         });
 

@@ -64,7 +64,7 @@ public class PriceCxnItemStack {
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
 
             DataAccess access = entry.getValue();
-            JsonElement result = JsonNull.INSTANCE;
+            JsonElement result = access.getDefaultResult();
             String searchResult = this.toolTipSearch(access);
 
             if (searchResult != null) {

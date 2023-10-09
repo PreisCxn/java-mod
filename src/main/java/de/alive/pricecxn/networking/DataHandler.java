@@ -13,6 +13,7 @@ public class DataHandler {
     private final ServerChecker serverChecker;
 
     public static final int TRANSLATION_REFRESH_INTERVAL = 1000 * 60 * 60; // 1 Stunde
+    public static final int MODUSER_REFRESH_INTERVAL = 1000 * 60 * 60 * 6; // 5 Stunden
 
     private long lastUpdate = 0;
 
@@ -24,6 +25,7 @@ public class DataHandler {
     private final String keyColumnName;
 
     private Map<String, List<String>> data = null;
+    private JsonArray dataArray = null;
 
     /**
      * This constructor is used to create a DataHandler
@@ -33,7 +35,7 @@ public class DataHandler {
      * @param keyColumnName The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval, @Nullable DataAccess... dataAccess) {
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess... dataAccess) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
@@ -45,8 +47,12 @@ public class DataHandler {
         }
     }
 
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @NotNull List<String> columnNames, @NotNull String keyColumnName, int refreshInterval) {
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval) {
         this(serverChecker, uri, columnNames, keyColumnName, refreshInterval, (DataAccess) null);
+    }
+
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, int refreshInterval) {
+        this(serverChecker, uri, null, null, refreshInterval, (DataAccess) null);
     }
 
     /**
@@ -121,8 +127,13 @@ public class DataHandler {
             System.out.println("result: " + jsonString);
 
             try {
-                JsonParser parser = new JsonParser();
-                JsonArray array = parser.parse(jsonString).getAsJsonArray();
+                JsonArray array = JsonParser.parseString(jsonString).getAsJsonArray();
+                dataArray = array;
+
+                if(keyColumnName == null || columnNames == null) {
+                    future.complete(null);
+                    return null;
+                }
 
                 data = new HashMap<>();
 
@@ -161,7 +172,13 @@ public class DataHandler {
     }
 
     public @Nullable Map<String, List<String>> getData() {
+        if(keyColumnName == null || columnNames == null)
+            return null;
         return data;
+    }
+
+    public @Nullable JsonArray getDataArray(){
+        return dataArray;
     }
 
     public void setDataAccess(DataAccess dataAccess){
