@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class ServerChecker {
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final int DEFAULT_CHECK_INTERVAL = 1; //todo: change back up to 300000
+    private static final int DEFAULT_CHECK_INTERVAL = 300000; //5min
     private boolean connected = false;
     private final String uri;
     private final int checkInterval;

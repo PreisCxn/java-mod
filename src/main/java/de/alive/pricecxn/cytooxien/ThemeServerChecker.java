@@ -20,8 +20,6 @@ import static de.alive.pricecxn.PriceCxnMod.printDebug;
  */
 public class ThemeServerChecker extends TabListener {
 
-    private static final List<String> DEFAULT_SEARCHES = List.of("Du befindest dich auf");
-
     private Modes mode = Modes.NOTHING;
 
     private final AtomicBoolean onServer;
