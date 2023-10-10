@@ -72,7 +72,6 @@ public class TradeListener extends InventoryListener {
             printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
         }, EXECUTOR);
 
-
     }
 
     @Override
@@ -85,7 +84,6 @@ public class TradeListener extends InventoryListener {
     }
 
     private Optional<JsonElement> processData(List<PriceCxnItemStack> selfInv, List<PriceCxnItemStack> traderInv, JsonArray selfControls, JsonArray traderControls){
-
         if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
         if(selfInv.isEmpty() == traderInv.isEmpty()) return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
         if (notAccepted(traderControls) && notAccepted(selfControls)) return Optional.empty();
@@ -116,12 +114,14 @@ public class TradeListener extends InventoryListener {
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
+        System.out.println(result);
+
         return Optional.of(result);
     }
 
     private boolean buyPriceIsNull(JsonArray array) {
         Optional<JsonElement> get = getBuyPrice(array);
-        return get.map(jsonElement -> jsonElement.getAsString().equals("0,00")).orElse(false);
+        return get.map(jsonElement -> jsonElement.getAsString().equals("0,00") || jsonElement.getAsString().equals("0.00")).orElse(false);
     }
 
     private Optional<JsonElement> getBuyPrice(JsonArray array){
