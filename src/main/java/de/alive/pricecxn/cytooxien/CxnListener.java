@@ -142,16 +142,24 @@ public class CxnListener extends ServerListener {
                                 langList,
                                 "translation_key",
                                 DataHandler.TRANSLATION_REFRESH_INTERVAL,
+                                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
+                                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
+                                TranslationDataAccess.INV_NOOK_SEARCH,
+                                TranslationDataAccess.INV_TRADE_SEARCH,
                                 TranslationDataAccess.TIMESTAMP_SEARCH,
+                                TranslationDataAccess.SELLER_SEARCH,
+                                TranslationDataAccess.BID_SEARCH,
+                                TranslationDataAccess.AH_BUY_SEARCH,
+                                TranslationDataAccess.THEME_SERVER_SEARCH,
+                                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
+                                TranslationDataAccess.NOOK_BUY_SEARCH,
+                                TranslationDataAccess.SHOP_BUY_SEARCH,
+                                TranslationDataAccess.SHOP_SELL_SEARCH,
+                                TranslationDataAccess.TRADE_BUY_SEARCH,
                                 TranslationDataAccess.HOUR_SEARCH,
                                 TranslationDataAccess.MINUTE_SEARCH,
                                 TranslationDataAccess.SECOND_SEARCH,
-                                TranslationDataAccess.NOW_SEARCH,
-                                TranslationDataAccess.AH_BUY_SEARCH,
-                                TranslationDataAccess.THEME_SERVER_SEARCH,
-                                TranslationDataAccess.SELLER_SEARCH,
-                                TranslationDataAccess.BID_SEARCH,
-                                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH
+                                TranslationDataAccess.NOW_SEARCH
                         ));
                         return CompletableFuture.completedFuture(null);
                     });

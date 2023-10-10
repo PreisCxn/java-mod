@@ -18,9 +18,9 @@ public enum TranslationDataAccess implements DataAccess {
 
     //Inventory Searches
     INV_AUCTION_HOUSE_SEARCH("cxnprice.translation.auctions_search.inventory", List.of("Auktionshaus")),
-    INV_ITEM_SHOP_SEARCH("", List.of("Spieler-Shop")),
-    INV_NOOK_SEARCH("", List.of("Shop")),
-    INV_TRADE_SEARCH("", List.of("Handel")),
+    INV_ITEM_SHOP_SEARCH("cxnprice.translation.item_shop.inventory", List.of("Spieler-Shop")),
+    INV_NOOK_SEARCH("cxnprice.translation.nook_shop.inventory", List.of("Shop")),
+    INV_TRADE_SEARCH("cxnprice.translation.trade.inventory", List.of("Handel")),
 
     //ItemData Searches AuctionHouse
     TIMESTAMP_SEARCH("cxnprice.translation.auction_searches.timestamp", List.of("Ende: "), (result) -> {
@@ -40,17 +40,17 @@ public enum TranslationDataAccess implements DataAccess {
     AH_BUY_SEARCH("cxnprice.translation.auctions_search.buy", List.of("Sofortkauf: ")),
     THEME_SERVER_SEARCH("cxnprice.translation.theme_search", List.of("Du befindest dich auf")),
 
-    HIGHEST_BIDDER_SEARCH("", List.of("Höchstbietender: "), (result) -> new JsonPrimitive(!result.isJsonNull()), null, new JsonPrimitive(false)),
+    HIGHEST_BIDDER_SEARCH("cxnprice.translation.auctions_search.highest_bidder", List.of("Höchstbietender: "), (result) -> new JsonPrimitive(!result.isJsonNull()), null, new JsonPrimitive(false)),
 
     //ItemData Searches NookShop
-    NOOK_BUY_SEARCH("", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
+    NOOK_BUY_SEARCH("cxnprice.translation.nook_shop.buy", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
 
     //ItemData Searches ItemShop
-    SHOP_BUY_SEARCH("", List.of("Kaufen: ")),
-    SHOP_SELL_SEARCH("", List.of("Verkaufen: ")),
+    SHOP_BUY_SEARCH("cxnprice.translation.item_shop.buy", List.of("Kaufen: ")),
+    SHOP_SELL_SEARCH("cxnprice.translation.item_shop.sell", List.of("Verkaufen: ")),
 
     //ItemData Searches Trade
-    TRADE_BUY_SEARCH("", List.of("» "), StringUtil::removeLastChar, (equal) -> true),
+    TRADE_BUY_SEARCH("cxnprice.translation.trade.buy", List.of("» "), StringUtil::removeLastChar, (equal) -> true),
 
     //Time Searches
     HOUR_SEARCH("cxnprice.translation.time_search.hour", List.of("Stunde")),
@@ -66,7 +66,7 @@ public enum TranslationDataAccess implements DataAccess {
     private final Function<JsonElement, JsonElement> processData;
     private final Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
 
-    private JsonElement defaultResult = JsonNull.INSTANCE;
+    private final JsonElement defaultResult;
 
     TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
         this.id = id;
