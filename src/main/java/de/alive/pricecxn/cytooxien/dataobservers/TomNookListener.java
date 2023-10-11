@@ -67,6 +67,11 @@ public class TomNookListener extends InventoryListener {
         System.out.println("Nook: " + array.size() + " items");
         System.out.println(array);
 
+        if(!array.isEmpty())
+            sendData("/tomnook", array).thenAccept(aVoid -> {
+                printDebug("Nook data sent");
+            });
+
     }
 
     @Override

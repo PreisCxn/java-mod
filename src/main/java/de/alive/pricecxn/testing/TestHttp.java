@@ -1,5 +1,7 @@
 package de.alive.pricecxn.testing;
 
+import com.google.gson.JsonParser;
+import de.alive.pricecxn.networking.Http;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -11,22 +13,15 @@ public class TestHttp {
 
     private static final @NotNull HttpClient client = HttpClient.newHttpClient();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println("test");
 
-        HttpRequest.Builder get = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/api/datahandler"))
-                .GET();
-        try {
-            client.sendAsync(get.build(), HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-                System.out.println(response.body());
-            }).join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        Http.POST("/datahandler/auctionhouse", Http.JsonObjectConverter("{\"test\":true}")).thenAccept(aVoid -> {
+            System.out.println("test");
+        });
 
         System.out.println("test end");
+        Thread.sleep(3000);
     }
 
 }

@@ -1,5 +1,7 @@
 package de.alive.pricecxn.cytooxien.dataobservers;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
@@ -63,10 +65,20 @@ public class ItemShopListener extends InventoryListener {
 
         JsonObject object = itemStack.getData();
 
+        if(!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return;
+
+        JsonElement buyItemE =  buyItem.getData().get("buyPrice");
+        JsonElement sellItemE =  sellItem.getData().get("sellPrice");
+
+        if(buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return;
+
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        System.out.println(object);
+        sendData("/itemshop", object).thenAccept(aVoid -> {
+            printDebug("ItemShop data sent");
+        });
+
 
     }
 

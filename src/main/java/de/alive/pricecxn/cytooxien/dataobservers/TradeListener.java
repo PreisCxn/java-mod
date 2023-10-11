@@ -69,6 +69,7 @@ public class TradeListener extends InventoryListener {
 
         CompletableFuture.runAsync(() -> {
             Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
+            result.ifPresent(jsonElement -> sendData("/trade", jsonElement));
             printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
         }, EXECUTOR);
 

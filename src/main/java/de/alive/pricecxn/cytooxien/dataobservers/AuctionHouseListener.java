@@ -67,8 +67,10 @@ public class AuctionHouseListener extends InventoryListener {
             }
         }
 
-        System.out.println("AuctionHouse: " + array.size() + " items");
-        System.out.println(array);
+        if(!array.isEmpty())
+            sendData("/auctionhouse", array).thenAccept(aVoid -> {
+                printDebug("AuctionHouse data sent: " +  array.size() + " items");
+            });
     }
 
     @Override

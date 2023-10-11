@@ -1,7 +1,14 @@
 package de.alive.pricecxn.listener;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.PriceCxnModClient;
+import de.alive.pricecxn.cytooxien.CxnListener;
+import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.networking.Http;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -254,6 +261,52 @@ public abstract class InventoryListener {
                                         @NotNull Pair<Integer, Integer> range,
                                         @Nullable Map<String, DataAccess> searchData) {
         updateItemsAsync(items, handler, range, searchData, true);
+    }
+
+    protected CompletableFuture<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
+
+        CxnListener listener = PriceCxnModClient.CXN_LISTENER;
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        if(instance == null || instance.player == null) {
+            future.completeExceptionally(new NullPointerException("Instance or player is null"));
+            return future;
+        }
+
+        String uuid = instance.player.getUuidAsString();
+
+        JsonObject obj = new JsonObject();
+
+        String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
+
+        listener.checkConnectionAsync().thenRun(() -> {
+            if(listener.isActive().get()) {
+                if(PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
+                    future.completeExceptionally(new NullPointerException("Theme Checker is null"));
+                    return;
+                }
+                Modes mode = listener.getThemeChecker().getMode();
+                if(mode == null || mode == Modes.NOTHING) {
+                    future.completeExceptionally(new NullPointerException("Mode is null"));
+                    return;
+                }
+
+                obj.addProperty("listener", uri);
+                obj.addProperty("mode", mode.getTranslationKey());
+                obj.addProperty("uuid", uuid);
+                obj.add("data", data);
+                Http.POST("/datahandler/" + uri, obj).thenRun(() -> future.complete(null));
+            } else
+                future.completeExceptionally(new NullPointerException("Not connected"));
+        });
+
+        return future;
+
+    }
+
+    protected CompletableFuture<Void> sendData(@NotNull  String datahandlerUri, @NotNull JsonElement data) {
+        return sendData(datahandlerUri, MinecraftClient.getInstance(), data);
     }
 
 }
