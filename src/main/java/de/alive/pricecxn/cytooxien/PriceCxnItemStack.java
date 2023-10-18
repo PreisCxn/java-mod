@@ -194,6 +194,12 @@ public class PriceCxnItemStack {
         return data;
     }
 
+    public JsonObject getDataWithoutDisplay() {
+        JsonObject data = this.data.deepCopy();
+        data.get(COMMENT_KEY).getAsJsonObject().remove("display");
+        return data;
+    }
+
     private JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
