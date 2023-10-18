@@ -21,12 +21,17 @@ public class TimeUtil {
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
         Optional<Integer> minutes = getTime(timerString, MINUTE_SEARCH);
 
+        System.out.println("timerString: " + timerString);
+        System.out.println("hours: " + hours.orElse(-1));
+        System.out.println("minutes: " + minutes.orElse(-1));
+
         if(minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();
 
         if(hours.isEmpty())
             hours = Optional.of(0);
-        else
+
+        if(minutes.isEmpty())
             minutes = Optional.of(0);
 
         long elapsedSeconds = (hours.get() * 3600L + minutes.get() * 60L) * 1000;
@@ -34,7 +39,15 @@ public class TimeUtil {
         elapsedSeconds = day - elapsedSeconds;
         long startTimeStamp = System.currentTimeMillis() - elapsedSeconds;
 
-        startTimeStamp = (startTimeStamp / (60 * 1000)) * (60 * 1000);
+        System.out.println("Current Time: " + System.currentTimeMillis());
+        System.out.println("elapsedSeconds: " + elapsedSeconds);
+
+        System.out.println("startTimeStamp: " + startTimeStamp);
+
+        //startTimeStamp = (startTimeStamp / (60 * 1000)) * (60 * 1000);
+
+        System.out.println("startTimeStamp: " + startTimeStamp);
+        System.out.println();
 
         return Optional.of(startTimeStamp);
     }
@@ -77,11 +90,15 @@ public class TimeUtil {
      */
     public static Optional<Integer> getTime(String timerString, DataAccess search) {
 
+        timerString = timerString.toLowerCase();
+
+        List<String> searchList = StringUtil.listToLowerCase(search.getData());
+
         List<String> partsList = Arrays.asList(timerString.split(" "));
 
         return partsList
                 .stream()
-                .filter(s -> StringUtil.containsString(s, search.getData()))
+                .filter(s -> StringUtil.containsString(s, searchList))
                 .findFirst()
                 .flatMap(s -> {
                     //getting index before
