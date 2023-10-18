@@ -1,6 +1,7 @@
 package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
@@ -74,7 +75,7 @@ public abstract class InventoryListener {
 
 
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
-                if(!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
+                if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
                 initSlotsAsync(handler).thenRun(() -> {
                     this.isOpen = true;
@@ -136,7 +137,7 @@ public abstract class InventoryListener {
         if (client.player == null) return false;
         if (handler == null) return false;
         if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
-        if(!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return false;
+        if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return false;
 
         for (int i = 0; i < this.inventorySize; i++) {
 
@@ -192,13 +193,15 @@ public abstract class InventoryListener {
                     for (PriceCxnItemStack item : items) {
                         if (item.equals(newItem)) {
 
-                            if (searchData != null
-                                    && searchData.containsKey("timestamp")
-                                    && !TimeUtil.timestampsEqual(
-                                    item.getData().get("timestamp").getAsLong(),
-                                    newItem.getData().get("timestamp").getAsLong(),
-                                    5)) {
-                                continue;
+                            if (searchData != null && searchData.containsKey("timestamp")) {
+                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE &&
+                                        item.getData().get("timestamp") != JsonNull.INSTANCE &&
+                                        !TimeUtil.timestampsEqual(
+                                                item.getData().get("timestamp").getAsLong(),
+                                                newItem.getData().get("timestamp").getAsLong(),
+                                                5)) {
+                                    continue;
+                                }
                             }
 
                             add = false;
@@ -230,7 +233,7 @@ public abstract class InventoryListener {
         if (slot.getStack().isEmpty()) return Optional.empty();
 
         PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
-        if(item == null) return Optional.of(newItem);
+        if (item == null) return Optional.of(newItem);
 
         if (item.equals(newItem)) {
             if (searchData != null
@@ -240,7 +243,7 @@ public abstract class InventoryListener {
                     newItem.getData().get("timestamp").getAsLong(),
                     5)) {
                 return Optional.empty();
-            } else if(!item.deepEquals(newItem)) {
+            } else if (!item.deepEquals(newItem)) {
                 item.updateData(newItem);
                 return Optional.of(item);
             } else
@@ -269,7 +272,7 @@ public abstract class InventoryListener {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
 
-        if(instance == null || instance.player == null) {
+        if (instance == null || instance.player == null) {
             future.completeExceptionally(new NullPointerException("Instance or player is null"));
             return future;
         }
@@ -281,13 +284,13 @@ public abstract class InventoryListener {
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
         listener.checkConnectionAsync().thenRun(() -> {
-            if(listener.isActive().get()) {
-                if(PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
+            if (listener.isActive().get()) {
+                if (PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
                     future.completeExceptionally(new NullPointerException("Theme Checker is null"));
                     return;
                 }
                 Modes mode = listener.getThemeChecker().getMode();
-                if(mode == null || mode == Modes.NOTHING) {
+                if (mode == null || mode == Modes.NOTHING) {
                     future.completeExceptionally(new NullPointerException("Mode is null"));
                     return;
                 }
@@ -295,6 +298,7 @@ public abstract class InventoryListener {
                 obj.addProperty("listener", uri);
                 obj.addProperty("mode", mode.getTranslationKey());
                 obj.addProperty("uuid", uuid);
+                obj.addProperty("username", instance.player.getName().getString());
                 obj.add("data", data);
                 Http.POST("/datahandler/" + uri, obj).thenRun(() -> future.complete(null));
             } else
@@ -305,7 +309,7 @@ public abstract class InventoryListener {
 
     }
 
-    protected CompletableFuture<Void> sendData(@NotNull  String datahandlerUri, @NotNull JsonElement data) {
+    protected CompletableFuture<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
         return sendData(datahandlerUri, MinecraftClient.getInstance(), data);
     }
 
