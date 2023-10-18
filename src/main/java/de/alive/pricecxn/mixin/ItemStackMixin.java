@@ -1,5 +1,6 @@
 package de.alive.pricecxn.mixin;
 
+import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.cytooxien.Modes;
@@ -8,7 +9,11 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,13 +44,20 @@ public abstract class ItemStackMixin {
         ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
-        if(serverChecker == null) return;
-        if(themeChecker == null) return;
+        if (serverChecker == null) return;
+        if (themeChecker == null) return;
 
         Modes mode = themeChecker.getMode();
 
-        if(mode == Modes.NOTHING || mode == Modes.LOBBY) return;
+        if (mode == Modes.NOTHING || mode == Modes.LOBBY) return;
 
+
+        list.add(
+                MutableText.of(new LiteralTextContent("--- "))
+                        .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
+                        .append(PriceCxnMod.MOD_TEXT.copy())
+                        .append(MutableText.of(new LiteralTextContent("---"))
+                                .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
         list.add(Text.of(themeChecker.getMode().toString()));
 
 
