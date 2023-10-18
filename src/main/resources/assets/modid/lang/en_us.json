@@ -1,4 +1,6 @@
 {
+  "cxn_listener.mod_text": "PriceCxn",
+
   "cxn_listener.test": "Test",
 
   "cxn_listener.mod_started": "The mod started successfully.",

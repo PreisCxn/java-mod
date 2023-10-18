@@ -9,6 +9,7 @@ import de.alive.pricecxn.networking.*;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.alive.pricecxn.PriceCxnMod.MOD_TEXT;
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class CxnListener extends ServerListener {
@@ -192,10 +194,22 @@ public class CxnListener extends ServerListener {
         if (force || messageInformation.getLeft()) {
             if (MinecraftClient.getInstance().player != null) {
                 ActionNotification message = messageInformation.getRight();
+
                 if (message.hasTextVariables()) {
-                    MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()));
-                } else
-                    MinecraftClient.getInstance().player.sendMessage(Text.translatable(message.getTranslationKey()));
+
+                    MutableText msg = MOD_TEXT.copy()
+                            .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
+                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
+
+                    MinecraftClient.getInstance().player.sendMessage(msg);
+                } else {
+
+                    MutableText msg = MOD_TEXT.copy()
+                            .append(Text.translatable(message.getTranslationKey()))
+                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
+
+                    MinecraftClient.getInstance().player.sendMessage(msg);
+                }
             }
         }
 
