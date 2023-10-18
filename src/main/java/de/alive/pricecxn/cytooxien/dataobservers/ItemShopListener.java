@@ -20,16 +20,15 @@ import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class ItemShopListener extends InventoryListener {
 
-    private final List<PriceCxnItemStack> items = new ArrayList<>();
     private final Map<String, DataAccess> searchData = new HashMap<>();
     private final int itemStackSlot = 13;
     private final int buyItemSlot = 11;
     private final int sellItemSlot = 15;
-    private PriceCxnItemStack itemStack;
+    private PriceCxnItemStack itemStack = null;
 
-    private PriceCxnItemStack buyItem;
+    private PriceCxnItemStack buyItem = null;
 
-    private PriceCxnItemStack sellItem;
+    private PriceCxnItemStack sellItem = null;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -54,7 +53,9 @@ public class ItemShopListener extends InventoryListener {
     protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop open");
 
-        items.clear();
+        itemStack = null;
+        buyItem = null;
+        sellItem = null;
         updateItemStacks(handler);
 
     }
@@ -62,6 +63,7 @@ public class ItemShopListener extends InventoryListener {
     @Override
     protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop close");
+        if((sellItem == null && buyItem == null) || itemStack == null) return;
 
         JsonObject object = itemStack.getData();
 
