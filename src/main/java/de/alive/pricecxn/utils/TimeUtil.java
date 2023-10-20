@@ -3,8 +3,11 @@ package de.alive.pricecxn.utils;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class TimeUtil {
@@ -13,6 +16,29 @@ public class TimeUtil {
     private static final DataAccess NOW_SEARCH = TranslationDataAccess.NOW_SEARCH;
     private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
     private static final DataAccess SECOND_SEARCH = TranslationDataAccess.SECOND_SEARCH;
+
+    public static Optional<String> getTimestampDifference(long timestamp) {
+        long currentTimestamp = System.currentTimeMillis(); // Aktueller Unix-Timestamp in Millisekunden
+
+        long difference = currentTimestamp - timestamp;
+
+        if (difference <= 0) {
+            return Optional.empty(); // Der übergebene Timestamp ist aktueller oder gleich der aktuellen Zeit
+        }
+
+        if (difference >= 24 * 60 * 60 * 1000) {
+            long days = difference / (24 * 60 * 60 * 1000);
+            return Optional.of(days + " Tage");
+        } else if (difference >= 60 * 60 * 1000) {
+            long hours = difference / (60 * 60 * 1000);
+            return Optional.of(hours + " Stunden");
+        } else if (difference >= 60 * 1000) {
+            long minutes = difference / (60 * 1000);
+            return Optional.of(minutes + " Minuten");
+        }
+
+        return Optional.empty();
+    }
 
     public static Optional<Long> getStartTimeStamp(String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))

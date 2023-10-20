@@ -16,15 +16,28 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
 
 /**
  * This class is used to provide some useful methods for Strings
  */
 public class StringUtil {
+
+    private static String convertPrice(double time) {
+        Locale locale = Locale.GERMAN;
+        Locale.setDefault(locale);
+
+        DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(locale);
+        decimalFormat.setMaximumFractionDigits(2);
+
+        DecimalFormatSymbols symbols = decimalFormat.getDecimalFormatSymbols();
+        symbols.setDecimalSeparator(',');
+        decimalFormat.setDecimalFormatSymbols(symbols);
+
+        return decimalFormat.format(time);
+    }
 
     /**
      * This method converts all Strings in a list to lower case
