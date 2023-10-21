@@ -2,6 +2,8 @@ package de.alive.pricecxn.utils;
 
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -17,7 +19,44 @@ public class TimeUtil {
     private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
     private static final DataAccess SECOND_SEARCH = TranslationDataAccess.SECOND_SEARCH;
 
-    public static Optional<String> getTimestampDifference(long timestamp) {
+    public enum TimeUnit {
+        SECONDS(1000, "", ""),
+        MINUTES(60 * 1000, "cxn_listener.display_prices.minutes_singular", "cxn_listener.display_prices.minutes_plural"),
+        HOURS(60 * 60 * 1000, "cxn_listener.display_prices.hours_singular", "cxn_listener.display_prices.hours_plural"),
+        DAYS(24 * 60 * 60 * 1000, "cxn_listener.display_prices.days_singular", "cxn_listener.display_prices.days_plural");
+
+        private final long milliseconds;
+        private final String singularTranslatable;
+        private final String pluralTranslatable;
+
+        TimeUnit(long milliseconds, String singularTranslatable, String pluralTranslatable) {
+            this.milliseconds = milliseconds;
+            this.pluralTranslatable = pluralTranslatable;
+            this.singularTranslatable = singularTranslatable;
+        }
+
+        public long getMilliseconds() {
+            return milliseconds;
+        }
+
+        public String getPluralTranslatable() {
+            return pluralTranslatable;
+        }
+
+        public String getSingularTranslatable() {
+            return singularTranslatable;
+        }
+
+        public String getTranslatable(Long amount) {
+            if(amount == 1)
+                return getSingularTranslatable();
+            else
+                return getPluralTranslatable();
+        }
+
+    }
+
+    public static Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
         long currentTimestamp = System.currentTimeMillis(); // Aktueller Unix-Timestamp in Millisekunden
 
         long difference = currentTimestamp - timestamp;
@@ -26,15 +65,15 @@ public class TimeUtil {
             return Optional.empty(); // Der übergebene Timestamp ist aktueller oder gleich der aktuellen Zeit
         }
 
-        if (difference >= 24 * 60 * 60 * 1000) {
-            long days = difference / (24 * 60 * 60 * 1000);
-            return Optional.of(days + " Tage");
-        } else if (difference >= 60 * 60 * 1000) {
-            long hours = difference / (60 * 60 * 1000);
-            return Optional.of(hours + " Stunden");
-        } else if (difference >= 60 * 1000) {
-            long minutes = difference / (60 * 1000);
-            return Optional.of(minutes + " Minuten");
+        if (difference >= TimeUnit.DAYS.getMilliseconds()) {
+            long days = difference / TimeUnit.DAYS.getMilliseconds();
+            return Optional.of(new Pair<>(days, TimeUnit.DAYS));
+        } else if (difference >= TimeUnit.HOURS.getMilliseconds()) {
+            long hours = difference / TimeUnit.HOURS.getMilliseconds();
+            return Optional.of(new Pair<>(hours, TimeUnit.HOURS));
+        } else if (difference >= TimeUnit.MINUTES.getMilliseconds()) {
+            long minutes = difference / TimeUnit.MINUTES.getMilliseconds();
+            return Optional.of(new Pair<>(minutes, TimeUnit.MINUTES));
         }
 
         return Optional.empty();
@@ -65,15 +104,7 @@ public class TimeUtil {
         elapsedSeconds = day - elapsedSeconds;
         long startTimeStamp = System.currentTimeMillis() - elapsedSeconds;
 
-        System.out.println("Current Time: " + System.currentTimeMillis());
-        System.out.println("elapsedSeconds: " + elapsedSeconds);
-
-        System.out.println("startTimeStamp: " + startTimeStamp);
-
         //startTimeStamp = (startTimeStamp / (60 * 1000)) * (60 * 1000);
-
-        System.out.println("startTimeStamp: " + startTimeStamp);
-        System.out.println();
 
         return Optional.of(startTimeStamp);
     }

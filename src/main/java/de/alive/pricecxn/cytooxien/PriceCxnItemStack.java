@@ -32,9 +32,9 @@ public class PriceCxnItemStack {
 
     private int amount = 0;
 
-    private final List<String> toolTips;
+    private List<String> toolTips;
 
-    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
         if (searchData == null)
             this.searchData = new HashMap<>();
@@ -42,7 +42,8 @@ public class PriceCxnItemStack {
             this.searchData = searchData;
 
         this.item = item;
-        this.toolTips = StringUtil.getToolTips(this.item);
+        if(addTooltips)
+            this.toolTips = StringUtil.getToolTips(this.item);
         this.itemName = this.item.getItem().getTranslationKey();
         this.amount = item.getCount();
 
@@ -78,6 +79,10 @@ public class PriceCxnItemStack {
             data.add(entry.getKey(), result);
         }
 
+    }
+
+    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+        this(item, searchData, addComment, true);
     }
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {

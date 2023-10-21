@@ -14,5 +14,13 @@
 
   "cxn_listener.data_handler.refresh": "%s data has been updated.",
 
-  "cxn_listener.theme_checker.changed": "Changed mode to  %s."
+  "cxn_listener.theme_checker.changed": "Changed mode to %s.",
+
+  "cxn_listener.display_prices.updated": "Updated %s %s ago",
+  "cxn_listener.display_prices.minutes_plural": "minutes",
+  "cxn_listener.display_prices.minutes_singular": "minute",
+  "cxn_listener.display_prices.hours_plural": "hours",
+  "cxn_listener.display_prices.hours_singular": "hour",
+  "cxn_listener.display_prices.days_plural": "days",
+  "cxn_listener.display_prices.days_singular": "day"
 }

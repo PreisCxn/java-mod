@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.dataobservers.*;
 import de.alive.pricecxn.listener.InventoryListener;
@@ -62,6 +63,10 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onTabChange() {
+        if (!this.isOnServer().get()) return;
+
+        refreshItemData("pricecxn.data.item_data", false);
+        refreshItemData("pricecxn.data.nook_data", true);
 
     }
 
@@ -90,6 +95,31 @@ public class CxnListener extends ServerListener {
     public void onServerLeave() {
         System.out.println("Cytooxien left : " + this.isOnServer().get());
         deactivate();
+    }
+
+    private void refreshItemData(String dataKey, boolean isNook){
+        if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
+
+            if(this.themeChecker.getMode().equals(Modes.SKYBLOCK)){
+                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
+            } else if(this.themeChecker.getMode().equals(Modes.CITYBUILD)){
+                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
+            } else return;
+
+        } else {
+            JsonObject jsonObject = data.get(dataKey).getDataObject();
+            if(jsonObject == null || !jsonObject.has("mode")) return;
+            String mode = jsonObject.get("mode").getAsString();
+
+            if(this.themeChecker.getMode().equals(Modes.SKYBLOCK) && !mode.equals(Modes.SKYBLOCK.getTranslationKey())){
+                data.get(dataKey).setUri("/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"));
+            } else if(this.themeChecker.getMode().equals(Modes.CITYBUILD) && !mode.equals(Modes.CITYBUILD.getTranslationKey())){
+                data.get(dataKey).setUri("/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"));
+            } else return;
+
+        }
+
+        data.get(dataKey).refresh(true);
     }
 
     public CompletableFuture<Void> activate(boolean themeRefresh) {

@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien.dataobservers;
 
 import com.google.gson.JsonArray;
+import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;

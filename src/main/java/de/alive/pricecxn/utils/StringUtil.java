@@ -25,12 +25,37 @@ import java.util.*;
  */
 public class StringUtil {
 
-    private static String convertPrice(double time) {
+    public static String removeLastChar(String text) {
+        if (text == null || text.isEmpty()) {
+            return text; // Wenn der Eingabestring leer ist oder null, gibt ihn unverändert zurück.
+        }
+
+        return text.substring(0, text.length() - 1);
+    }
+
+    public static String removeChars(String text) {
+        StringBuilder nurZahlen = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char zeichen = text.charAt(i);
+            if (Character.isDigit(zeichen)) {
+                nurZahlen.append(zeichen);
+            }
+        }
+        return nurZahlen.toString();
+    }
+
+    public static String convertPrice(double time) {
         Locale locale = Locale.GERMAN;
         Locale.setDefault(locale);
 
         DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(locale);
-        decimalFormat.setMaximumFractionDigits(2);
+        if(time >= 100000) {
+            decimalFormat.setMaximumFractionDigits(0);
+            decimalFormat.setMinimumFractionDigits(0);
+        } else {
+            decimalFormat.setMaximumFractionDigits(2);
+            decimalFormat.setMinimumFractionDigits(2);
+        }
 
         DecimalFormatSymbols symbols = decimalFormat.getDecimalFormatSymbols();
         symbols.setDecimalSeparator(',');

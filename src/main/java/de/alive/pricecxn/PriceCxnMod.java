@@ -21,6 +21,7 @@ public class PriceCxnMod implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("modid");
 	public static final Style DEFAULT_TEXT = Style.EMPTY.withColor(Formatting.GRAY);
+	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
 	public static boolean DEBUG_MODE = true;

@@ -13,10 +13,11 @@ public class DataHandler {
 
     public static final int TRANSLATION_REFRESH_INTERVAL = 1000 * 60 * 60; // 1 Stunde
     public static final int MODUSER_REFRESH_INTERVAL = 1000 * 60 * 60 * 6; // 6 Stunden
+    public static final int ITEM_REFRESH_INTERVAL = 1000 * 60 * 60 * 3; // 6 Stunden
 
     private long lastUpdate = 0;
 
-    private final String uri;
+    private String uri;
 
     private int refreshInterval = 0;
 
@@ -25,6 +26,7 @@ public class DataHandler {
 
     private Map<String, List<String>> data = null;
     private JsonArray dataArray = null;
+    private JsonObject dataObject = null;
 
     /**
      * This constructor is used to create a DataHandler
@@ -126,10 +128,21 @@ public class DataHandler {
             System.out.println("result: " + jsonString);
 
             try {
-                JsonArray array = JsonParser.parseString(jsonString).getAsJsonArray();
-                dataArray = array;
+
+                if(JsonParser.parseString(jsonString).isJsonArray()) {
+                    dataArray = JsonParser.parseString(jsonString).getAsJsonArray();
+                } else if(JsonParser.parseString(jsonString).isJsonObject()) {
+                    dataObject = JsonParser.parseString(jsonString).getAsJsonObject();
+                }
 
                 if(keyColumnName == null || columnNames == null) {
+                    future.complete(null);
+                    return null;
+                }
+
+                JsonArray array = this.dataArray;
+
+                if(this.dataArray.isEmpty()) {
                     future.complete(null);
                     return null;
                 }
@@ -180,8 +193,16 @@ public class DataHandler {
         return dataArray;
     }
 
+    public @Nullable JsonObject getDataObject(){
+        return dataObject;
+    }
+
     public void setDataAccess(DataAccess dataAccess){
         dataAccess.setDataHandler(this);
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public static CompletableFuture<Void> refresh(boolean isForced, DataHandler... dataHandlers){
