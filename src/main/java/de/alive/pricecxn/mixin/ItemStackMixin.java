@@ -5,11 +5,9 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.ServerChecker;
-import de.alive.pricecxn.cytooxien.Modes;
-import de.alive.pricecxn.cytooxien.ThemeServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.item.TooltipContext;
@@ -33,7 +31,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
@@ -58,6 +58,12 @@ public abstract class ItemStackMixin {
     @Unique
     private long lastUpdate = 0;
     @Unique
+    private StorageItemStack storageItemStack = new StorageItemStack();
+    @Unique
+    private String searchingString = "";
+    @Unique
+    private int searchingCount = 20;
+    @Unique
     private PriceCxnItemStack cxnItemStack = null;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -65,6 +71,8 @@ public abstract class ItemStackMixin {
 
         ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+
+        ItemStack itemStack = (ItemStack) (Object) this;
 
         if (serverChecker == null) return;
         if (themeChecker == null) return;
@@ -77,31 +85,46 @@ public abstract class ItemStackMixin {
 
         if (pcxnPrice.isEmpty() && nookPrice.isEmpty()) return;
 
-        if(this.cxnItemStack == null) return;
+        if (this.cxnItemStack == null) return;
 
         int amount = this.cxnItemStack.getAmount();
 
-        if(pcxnPrice.isPresent() && pcxnPrice.get().has("pbv_search_key") && pcxnPrice.get().get("pbv_search_key") != JsonNull.INSTANCE){
+        PriceText pcxnPriceText = PriceText.create();
+
+
+        if (pcxnPrice.isPresent() && pcxnPrice.get().has("pbv_search_key") && pcxnPrice.get().get("pbv_search_key") != JsonNull.INSTANCE) {
             String pbvKey = pcxnPrice.get().get("pbv_search_key").getAsString();
-            if(!this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY)) return;
+            if (!this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY)) return;
             JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
-            if(!nbtData.has("PublicBukkitValues")) return;
+            if (!nbtData.has("PublicBukkitValues")) return;
             JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
-            if(!pbvData.has(pbvKey)) return;
+            if (!pbvData.has(pbvKey)) return;
 
-            //todo: venditoren und itemlager von Server lvl Abfragen und so
+            String pbvSearchResult = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
 
-            String devide2 = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
+            int pbvAmount = 0;
 
             try {
-                amount *= Integer.parseInt(devide2);
-            } catch (NumberFormatException e){
+                pbvAmount = Integer.parseInt(pbvSearchResult);
+            } catch (NumberFormatException e) {
                 System.err.println("fehler beim konvertieren des pbv Daten im Item: " + e);
                 return;
             }
+
+            if (StorageItemStack.isOf(pcxnPrice.get())) {
+
+                storageItemStack.setup(pcxnPrice.get(), serverChecker.getWebsocket());
+                pcxnPriceText = storageItemStack.getText();
+                storageItemStack.search(pbvAmount);
+
+            } else {
+
+                amount *= pbvAmount;
+
+            }
         }
 
-        list.add(Text.of(""));
+        list.add(PriceText.space());
 
         list.add(
                 MutableText.of(new LiteralTextContent("--- "))
@@ -111,29 +134,25 @@ public abstract class ItemStackMixin {
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         int finalAmount = amount;
+        PriceText finalPcxnPriceText = pcxnPriceText;
+        System.out.println(finalPcxnPriceText.getPriceAdder());
         pcxnPrice.ifPresent(jsonObject -> {
-            list.add(MutableText.of(new LiteralTextContent(
-                            convertPrice(jsonObject.get("lower_price").getAsDouble() * finalAmount))).setStyle(PriceCxnMod.GOLD_TEXT)
-                    .append(MutableText.of(new LiteralTextContent(
-                                    " - ")).setStyle(PriceCxnMod.DEFAULT_TEXT))
-                    .append(MutableText.of(new LiteralTextContent(
-                                            convertPrice(jsonObject.get("upper_price").getAsDouble() * finalAmount))).setStyle(PriceCxnMod.GOLD_TEXT))
-                    .append(MutableText.of(new LiteralTextContent(
-                            "\uE202")).setStyle(Style.EMPTY.withColor(Formatting.YELLOW))));
+            list.add(finalPcxnPriceText
+                    .withPrices(jsonObject.get("lower_price").getAsDouble(), jsonObject.get("upper_price").getAsDouble())
+                    .withPriceMultiplier(finalAmount)
+                    .getText());
         });
 
         nookPrice.ifPresent(jsonObject -> {
-            list.add(MutableText.of(
-                    new LiteralTextContent(
-                            "Tom Block: ")).setStyle(PriceCxnMod.DEFAULT_TEXT)
-                    .append(MutableText.of(new LiteralTextContent(
-                            convertPrice(jsonObject.get("price").getAsDouble() * finalAmount))).setStyle(PriceCxnMod.GOLD_TEXT))
-                            .append(MutableText.of(new LiteralTextContent("\uE202")).setStyle(Style.EMPTY.withColor(Formatting.YELLOW))));
-
+            list.add(PriceText.create()
+                    .withIdentifierText("Tom Block:")
+                    .withPrices(jsonObject.get("price").getAsDouble())
+                    .withPriceMultiplier(finalAmount)
+                    .getText());
         });
 
         pcxnPrice.ifPresent(jsonObject -> {
-            list.add(Text.of(""));
+            list.add(PriceText.space());
 
             Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate = TimeUtil.getTimestampDifference(Long.parseLong(jsonObject.get("timestamp").getAsString()));
 
@@ -143,7 +162,7 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                                    .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
+                        .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
             });
 
         });

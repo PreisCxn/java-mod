@@ -3,15 +3,24 @@ package de.alive.pricecxn.cytooxien;
 import com.google.gson.*;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static net.minecraft.item.trim.ArmorTrim.NBT_KEY;
 
 public class PriceCxnItemStack {
 
@@ -28,7 +37,7 @@ public class PriceCxnItemStack {
 
     private final JsonObject data = new JsonObject();
 
-    private final String itemName;
+    private String itemName;
 
     private int amount = 0;
 
@@ -47,6 +56,13 @@ public class PriceCxnItemStack {
         this.itemName = this.item.getItem().getTranslationKey();
         this.amount = item.getCount();
 
+        if(item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
+
+            Optional<RegistryKey<Item>> key = item.getRegistryEntry().getKey();
+            key.map(itemRegistryKey -> this.itemName += "." + itemRegistryKey.getValue().getPath());
+
+        }
+
         /*
         wird immer gesucht:
         - itemName
@@ -57,6 +73,9 @@ public class PriceCxnItemStack {
         data.addProperty(AMOUNT_KEY, amount);
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
+
+        System.out.println(itemName);
+
 
         /*
         zusätzlich suche nach den keys in searchData:
@@ -272,4 +291,5 @@ public class PriceCxnItemStack {
     public @NotNull Map<String, DataAccess> getSearchData() {
         return searchData;
     }
+
 }

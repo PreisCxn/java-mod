@@ -42,6 +42,7 @@ public class WebSocketCompletion {
 
         this.connector.addMessageListener(listener);
         String queryString = QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", ""));
+        System.out.println(queryString);
         connector.sendMessage(queryString);
 
         timeoutExecutor.schedule(() -> {
