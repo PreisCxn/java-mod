@@ -12,7 +12,7 @@ import java.util.Optional;
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
 public class PriceText {
-    public static final MutableText COIN_TEXT = MutableText.of(new LiteralTextContent("\uE202"))
+    public static final MutableText COIN_TEXT = MutableText.of(new PlainTextContent.Literal("\uE202"))
             .setStyle(Style.EMPTY.withColor(Formatting.YELLOW));
     public static final Style PRICE_STYLE = Style.EMPTY.withColor(Formatting.GOLD);
     public static final Style GRAY_STYLE = Style.EMPTY.withColor(Formatting.GRAY);
@@ -78,12 +78,12 @@ public class PriceText {
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
         System.out.println("preise!!! ");
         System.out.println(this.priceAdder);
-        return getLowerPriceText().flatMap(text -> getUpperPriceText().map(mutableText -> MutableText.of(new LiteralTextContent(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
+        return getLowerPriceText().flatMap(text -> getUpperPriceText().map(mutableText -> MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
                         .append(text)
-                        .append(MutableText.of(new LiteralTextContent(
+                        .append(MutableText.of(new PlainTextContent.Literal(
                                 " - ")).setStyle(GRAY_STYLE))
                         .append(mutableText)
-                        .append(COIN_TEXT)).or(() -> Optional.ofNullable(MutableText.of(new LiteralTextContent(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
+                        .append(COIN_TEXT)).or(() -> Optional.ofNullable(MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
                         .append(text)
                         .append(COIN_TEXT))))
                 .orElse(getSearchingText());
@@ -125,7 +125,7 @@ public class PriceText {
         if (price == 0) return Optional.empty();
         return Optional
                 .of(MutableText
-                        .of(new LiteralTextContent(
+                        .of(new PlainTextContent.Literal(
                                 convertPrice(price * this.priceMultiplier + this.priceAdder)))
                         .setStyle(PRICE_STYLE));
     }

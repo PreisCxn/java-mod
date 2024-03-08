@@ -14,8 +14,8 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -127,10 +127,10 @@ public abstract class ItemStackMixin {
         list.add(PriceText.space());
 
         list.add(
-                MutableText.of(new LiteralTextContent("--- "))
+                MutableText.of(new PlainTextContent.Literal("--- "))
                         .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
                         .append(PriceCxnMod.MOD_TEXT.copy())
-                        .append(MutableText.of(new LiteralTextContent("---"))
+                        .append(MutableText.of(new PlainTextContent.Literal("---"))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         int finalAmount = amount;

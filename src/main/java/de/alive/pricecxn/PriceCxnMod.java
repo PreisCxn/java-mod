@@ -3,8 +3,8 @@ package de.alive.pricecxn;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -27,14 +27,14 @@ public class PriceCxnMod implements ModInitializer {
 	public static boolean DEBUG_MODE = true;
 	public static final String MOD_NAME = "PriceCxn";
 	public static final MutableText MOD_TEXT = MutableText
-			.of(new LiteralTextContent(""))
-			.append(MutableText.of(new LiteralTextContent("["))
+			.of(new PlainTextContent.Literal(""))
+			.append(MutableText.of(new PlainTextContent.Literal("["))
 					.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)))
 			.append(Text.translatable("cxn_listener.mod_text")
 					.setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
-			.append(MutableText.of(new LiteralTextContent("] "))
+			.append(MutableText.of(new PlainTextContent.Literal("] "))
 					.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
-	public static final String MOD_VERSION = "1.0.0";
+	public static final String MOD_VERSION = "2.0.0";
 
 	@Override
 	public void onInitialize() {
@@ -52,7 +52,7 @@ public class PriceCxnMod implements ModInitializer {
 
 	public static void printDebug(String message, boolean overlay, boolean sysOut){
 		doDebug((client) -> {
-			MutableText text = MutableText.of(new LiteralTextContent(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
+			MutableText text = MutableText.of(new PlainTextContent.Literal(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
 			client.player.sendMessage(text, overlay);
 			if(sysOut) System.out.println("[PCXN-DEBUG] : " + message);
 		});

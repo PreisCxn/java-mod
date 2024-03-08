@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 public class Http {
 
-    public static final String API_URL = "http://127.0.0.1:7070/api";
+    public static final String API_URL = "http://127.0.0.1:8080/api";
 
     private static final @NotNull HttpClient client = HttpClient.newHttpClient();
 

@@ -19,7 +19,7 @@ public enum TranslationDataAccess implements DataAccess {
     //Inventory Searches
     INV_AUCTION_HOUSE_SEARCH("cxnprice.translation.auctions_search.inventory", List.of("Auktionshaus")),
     INV_ITEM_SHOP_SEARCH("cxnprice.translation.item_shop.inventory", List.of("Spieler-Shop")),
-    INV_NOOK_SEARCH("cxnprice.translation.nook_shop.inventory", List.of("Shop")),
+    INV_NOOK_SEARCH("cxnprice.translation.nook_shop.inventory", List.of("Tom Block")),
     INV_TRADE_SEARCH("cxnprice.translation.trade.inventory", List.of("Handel")),
 
     //ItemData Searches AuctionHouse

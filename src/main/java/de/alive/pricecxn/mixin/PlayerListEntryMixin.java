@@ -3,8 +3,8 @@ package de.alive.pricecxn.mixin;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -48,7 +48,7 @@ public abstract class PlayerListEntryMixin {
 
         if(!optional.get().contains(playerName)) return;
 
-        MutableText text = MutableText.of(new LiteralTextContent("")).setStyle(Style.EMPTY.withColor(Formatting.WHITE));
+        MutableText text = MutableText.of(new PlainTextContent.Literal("")).setStyle(Style.EMPTY.withColor(Formatting.WHITE));
         text.append(originalDisplayName).append("\uE202 ");
 
         ci.setReturnValue(text);
