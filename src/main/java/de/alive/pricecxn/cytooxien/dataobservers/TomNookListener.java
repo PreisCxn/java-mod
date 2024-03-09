@@ -23,7 +23,7 @@ public class TomNookListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
-    private final Pair<Integer, Integer> itemRange = new Pair<>(0, 8);
+    private final Pair<Integer, Integer> itemRange = new Pair<>(0, 35);
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
@@ -35,7 +35,7 @@ public class TomNookListener extends InventoryListener {
      * @param active
      */
     public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 1*9 : inventorySize, active);
+        super(inventoryTitles, inventorySize <= 0 ? 4*9 : inventorySize, active);
 
         searchData.put("buyPrice", TranslationDataAccess.NOOK_BUY_SEARCH);
     }
@@ -67,10 +67,13 @@ public class TomNookListener extends InventoryListener {
         System.out.println("Nook: " + array.size() + " items");
         System.out.println(array);
 
+        /*
         if(!array.isEmpty())
             sendData("/tomnook", array).thenAccept(aVoid -> {
                 printDebug("Nook data sent");
             });
+
+         */
 
     }
 

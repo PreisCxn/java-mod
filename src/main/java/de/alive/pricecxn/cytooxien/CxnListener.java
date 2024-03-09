@@ -97,23 +97,23 @@ public class CxnListener extends ServerListener {
         deactivate();
     }
 
-    private void refreshItemData(String dataKey, boolean isNook){
+    private void refreshItemData(String dataKey, boolean isNook) {
         if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
 
-            if(this.themeChecker.getMode().equals(Modes.SKYBLOCK)){
+            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK)) {
                 data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
-            } else if(this.themeChecker.getMode().equals(Modes.CITYBUILD)){
+            } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD)) {
                 data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
             } else return;
 
         } else {
             JsonObject jsonObject = data.get(dataKey).getDataObject();
-            if(jsonObject == null || !jsonObject.has("mode")) return;
+            if (jsonObject == null || !jsonObject.has("mode")) return;
             String mode = jsonObject.get("mode").getAsString();
 
-            if(this.themeChecker.getMode().equals(Modes.SKYBLOCK) && !mode.equals(Modes.SKYBLOCK.getTranslationKey())){
+            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK) && !mode.equals(Modes.SKYBLOCK.getTranslationKey())) {
                 data.get(dataKey).setUri("/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"));
-            } else if(this.themeChecker.getMode().equals(Modes.CITYBUILD) && !mode.equals(Modes.CITYBUILD.getTranslationKey())){
+            } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD) && !mode.equals(Modes.CITYBUILD.getTranslationKey())) {
                 data.get(dataKey).setUri("/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"));
             } else return;
 
@@ -156,7 +156,7 @@ public class CxnListener extends ServerListener {
             //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
         }
 
-        if(!this.data.containsKey("pricecxn.data.mod_users")){
+        if (!this.data.containsKey("pricecxn.data.mod_users")) {
             data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
         }
         //...
@@ -370,21 +370,27 @@ public class CxnListener extends ServerListener {
         return CompletableFuture.supplyAsync(() -> this.checkConnection(true), ServerChecker.EXECUTOR).thenCompose(result -> result);
     }
 
-    public Optional<List<String>> getModUsers(){
+    public Optional<List<String>> getModUsers() {
         List<String> stringList = new ArrayList<>();
 
-        JsonArray array = this.data.get("pricecxn.data.mod_users").getDataArray();
+        JsonArray array;
 
-        if(array == null) return Optional.empty();
+        try {
+            array = this.data.get("pricecxn.data.mod_users").getDataArray();
 
-        array.asList().forEach(element -> {
-            if(!element.isJsonNull())
-                stringList.add(element.getAsString());
-        });
+            if (array == null) return Optional.empty();
 
-        if(stringList.isEmpty()) return Optional.empty();
+            array.asList().forEach(element -> {
+                if (!element.isJsonNull())
+                    stringList.add(element.getAsString());
+            });
 
-        return Optional.of(stringList);
+            if (stringList.isEmpty()) return Optional.empty();
+
+            return Optional.of(stringList);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public AtomicBoolean isActive() {

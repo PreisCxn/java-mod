@@ -125,6 +125,19 @@ public abstract class InventoryListener {
         if (inventoryTitles == null) return false;
 
         for (String title : inventoryTitles) {
+
+            if(title.contains("--##--")) {
+                String[] split = title.split("--##--");
+                boolean allContained = true;
+                for (String s : split) {
+                    if (!client.currentScreen.getTitle().getString().contains(s)) {
+                        allContained = false;
+                        break;
+                    }
+                }
+                return allContained;
+            }
+
             if (client.currentScreen.getTitle().getString().equals(title))
                 return true;
         }
