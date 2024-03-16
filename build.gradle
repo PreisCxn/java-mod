@@ -97,12 +97,17 @@ tasks.register('generateVersion', Copy) {
 	doLast {
 		println "generateVersion task has been executed"
 	}
+	outputs.upToDateWhen { false } // Füge diese Zeile hinzu
 }
 
 tasks.named('compileJava').configure {
-    dependsOn 'generateVersion'
+	dependsOn 'generateVersion'
 }
 
 tasks.named('sourcesJar').configure {
-    dependsOn 'generateVersion'
+	dependsOn 'generateVersion'
+}
+
+tasks.named('build').configure {
+	dependsOn 'generateVersion'
 }
