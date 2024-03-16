@@ -85,13 +85,24 @@ publishing {
 }
 
 tasks.register('generateVersion', Copy) {
-	from 'src/main/java/de/alive/pricecxn/version_template.java'
+	doFirst {
+		delete 'src/main/java/de/alive/pricecxn/Version.java'
+		println "mod_version is: ${project.mod_version}"
+	}
+	from 'src/templates/version_template.java'
 	into 'src/main/java/de/alive/pricecxn/'
 	include 'version_template.java'
 	rename 'version_template.java', 'Version.java'
 	expand(version: project.mod_version)
+	doLast {
+		println "generateVersion task has been executed"
+	}
 }
 
 tasks.named('compileJava').configure {
-	dependsOn 'generateVersion'
+    dependsOn 'generateVersion'
+}
+
+tasks.named('sourcesJar').configure {
+    dependsOn 'generateVersion'
 }
