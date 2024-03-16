@@ -21,7 +21,7 @@ public class WebSocketConnector {
 
     private boolean isConnected = false;
 
-    public static final String DEFAULT_WEBSOCKET_URI = "ws://127.0.0.1:7070";
+    public static final String DEFAULT_WEBSOCKET_URI = "wss://socket.preiscxn.de";
 
     private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();

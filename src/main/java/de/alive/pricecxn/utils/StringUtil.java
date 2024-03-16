@@ -91,6 +91,15 @@ public class StringUtil {
         return result;
     }
 
+    public static String extractBetweenParts(String s, String start, String end) {
+        int sIndex = s.indexOf(start) + start.length();
+        int eIndex = s.indexOf(end);
+        if (sIndex < eIndex) {
+            return s.substring(sIndex, eIndex);
+        }
+        return null;
+    }
+
     public static String getFirstSuffixStartingWith(List<String> strings, String prefix) {
         for (String s : strings) {
             if (s.startsWith(prefix)) {

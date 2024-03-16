@@ -24,7 +24,7 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-	public static boolean DEBUG_MODE = true;
+	public static boolean DEBUG_MODE = false;
 	public static final String MOD_NAME = "PriceCxn";
 	public static final MutableText MOD_TEXT = MutableText
 			.of(new PlainTextContent.Literal(""))
@@ -34,7 +34,7 @@ public class PriceCxnMod implements ModInitializer {
 					.setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
 			.append(MutableText.of(new PlainTextContent.Literal("] "))
 					.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
-	public static final String MOD_VERSION = "2.0.0";
+	public static final String MOD_VERSION = Version.MOD_VERSION;
 
 	@Override
 	public void onInitialize() {

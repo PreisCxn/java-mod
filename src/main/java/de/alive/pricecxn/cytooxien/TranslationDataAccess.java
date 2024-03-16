@@ -49,7 +49,7 @@ public enum TranslationDataAccess implements DataAccess {
             new JsonPrimitive(false)),
 
     //ItemData Searches NookShop
-    NOOK_BUY_SEARCH("cxnprice.translation.nook_shop.buy", List.of("\uE204\uE211\uE212\uE212\uE212\uE212\uE212P\uE210R\uE210E\uE210I\uE210S ")),
+    NOOK_BUY_SEARCH("cxnprice.translation.nook_shop.buy", List.of("\uF702\uF702\uF702\uF702\uEA02\uEA01\uE401\uEB02\uEB01\uEA09\uEB08\uEB07\uEB06\uEB03\uEB02\uEB01\uF602\uF602\uF602\uF602\uF702\uEB09\uEA08\uEA07\uEA06\uEA05\uEA04\uEA03\uEA02\uEA01\uE420\uEA09\uEB08\uEB07\uEB06\uEB05\uEB04\uEB03\uEB02\uEB01\uEA09\uEB08\uEB02\uEB01\uEB09\uEA08\uEA07\uEA06\uEA05\uEA04\uEA02--##--\uEA06\uEA04\uEA03\uEA02\uF602\uF702\uF702\uF702\uF702\uF702\uF702\uEB09\uEA08\uEA07\uEA06\uEA05\uEA04\uEA02\uE302\uEA09\uEB08\uEB07\uEB06\uEB05\uEB04\uEB02\uEA09\uEB08\uEB07\uEB06\uEB01\uF602\uF602\uF602\uF602\uF602\uF602")),
 
     //ItemData Searches ItemShop
     SHOP_BUY_SEARCH("cxnprice.translation.item_shop.buy", List.of("Kaufen: ")),

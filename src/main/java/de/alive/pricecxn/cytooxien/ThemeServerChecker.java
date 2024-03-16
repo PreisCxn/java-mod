@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.alive.pricecxn.PriceCxnMod.DEBUG_MODE;
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 /**
@@ -62,7 +63,8 @@ public class ThemeServerChecker extends TabListener {
 
         printDebug("New Mode: " + this.mode.toString());
         assert MinecraftClient.getInstance().player != null;
-        MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
+        if(DEBUG_MODE)
+            MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
     }
 
     @Override

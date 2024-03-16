@@ -30,6 +30,8 @@ public class PriceCxnItemStack {
     public static final String ITEM_NAME_KEY = "itemName";
     public static final String AMOUNT_KEY = "amount";
     public static final String COMMENT_KEY = "comment";
+    public static final String DISPLAY_NAME_KEY = "displayName";
+    public static final String MC_CLIENT_LANG_KEY = "mcClientLang";
 
     private final ItemStack item;
 
@@ -38,6 +40,8 @@ public class PriceCxnItemStack {
     private final JsonObject data = new JsonObject();
 
     private String itemName;
+
+    private String displayName;
 
     private int amount = 0;
 
@@ -54,6 +58,7 @@ public class PriceCxnItemStack {
         if(addTooltips)
             this.toolTips = StringUtil.getToolTips(this.item);
         this.itemName = this.item.getItem().getTranslationKey();
+        this.displayName = this.item.getName().getString();
         this.amount = item.getCount();
 
         if(item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
@@ -67,10 +72,13 @@ public class PriceCxnItemStack {
         wird immer gesucht:
         - itemName
         - amount
+        - display name + current lang
         - comment (nbts)
          */
         data.addProperty(ITEM_NAME_KEY, itemName);
         data.addProperty(AMOUNT_KEY, amount);
+        data.addProperty(DISPLAY_NAME_KEY, displayName);
+        data.addProperty(MC_CLIENT_LANG_KEY, MinecraftClient.getInstance().getLanguageManager().getLanguage());
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
