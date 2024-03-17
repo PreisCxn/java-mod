@@ -73,11 +73,6 @@ public abstract class InventoryListener {
             if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
                 return;
 
-            //System.out.println("Title: " + client.currentScreen.getTitle().getString());
-            //--##--
-
-
-
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
