@@ -191,7 +191,9 @@ public class CxnListener extends ServerListener {
                                 TranslationDataAccess.HOUR_SEARCH,
                                 TranslationDataAccess.MINUTE_SEARCH,
                                 TranslationDataAccess.SECOND_SEARCH,
-                                TranslationDataAccess.NOW_SEARCH
+                                TranslationDataAccess.NOW_SEARCH,
+                                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
+                                TranslationDataAccess.CITYBUILD_INV_BLOCK
                         ));
                         return CompletableFuture.completedFuture(null);
                     });

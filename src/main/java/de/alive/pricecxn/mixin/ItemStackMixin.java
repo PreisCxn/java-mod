@@ -10,6 +10,7 @@ import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -80,6 +81,28 @@ public abstract class ItemStackMixin {
         Modes mode = themeChecker.getMode();
 
         if (mode == Modes.NOTHING || mode == Modes.LOBBY) return;
+
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (client.player == null || client.currentScreen == null) return;
+        if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
+            return;
+
+        String title = client.currentScreen.getTitle().getString().toUpperCase();
+
+        List<String> invBlocks = mode == Modes.SKYBLOCK ?
+                TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData() :
+                mode == Modes.CITYBUILD ?
+                        TranslationDataAccess.CITYBUILD_INV_BLOCK.getData() :
+                        null;
+
+        if (invBlocks == null) return;
+
+        for(String s : invBlocks) {
+            if(title.contains(s.toUpperCase())) {
+                return;
+            }
+        }
 
         findInfo();
 

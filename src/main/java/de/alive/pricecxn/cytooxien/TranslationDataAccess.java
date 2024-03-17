@@ -62,7 +62,11 @@ public enum TranslationDataAccess implements DataAccess {
     HOUR_SEARCH("cxnprice.translation.time_search.hour", List.of("Stunde")),
     MINUTE_SEARCH("cxnprice.translation.time_search.minute", List.of("Minute")),
     SECOND_SEARCH("cxnprice.translation.time_search.second", List.of("Sekunde")),
-    NOW_SEARCH("cxnprice.translation.time_search.now", List.of("Jetzt"));
+    NOW_SEARCH("cxnprice.translation.time_search.now", List.of("Jetzt")),
+
+    //Inv blocks
+    SKYBLOCK_INV_BLOCK("cxnprice.translation.inv_block.skyblock", List.of("Inseln")),
+    CITYBUILD_INV_BLOCK("cxnprice.translation.inv_block.citybuild", List.of("Stadt"));
 
     private final String id;
     private final List<String> backupData;
