@@ -85,18 +85,12 @@ public class TomNookListener extends InventoryListener {
 
         String screenTitle = client.currentScreen.getTitle().getString();
 
-        System.out.println(screenTitle);
-
         for(String s : this.searchData.getData()) {
             if(s.contains("--##--")) {
                 String[] split = s.split("--##--");
 
                 if(split.length == 2) {
-                    System.out.println(split[0]);
-                    System.out.println(split[1]);
-                    System.out.println(screenTitle);
                     String result = StringUtil.extractBetweenParts(screenTitle, split[0], split[1]);
-                    System.out.println(result);
                     if(result != null && StringUtil.isValidPrice(result)) {
                         return Optional.of(result);
                     }
