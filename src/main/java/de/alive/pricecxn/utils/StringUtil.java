@@ -92,12 +92,16 @@ public class StringUtil {
     }
 
     public static String extractBetweenParts(String s, String start, String end) {
-        int sIndex = s.indexOf(start) + start.length();
-        int eIndex = s.indexOf(end);
-        if (sIndex < eIndex) {
-            return s.substring(sIndex, eIndex);
+        int sIndex = s.indexOf(start);
+        if (sIndex == -1) {
+            return null; // start string not found
         }
-        return null;
+        sIndex += start.length();
+        int eIndex = s.indexOf(end, sIndex);
+        if (eIndex == -1) {
+            return null; // end string not found after start string
+        }
+        return s.substring(sIndex, eIndex);
     }
 
     public static String getFirstSuffixStartingWith(List<String> strings, String prefix) {
@@ -111,6 +115,10 @@ public class StringUtil {
 
     public static boolean containsString(String string, List<String> searches) {
         return searches.stream().anyMatch(string::contains);
+    }
+
+    public static boolean isValidPrice(String s) {
+        return s.matches("[0-9.,]*");
     }
 
     public static JsonElement removeLastChar(JsonElement element) {

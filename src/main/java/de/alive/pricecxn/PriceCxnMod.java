@@ -24,7 +24,7 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-	public static boolean DEBUG_MODE = false;
+	public static boolean DEBUG_MODE = true;
 	public static final String MOD_NAME = "PriceCxn";
 	public static final MutableText MOD_TEXT = MutableText
 			.of(new PlainTextContent.Literal(""))
