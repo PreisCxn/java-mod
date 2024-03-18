@@ -10,16 +10,18 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 @ClientEndpoint
 public class WebSocketConnector {
     private Session session;
 
     private boolean isConnected = false;
+
+    private ScheduledExecutorService pingExecutor;
 
     public static final String DEFAULT_WEBSOCKET_URI = "wss://socket.preiscxn.de";
 
@@ -38,6 +40,16 @@ public class WebSocketConnector {
                 listener.onOpen(session);
             }
         }
+
+        // Start sending pings every 30 seconds
+        pingExecutor = Executors.newSingleThreadScheduledExecutor();
+        pingExecutor.scheduleAtFixedRate(() -> {
+            try {
+                session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }, 30, 30, TimeUnit.SECONDS);
     }
 
     @OnMessage
