@@ -3,19 +3,20 @@ package de.alive.pricecxn.cytooxien.dataobservers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
@@ -28,8 +29,8 @@ public class TradeListener extends InventoryListener {
 
     private final List<TradeStackRow> selfInventory = TradeStackRow.from(9, INVENTORY_HEIGHT, INVENTORY_WIDTH, INVENTORY_SPACE_BETWEEN);
     private final List<TradeStackRow> traderInventory = TradeStackRow.from(14, INVENTORY_HEIGHT, INVENTORY_WIDTH, INVENTORY_SPACE_BETWEEN);
-    private final TradeStackRow selfControls = TradeStackRow.from(1,2);
-    private final TradeStackRow traderControls = TradeStackRow.from(6,2);
+    private final TradeStackRow selfControls = TradeStackRow.from(1, 2);
+    private final TradeStackRow traderControls = TradeStackRow.from(6, 2);
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
     /**
@@ -39,7 +40,7 @@ public class TradeListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
     public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+        super(inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
         //ICH LIEBE MEINE FREUNDIN SO SEHR <3 (AlinaTmr aka Alina aka Schatz aka Prinzessin)
         this.searchData.put("buyPrice", TranslationDataAccess.TRADE_BUY_SEARCH);
     }
@@ -55,6 +56,7 @@ public class TradeListener extends InventoryListener {
         traderInventory.forEach(row -> row.updateAsync(handler, null, true));
         selfControls.updateAsync(handler, this.searchData, false);
         traderControls.updateAsync(handler, this.searchData, false);
+        //todo subscribe
     }
 
     @Override
@@ -62,16 +64,21 @@ public class TradeListener extends InventoryListener {
         printDebug("Trade close");
 
         JsonObject array = new JsonObject();
-        array.add("self",TradeStackRow.getData(selfInventory));
-        array.add("trader",TradeStackRow.getData(traderInventory));
-        array.add("selfControls",selfControls.getData());
-        array.add("traderControls",traderControls.getData());
+        array.add("self", TradeStackRow.getData(selfInventory));
+        array.add("trader", TradeStackRow.getData(traderInventory));
+        array.add("selfControls", selfControls.getData());
+        array.add("traderControls", traderControls.getData());
 
-        CompletableFuture.runAsync(() -> {
-            Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
-            result.ifPresent(jsonElement -> sendData("/trade", jsonElement));
-            printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
-        }, EXECUTOR);
+        Mono.fromSupplier(() -> {
+                    Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
+
+                    Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
+
+                    printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
+
+                    return mono;
+                })
+                .subscribeOn(Schedulers.boundedElastic());//todo subscribe
 
     }
 
@@ -84,19 +91,20 @@ public class TradeListener extends InventoryListener {
         traderControls.updateAsync(handler, this.searchData, false);
     }
 
-    private Optional<JsonElement> processData(List<PriceCxnItemStack> selfInv, List<PriceCxnItemStack> traderInv, JsonArray selfControls, JsonArray traderControls){
-        if(selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
-        if(selfInv.isEmpty() == traderInv.isEmpty()) return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
+    private Optional<JsonElement> processData(List<PriceCxnItemStack> selfInv, List<PriceCxnItemStack> traderInv, JsonArray selfControls, JsonArray traderControls) {
+        if (selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
+        if (selfInv.isEmpty() == traderInv.isEmpty())
+            return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
         if (notAccepted(traderControls) && notAccepted(selfControls)) return Optional.empty();
 
         List<PriceCxnItemStack> items;
         Optional<String> price;
 
-        if(selfInv.isEmpty()){
+        if (selfInv.isEmpty()) {
             if (buyPriceIsNull(selfControls) || !buyPriceIsNull(traderControls)) return Optional.empty();
             items = traderInv;
             price = getBuyPrice(selfControls).map(JsonElement::getAsString);
-        } else if(traderInv.isEmpty()){
+        } else if (traderInv.isEmpty()) {
             if (buyPriceIsNull(traderControls) || !buyPriceIsNull(selfControls)) return Optional.empty();
             items = selfInv;
             price = getBuyPrice(traderControls).map(JsonElement::getAsString);
@@ -104,8 +112,8 @@ public class TradeListener extends InventoryListener {
 
         int amount = items.get(0).getAmount();
 
-        for(int i = 1; i < items.size(); i++){
-            if(!items.get(i).isSameItem(items.get(0))) return Optional.empty();
+        for (int i = 1; i < items.size(); i++) {
+            if (!items.get(i).isSameItem(items.get(0))) return Optional.empty();
             amount += items.get(i).getAmount();
         }
 
@@ -125,7 +133,7 @@ public class TradeListener extends InventoryListener {
         return get.map(jsonElement -> jsonElement.getAsString().equals("0,00") || jsonElement.getAsString().equals("0.00")).orElse(false);
     }
 
-    private Optional<JsonElement> getBuyPrice(JsonArray array){
+    private Optional<JsonElement> getBuyPrice(JsonArray array) {
         return array.asList()
                 .stream()
                 .filter(JsonElement::isJsonObject)
@@ -161,32 +169,6 @@ public class TradeListener extends InventoryListener {
             return new TradeStackRow(new Pair<>(start, start + width - 1), new ArrayList<>());
         }
 
-        void update(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
-            synchronized (slots) {
-                slots.clear();
-                for (int i = slotRange.getLeft(); i <= slotRange.getRight(); i++) {
-                    Slot slot = handler.getSlot(i);
-                    if (slot.getStack().isEmpty()) continue;
-
-                    PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, bool);
-
-                    slots.add(newItem);
-                }
-            }
-        }
-
-        void updateAsync(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool){
-            CompletableFuture.runAsync(() -> update(handler, searchData, bool), EXECUTOR);
-        }
-
-        JsonArray getData() {
-            JsonArray array = new JsonArray();
-            for(PriceCxnItemStack item : slots) {
-                array.add(item.getData());
-            }
-            return array;
-        }
-
         static JsonArray getData(List<TradeStackRow> rows) {
             JsonArray array = new JsonArray();
             for (TradeStackRow row : rows) {
@@ -203,5 +185,32 @@ public class TradeListener extends InventoryListener {
             return result;
         }
 
+        void update(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
+            synchronized(slots){
+                slots.clear();
+                for (int i = slotRange.getLeft(); i <= slotRange.getRight(); i++) {
+                    Slot slot = handler.getSlot(i);
+                    if (slot.getStack().isEmpty()) continue;
+
+                    PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, bool);
+
+                    slots.add(newItem);
+                }
+            }
+        }
+
+        Mono<Void> updateAsync(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
+            return Mono.fromRunnable(() -> update(handler, searchData, bool)).then();
+        }
+
+        JsonArray getData() {
+            JsonArray array = new JsonArray();
+            for (PriceCxnItemStack item : slots) {
+                array.add(item.getData());
+            }
+            return array;
+        }
+
     }
+
 }

@@ -19,21 +19,19 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class InventoryListener {
 
+    protected static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int REFRESH_INTERVAL = 200;
-
     private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
-    protected static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-
     private final List<Integer> slotNbt = new ArrayList<>();
 
     private final AtomicBoolean[] active;
@@ -57,6 +55,95 @@ public abstract class InventoryListener {
         init();
     }
 
+    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                        @NotNull ScreenHandler handler,
+                                        @NotNull Pair<Integer, Integer> range,
+                                        @Nullable Map<String, DataAccess> searchData,
+                                        boolean addComment) {
+        Mono.fromRunnable(() -> {
+            for (int i = range.getLeft(); i <= range.getRight(); i++) {
+                Slot slot = handler.getSlot(i);
+                if (slot.getStack().isEmpty()) continue;
+
+                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
+
+                boolean add = true;
+
+                synchronized(items){
+                    for (PriceCxnItemStack item : items) {
+                        if (item.equals(newItem)) {
+
+                            if (searchData != null && searchData.containsKey("timestamp")) {
+                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE &&
+                                    item.getData().get("timestamp") != JsonNull.INSTANCE &&
+                                    !TimeUtil.timestampsEqual(
+                                            item.getData().get("timestamp").getAsLong(),
+                                            newItem.getData().get("timestamp").getAsLong(),
+                                            5)) {
+                                    continue;
+                                }
+                            }
+
+                            add = false;
+                            if (!item.deepEquals(newItem)) {
+                                item.updateData(newItem);
+                            }
+                            break;
+                        }
+                    }
+
+                    if (add) {
+                        items.add(newItem);
+                    }
+                }
+
+            }
+        });//todo subscribe
+
+    }
+
+    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                         @NotNull ScreenHandler handler,
+                                                         final int slotIndex,
+                                                         @Nullable Map<String, DataAccess> searchData,
+                                                         boolean addComment) {
+        Slot slot = handler.getSlot(slotIndex);
+        if (slot.getStack().isEmpty()) return Optional.empty();
+
+        PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
+        if (item == null) return Optional.of(newItem);
+
+        if (item.equals(newItem)) {
+            if (searchData != null
+                && searchData.containsKey("timestamp")
+                && !TimeUtil.timestampsEqual(
+                    item.getData().get("timestamp").getAsLong(),
+                    newItem.getData().get("timestamp").getAsLong(),
+                    5)) {
+                return Optional.empty();
+            } else if (!item.deepEquals(newItem)) {
+                item.updateData(newItem);
+                return Optional.of(item);
+            } else
+                return Optional.empty();
+        }
+
+        return Optional.of(newItem);
+    }
+
+    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                         @NotNull ScreenHandler handler,
+                                                         final int slotIndex) {
+        return updateItem(item, handler, slotIndex, null, true);
+    }
+
+    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                        @NotNull ScreenHandler handler,
+                                        @NotNull Pair<Integer, Integer> range,
+                                        @Nullable Map<String, DataAccess> searchData) {
+        updateItemsAsync(items, handler, range, searchData, true);
+    }
+
     //setup of Listeners
     private void init() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -76,21 +163,22 @@ public abstract class InventoryListener {
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
-                initSlotsAsync(handler).thenRun(() -> {
-                    this.isOpen = true;
-                    lastUpdate = System.currentTimeMillis();
-                    onInventoryOpen(client, handler);
-                });
+                initSlotsAsync(handler)
+                        .doOnSuccess(unused -> {
+                            this.isOpen = true;
+                            lastUpdate = System.currentTimeMillis();
+                            onInventoryOpen(client, handler);
+                        });//todo subscribe
                 return;
             }
 
             hadItemsChangeAsync(client, client.player.currentScreenHandler)
-                    .thenAccept(hasChanged -> {
+                    .doOnSuccess(hasChanged -> {
                         if (hasChanged) {
                             lastUpdate = System.currentTimeMillis();
                             onInventoryUpdate(client, client.player.currentScreenHandler);
                         }
-                    });
+                    });//todo subscribe
 
         });
     }
@@ -125,7 +213,7 @@ public abstract class InventoryListener {
 
         for (String title : inventoryTitles) {
 
-            if(title.contains("--##--")) {
+            if (title.contains("--##--")) {
                 String[] split = title.split("--##--");
                 boolean allContained = true;
                 for (String s : split) {
@@ -163,12 +251,12 @@ public abstract class InventoryListener {
         return false;
     }
 
-    public CompletableFuture<Boolean> hadItemsChangeAsync(MinecraftClient client, ScreenHandler handler) {
-        return CompletableFuture.supplyAsync(() -> hadItemsChange(client, handler), EXECUTOR);
+    public Mono<Boolean> hadItemsChangeAsync(MinecraftClient client, ScreenHandler handler) {
+        return Mono.fromRunnable(() -> hadItemsChange(client, handler));
     }
 
-    public CompletableFuture<Void> initSlotsAsync(ScreenHandler handler) {
-        return CompletableFuture.runAsync(() -> initSlots(handler), EXECUTOR);
+    public Mono<Void> initSlotsAsync(ScreenHandler handler) {
+        return Mono.fromRunnable(() -> initSlots(handler));
     }
 
     private void initSlots(@Nullable ScreenHandler handler) {
@@ -187,124 +275,25 @@ public abstract class InventoryListener {
         return slot.getStack().getNbt() == null ? slot.getStack().getName().hashCode() : slot.getStack().getNbt().hashCode();
     }
 
-    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                        @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range,
-                                        @Nullable Map<String, DataAccess> searchData,
-                                        boolean addComment) {
-        CompletableFuture.supplyAsync(() -> {
-            for (int i = range.getLeft(); i <= range.getRight(); i++) {
-                Slot slot = handler.getSlot(i);
-                if (slot.getStack().isEmpty()) continue;
-
-                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
-
-                boolean add = true;
-
-                synchronized (items) {
-                    for (PriceCxnItemStack item : items) {
-                        if (item.equals(newItem)) {
-
-                            if (searchData != null && searchData.containsKey("timestamp")) {
-                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                        item.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                        !TimeUtil.timestampsEqual(
-                                                item.getData().get("timestamp").getAsLong(),
-                                                newItem.getData().get("timestamp").getAsLong(),
-                                                5)) {
-                                    continue;
-                                }
-                            }
-
-                            add = false;
-                            if (!item.deepEquals(newItem)) {
-                                item.updateData(newItem);
-                            }
-                            break;
-                        }
-                    }
-
-                    if (add) {
-                        items.add(newItem);
-                    }
-                }
-
-            }
-
-            return null;
-        }, EXECUTOR);
-
-    }
-
-    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                         @NotNull ScreenHandler handler,
-                                                         final int slotIndex,
-                                                         @Nullable Map<String, DataAccess> searchData,
-                                                         boolean addComment) {
-        Slot slot = handler.getSlot(slotIndex);
-        if (slot.getStack().isEmpty()) return Optional.empty();
-
-        PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
-        if (item == null) return Optional.of(newItem);
-
-        if (item.equals(newItem)) {
-            if (searchData != null
-                    && searchData.containsKey("timestamp")
-                    && !TimeUtil.timestampsEqual(
-                    item.getData().get("timestamp").getAsLong(),
-                    newItem.getData().get("timestamp").getAsLong(),
-                    5)) {
-                return Optional.empty();
-            } else if (!item.deepEquals(newItem)) {
-                item.updateData(newItem);
-                return Optional.of(item);
-            } else
-                return Optional.empty();
-        }
-
-        return Optional.of(newItem);
-    }
-
-    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                         @NotNull ScreenHandler handler,
-                                                         final int slotIndex) {
-        return updateItem(item, handler, slotIndex, null, true);
-    }
-
-    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                        @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range,
-                                        @Nullable Map<String, DataAccess> searchData) {
-        updateItemsAsync(items, handler, range, searchData, true);
-    }
-
-    protected CompletableFuture<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
-
+    protected Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
         CxnListener listener = PriceCxnModClient.CXN_LISTENER;
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-
         if (instance == null || instance.player == null) {
-            future.completeExceptionally(new NullPointerException("Instance or player is null"));
-            return future;
+            return Mono.error(new NullPointerException("Instance or player is null"));
         }
 
         String uuid = instance.player.getUuidAsString();
-
         JsonObject obj = new JsonObject();
-
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
-        listener.checkConnectionAsync().thenRun(() -> {
+        return listener.checkConnectionAsync().then(Mono.defer(() -> {
             if (listener.isActive().get()) {
                 if (PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
-                    future.completeExceptionally(new NullPointerException("Theme Checker is null"));
-                    return;
+                    return Mono.error(new NullPointerException("Theme Checker is null"));
                 }
                 Modes mode = listener.getThemeChecker().getMode();
                 if (mode == null || mode == Modes.NOTHING) {
-                    future.completeExceptionally(new NullPointerException("Mode is null"));
-                    return;
+                    return Mono.error(new NullPointerException("Mode is null"));
                 }
 
                 obj.addProperty("listener", uri);
@@ -312,16 +301,13 @@ public abstract class InventoryListener {
                 obj.addProperty("uuid", uuid);
                 obj.addProperty("username", instance.player.getName().getString());
                 obj.add("data", data);
-                Http.POST("/datahandler/" + uri, obj).thenRun(() -> future.complete(null));
+                return Http.POST("/datahandler/" + uri, obj).then();
             } else
-                future.completeExceptionally(new NullPointerException("Not connected"));
-        });
-
-        return future;
-
+                return Mono.error(new NullPointerException("Not connected"));
+        }));
     }
 
-    protected CompletableFuture<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
+    protected Mono<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
         return sendData(datahandlerUri, MinecraftClient.getInstance(), data);
     }
 

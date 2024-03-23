@@ -11,9 +11,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
@@ -56,7 +57,7 @@ public class ItemShopListener extends InventoryListener {
         itemStack = null;
         buyItem = null;
         sellItem = null;
-        updateItemStacks(handler);
+        updateItemStacks(handler);//todo subscribe
 
     }
 
@@ -77,9 +78,9 @@ public class ItemShopListener extends InventoryListener {
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        sendData("/itemshop", object).thenAccept(aVoid -> {
+        sendData("/itemshop", object).doOnSuccess(aVoid -> {
             printDebug("ItemShop data sent");
-        });
+        });//todo subscribe;
 
 
     }
@@ -87,12 +88,11 @@ public class ItemShopListener extends InventoryListener {
     @Override
     protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop updated");
-        updateItemStacks(handler);
+        updateItemStacks(handler);//todo subscribe
     }
 
-    private void updateItemStacks(@NotNull ScreenHandler handler){
-        CompletableFuture.runAsync(() -> {
-
+    private Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
+        return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);
             middle.ifPresent(priceCxnItemStack -> itemStack = priceCxnItemStack);
@@ -104,8 +104,7 @@ public class ItemShopListener extends InventoryListener {
             //sellItem
             Optional<PriceCxnItemStack> sell = updateItem(itemStack, handler, sellItemSlot, this.searchData, false);
             sell.ifPresent(priceCxnItemStack -> sellItem = priceCxnItemStack);
-
-        }, EXECUTOR);
+        }).subscribeOn(Schedulers.boundedElastic()).then();
     }
 
 }

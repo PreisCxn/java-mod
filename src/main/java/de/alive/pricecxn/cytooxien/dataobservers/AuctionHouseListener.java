@@ -72,9 +72,8 @@ public class AuctionHouseListener extends InventoryListener {
         }
 
         if(!array.isEmpty())
-            sendData("/auctionhouse", array).thenAccept(aVoid -> {
-                printDebug("AuctionHouse data sent: " +  array.size() + " items");
-            });
+            sendData("/auctionhouse", array)
+                    .doOnSuccess(aVoid -> printDebug("AuctionHouse data sent: " + array.size() + " items"));//todo subscribe
     }
 
     @Override

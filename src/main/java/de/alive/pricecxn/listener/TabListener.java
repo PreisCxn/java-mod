@@ -8,10 +8,10 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,7 +35,8 @@ public abstract class TabListener {
             if (client.getCurrentServerEntry() == null) return;
             if (!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, refreshesAfterJoinEvent).thenRun(this::onJoinEvent);
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent)
+                    .doOnSuccess(unused -> this.onJoinEvent());//todo subscribe
         });
     }
 
@@ -76,37 +77,25 @@ public abstract class TabListener {
         return found.get();
     }
 
-    public CompletableFuture<Void> refreshAsync(@Nullable String notInValue, @Nullable int maxRefresh) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-
+    public Mono<Void> refreshAsync(@Nullable String notInValue, @Nullable int maxRefresh) {
         AtomicInteger attempts = new AtomicInteger(0);
-
         int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
-        Runnable refreshTask = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("try");
-                if (refresh(notInValue)) {
-                    System.out.println("found : " + notInValue);
-                    future.complete(null);
-                    return;
-                }
 
-                if (attempts.incrementAndGet() >= finalMaxRefresh) {
-                    future.complete(null);
-                    return;
-                }
-
-                PriceCxnModClient.EXECUTOR_SERVICE.schedule(this, 200 + attempts.get() * 50L, TimeUnit.MILLISECONDS);
+        return Mono.defer(() -> {
+            if (refresh(notInValue)) {
+                return Mono.empty();
             }
-        };
 
-        PriceCxnModClient.EXECUTOR_SERVICE.schedule(refreshTask, 200, TimeUnit.MILLISECONDS);
+            if (attempts.incrementAndGet() >= finalMaxRefresh) {
+                return Mono.empty();
+            }
 
-        return future;
+            return Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L))
+                    .then(refreshAsync(notInValue, maxRefresh));
+        });
     }
 
-    public CompletableFuture<Void> refreshAsync() {
+    public Mono<Void> refreshAsync() {
         return refreshAsync(null, 0);
     }
 

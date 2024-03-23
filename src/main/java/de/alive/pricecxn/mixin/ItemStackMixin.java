@@ -29,14 +29,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
@@ -138,7 +133,7 @@ public abstract class ItemStackMixin {
 
                 storageItemStack.setup(pcxnPrice.get(), serverChecker.getWebsocket());
                 pcxnPriceText = storageItemStack.getText();
-                storageItemStack.search(pbvAmount);
+                storageItemStack.search(pbvAmount); //todo subscribe
 
             } else {
 

@@ -73,9 +73,9 @@ public class TomNookListener extends InventoryListener {
 
 
         if(!array.isEmpty())
-            sendData("/tomnook", array).thenAccept(aVoid -> {
+            sendData("/tomnook", array).doOnSuccess(aVoid -> {
                 printDebug("Nook data sent");
-            });
+            });//todo subscribe
 
     }
 
