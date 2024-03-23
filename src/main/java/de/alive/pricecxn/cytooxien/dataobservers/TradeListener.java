@@ -13,6 +13,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -50,17 +51,22 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("Trade open");
-        selfInventory.forEach(row -> row.updateAsync(handler, null, true));
-        traderInventory.forEach(row -> row.updateAsync(handler, null, true));
-        selfControls.updateAsync(handler, this.searchData, false);
-        traderControls.updateAsync(handler, this.searchData, false);
-        //todo subscribe
+
+        return Flux.concat(
+                Flux.fromIterable(selfInventory)
+                        .concatMap(row -> row.updateAsync(handler, null, true)),
+                Flux.fromIterable(traderInventory)
+                        .concatMap(row -> row.updateAsync(handler, null, true)),
+                selfControls.updateAsync(handler, this.searchData, false),
+                traderControls.updateAsync(handler, this.searchData, false)
+        ).then();
+
     }
 
     @Override
-    protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("Trade close");
 
         JsonObject array = new JsonObject();
@@ -69,7 +75,7 @@ public class TradeListener extends InventoryListener {
         array.add("selfControls", selfControls.getData());
         array.add("traderControls", traderControls.getData());
 
-        Mono.fromSupplier(() -> {
+        return Mono.fromSupplier(() -> {
                     Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
 
                     Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
@@ -78,17 +84,22 @@ public class TradeListener extends InventoryListener {
 
                     return mono;
                 })
-                .subscribeOn(Schedulers.boundedElastic());//todo subscribe
+                .subscribeOn(Schedulers.boundedElastic())
+                .then();
 
     }
 
     @Override
-    protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("Trade updated");
-        selfInventory.forEach(row -> row.updateAsync(handler, null, true));
-        traderInventory.forEach(row -> row.updateAsync(handler, null, true));
-        selfControls.updateAsync(handler, this.searchData, false);
-        traderControls.updateAsync(handler, this.searchData, false);
+        return Flux.concat(
+                Flux.fromIterable(selfInventory)
+                        .concatMap(row -> row.updateAsync(handler, null, true)),
+                Flux.fromIterable(traderInventory)
+                        .concatMap(row -> row.updateAsync(handler, null, true)),
+                selfControls.updateAsync(handler, this.searchData, false),
+                traderControls.updateAsync(handler, this.searchData, false)
+        ).then();
     }
 
     private Optional<JsonElement> processData(List<PriceCxnItemStack> selfInv, List<PriceCxnItemStack> traderInv, JsonArray selfControls, JsonArray traderControls) {

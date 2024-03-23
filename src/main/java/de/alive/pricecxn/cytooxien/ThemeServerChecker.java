@@ -9,8 +9,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.DEBUG_MODE;
@@ -43,7 +43,7 @@ public class ThemeServerChecker extends TabListener {
 
     //check for the mode from the tab list
     @Override
-    protected void handleData(@NotNull String data) {
+    protected Mono<Void> handleData(@NotNull String data) {
         String lowerCaseData = data.toLowerCase();
 
         if(lowerCaseData.contains(Modes.SKYBLOCK.toString().toLowerCase())) {
@@ -58,13 +58,16 @@ public class ThemeServerChecker extends TabListener {
 
         setNotInValue(this.mode.toString());
 
+        Mono<Void> voidMono = Mono.empty();
         if(serverListener != null)
-            serverListener.onTabChange();
+            voidMono = voidMono.then(serverListener.onTabChange());
 
         printDebug("New Mode: " + this.mode.toString());
         assert MinecraftClient.getInstance().player != null;
         if(DEBUG_MODE)
             MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
+
+        return voidMono;
     }
 
     @Override
@@ -79,9 +82,10 @@ public class ThemeServerChecker extends TabListener {
     }
 
     @Override
-    public void onJoinEvent() {
+    public Mono<Void> onJoinEvent() {
         if (serverListener != null)
-            serverListener.onJoinEvent();
+            return serverListener.onJoinEvent();
+        return Mono.empty();
     }
 
     public Modes getMode() {

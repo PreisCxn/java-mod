@@ -1,7 +1,6 @@
 package de.alive.pricecxn.listener;
 
 import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.PriceCxnModClient;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -36,7 +35,8 @@ public abstract class TabListener {
             if (!refreshAfterJoinEvent()) return;
 
             refreshAsync(this.notInValue, refreshesAfterJoinEvent)
-                    .doOnSuccess(unused -> this.onJoinEvent());//todo subscribe
+                    .then(this.onJoinEvent())
+                    .subscribe();
         });
     }
 
@@ -104,7 +104,7 @@ public abstract class TabListener {
      *
      * @param data The String line from the tab
      */
-    protected abstract void handleData(@NotNull String data);
+    protected abstract Mono<Void> handleData(@NotNull String data);
 
     /**
      * Decide if the refresh method should be called after the player joins a server or change the server on a network
@@ -113,7 +113,7 @@ public abstract class TabListener {
      */
     protected abstract boolean refreshAfterJoinEvent();
 
-    public abstract void onJoinEvent();
+    public abstract Mono<Void> onJoinEvent();
 
     protected int getRefreshesAfterJoinEvent() {
         return MAX_REFRESH / 2;

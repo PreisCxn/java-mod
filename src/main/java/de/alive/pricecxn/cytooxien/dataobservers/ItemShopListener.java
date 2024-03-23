@@ -51,44 +51,42 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
         buyItem = null;
         sellItem = null;
-        updateItemStacks(handler);//todo subscribe
+        return updateItemStacks(handler);
 
     }
 
     @Override
-    protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop close");
-        if((sellItem == null && buyItem == null) || itemStack == null) return;
+        if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
         JsonObject object = itemStack.getData();
 
-        if(!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return;
+        if(!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return Mono.empty();
 
         JsonElement buyItemE =  buyItem.getData().get("buyPrice");
         JsonElement sellItemE =  sellItem.getData().get("sellPrice");
 
-        if(buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return;
+        if(buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return Mono.empty();
 
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        sendData("/itemshop", object).doOnSuccess(aVoid -> {
+        return sendData("/itemshop", object).doOnSuccess(aVoid -> {
             printDebug("ItemShop data sent");
-        });//todo subscribe;
-
-
+        });
     }
 
     @Override
-    protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop updated");
-        updateItemStacks(handler);//todo subscribe
+        return updateItemStacks(handler);
     }
 
     private Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){

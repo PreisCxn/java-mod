@@ -71,21 +71,21 @@ public class CxnListener extends ServerListener {
             if (MinecraftClient.getInstance().player != null) {
                 ActionNotification message = messageInformation.getRight();
 
+                MutableText msg;
                 if (message.hasTextVariables()) {
 
-                    MutableText msg = MOD_TEXT.copy()
+                    msg = MOD_TEXT.copy()
                             .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
                             .setStyle(PriceCxnMod.DEFAULT_TEXT);
 
-                    MinecraftClient.getInstance().player.sendMessage(msg);
                 } else {
 
-                    MutableText msg = MOD_TEXT.copy()
+                    msg = MOD_TEXT.copy()
                             .append(Text.translatable(message.getTranslationKey()))
                             .setStyle(PriceCxnMod.DEFAULT_TEXT);
 
-                    MinecraftClient.getInstance().player.sendMessage(msg);
                 }
+                MinecraftClient.getInstance().player.sendMessage(msg);
             }
         }
 
@@ -96,33 +96,38 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public void onTabChange() {
-        if (!this.isOnServer().get()) return;
+    public Mono<Void> onTabChange() {
+        if (!this.isOnServer().get())
+            return Mono.empty();
 
-        refreshItemData("pricecxn.data.item_data", false);
-        refreshItemData("pricecxn.data.nook_data", true);
+        return Mono.zip(
+                refreshItemData("pricecxn.data.item_data", false),
+                refreshItemData("pricecxn.data.nook_data", true)
+        ).then();
 
     }
 
     @Override
-    public void onJoinEvent() {
-        if (!this.isOnServer().get()) return;
+    public Mono<Void> onJoinEvent() {
+        if (!this.isOnServer().get())
+            return Mono.empty();
         boolean activeBackup = this.active.get();
 
-        checkConnectionAsync()
+        return checkConnectionAsync()
                 .flatMap(messageInformation -> {
                     sendConnectionInformation(messageInformation);
                     if (activeBackup)
                         return refreshData(false);
                     return Mono.empty();
-                });//todo subscribe;
+                });
     }
 
     @Override
-    public void onServerJoin() {
+    public Mono<Void> onServerJoin() {
 
-        checkConnectionAsync()
-                .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true));//todo subscribe
+        return checkConnectionAsync()
+                .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true))
+                .then();
 
     }
 
@@ -268,12 +273,13 @@ public class CxnListener extends ServerListener {
      * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
      * (Mod Version > Server Min-Version -> true)
      */
-    public boolean isMinVersion() {
-        return PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
-                .filter(value -> PriceCxnMod.getIntVersion(this.serverChecker.getServerMinVersion())
-                        .filter(integer -> value >= integer)
-                        .isPresent())
-                .isPresent();
+    public Mono<Boolean> isMinVersion() {
+        return this.serverChecker.getServerMinVersion()
+                .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
+                        .filter(value -> PriceCxnMod.getIntVersion(serverMinVersion)
+                                .filter(integer -> value >= integer)
+                                .isPresent())
+                        .isPresent());
     }
 
     public Mono<Boolean> isSpecialUser() {
@@ -291,20 +297,24 @@ public class CxnListener extends ServerListener {
 
         if (this.active == null) this.active = new AtomicBoolean(false);
 
-        return Mono.fromFuture(serverChecker.isConnected())
-                .flatMap(isConnected -> {
+        return Mono.zip(serverChecker.isConnected(), isMinVersion(), this.serverChecker.getServerMinVersion())
+                .flatMap(tuple3 -> {
+                    Boolean isConnected = tuple3.getT1();
+                    Boolean isMinVersion = tuple3.getT2();
+                    String serverMinVersion = tuple3.getT3();
+
                     this.state = serverChecker.getState();
                     if (!isConnected) {
                         // Server nicht erreichbar
                         this.deactivate();
                         return Mono.just(new Pair<>(activeBackup == null || activeBackup.get(), ActionNotification.SERVER_OFFLINE));
-                    } else if (!isMinVersion()) {
+                    } else if (!isMinVersion) {
                         // Version nicht korrekt
                         this.deactivate();
 
-                        ActionNotification.WRONG_VERSION.setTextVariables(this.serverChecker.getServerMinVersion());
+                        ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
 
-                        System.out.println(isRightVersionBackup + " " + this.serverChecker.getServerMinVersion());
+                        System.out.println(isRightVersionBackup + " " + serverMinVersion);
                         this.isRightVersion = false;
                         return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
                     } else {

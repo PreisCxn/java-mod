@@ -12,6 +12,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -44,16 +45,16 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook open");
 
         items.clear();
-        updateItemsAsync(this.items, handler, this.itemRange, null);
         this.invBuyPrice = getBuyPriceFromInvName(client);
+        return updateItemsAsync(this.items, handler, this.itemRange, null);
     }
 
     @Override
-    protected void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook close");
 
         JsonArray array = new JsonArray();
@@ -73,10 +74,11 @@ public class TomNookListener extends InventoryListener {
 
 
         if(!array.isEmpty())
-            sendData("/tomnook", array).doOnSuccess(aVoid -> {
+            return sendData("/tomnook", array).doOnSuccess(aVoid -> {
                 printDebug("Nook data sent");
-            });//todo subscribe
+            });
 
+        return Mono.empty();
     }
 
     private Optional<String> getBuyPriceFromInvName(@NotNull MinecraftClient client) {
@@ -103,9 +105,9 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook updated");
-        updateItemsAsync(this.items, handler, this.itemRange, null);
         this.invBuyPrice = getBuyPriceFromInvName(client);
+        return updateItemsAsync(this.items, handler, this.itemRange, null);
     }
 }

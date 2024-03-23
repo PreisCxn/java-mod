@@ -4,6 +4,7 @@ import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,18 +55,18 @@ public abstract class ServerListener {
         });
     }
 
-    public void onTabChange(){
-
+    public Mono<Void> onTabChange(){
+        return Mono.empty();
     }
 
-    public void onJoinEvent(){
-
+    public Mono<Void> onJoinEvent(){
+        return Mono.empty();
     }
 
     /**
      * This method is called when the player joins the server
      */
-    public abstract void onServerJoin();
+    public abstract Mono<Void> onServerJoin();
 
     /**
      * This method is called when the player leaves the server

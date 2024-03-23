@@ -133,7 +133,7 @@ public abstract class ItemStackMixin {
 
                 storageItemStack.setup(pcxnPrice.get(), serverChecker.getWebsocket());
                 pcxnPriceText = storageItemStack.getText();
-                storageItemStack.search(pbvAmount); //todo subscribe
+                storageItemStack.search(pbvAmount).block();
 
             } else {
 

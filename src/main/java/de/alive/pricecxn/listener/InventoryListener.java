@@ -3,12 +3,11 @@ package de.alive.pricecxn.listener;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -55,12 +54,12 @@ public abstract class InventoryListener {
         init();
     }
 
-    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                        @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range,
-                                        @Nullable Map<String, DataAccess> searchData,
-                                        boolean addComment) {
-        Mono.fromRunnable(() -> {
+    public static Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                              @NotNull ScreenHandler handler,
+                                              @NotNull Pair<Integer, Integer> range,
+                                              @Nullable Map<String, DataAccess> searchData,
+                                              boolean addComment) {
+        return Mono.fromRunnable(() -> {
             for (int i = range.getLeft(); i <= range.getRight(); i++) {
                 Slot slot = handler.getSlot(i);
                 if (slot.getStack().isEmpty()) continue;
@@ -98,7 +97,7 @@ public abstract class InventoryListener {
                 }
 
             }
-        });//todo subscribe
+        });
 
     }
 
@@ -137,11 +136,11 @@ public abstract class InventoryListener {
         return updateItem(item, handler, slotIndex, null, true);
     }
 
-    public static void updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                        @NotNull ScreenHandler handler,
-                                        @NotNull Pair<Integer, Integer> range,
-                                        @Nullable Map<String, DataAccess> searchData) {
-        updateItemsAsync(items, handler, range, searchData, true);
+    public static Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                              @NotNull ScreenHandler handler,
+                                              @NotNull Pair<Integer, Integer> range,
+                                              @Nullable Map<String, DataAccess> searchData) {
+        return updateItemsAsync(items, handler, range, searchData, true);
     }
 
     //setup of Listeners
@@ -151,34 +150,44 @@ public abstract class InventoryListener {
             if (client.player == null) return;
             if (client.player.currentScreenHandler == null) return;
 
+            Mono<Void> mono = Mono.empty();
             if (this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
                 this.isOpen = false;
-                onInventoryClose(client, client.player.currentScreenHandler);
+                mono = mono.zipWith(onInventoryClose(client, client.player.currentScreenHandler)).then();
             }
 
-            if (client.currentScreen == null) return;
-            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
+            if (client.currentScreen == null) {
+                mono.subscribe();
                 return;
+            }
+            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty()) {
+                mono.subscribe();
+                return;
+            }
 
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
-                initSlotsAsync(handler)
-                        .doOnSuccess(unused -> {
-                            this.isOpen = true;
-                            lastUpdate = System.currentTimeMillis();
-                            onInventoryOpen(client, handler);
-                        });//todo subscribe
+                Mono.zip(initSlotsAsync(handler)
+                                 .doOnSuccess((a) -> {
+                                     this.isOpen = true;
+                                     lastUpdate = System.currentTimeMillis();
+                                 }).then(onInventoryOpen(client, handler)), mono)
+                        .then()
+                        .subscribe();
                 return;
             }
 
-            hadItemsChangeAsync(client, client.player.currentScreenHandler)
-                    .doOnSuccess(hasChanged -> {
-                        if (hasChanged) {
-                            lastUpdate = System.currentTimeMillis();
-                            onInventoryUpdate(client, client.player.currentScreenHandler);
-                        }
-                    });//todo subscribe
+            mono.zipWith(
+                    hadItemsChangeAsync(client, client.player.currentScreenHandler)
+                            .flatMap(hasChanged -> {
+                                if (hasChanged) {
+                                    lastUpdate = System.currentTimeMillis();
+                                    return onInventoryUpdate(client, client.player.currentScreenHandler);
+                                }
+                                return Mono.empty();
+                            })
+            ).subscribe();
 
         });
     }
@@ -189,7 +198,7 @@ public abstract class InventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract void onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
     /**
      * This method is called when the inventory is closed
@@ -197,7 +206,7 @@ public abstract class InventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract void onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
     /**
      * This method is called when the inventory is updated
@@ -205,7 +214,7 @@ public abstract class InventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract void onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
 
     private boolean isInventoryTitle(@NotNull MinecraftClient client, @Nullable List<String> inventoryTitles) {
         if (client.currentScreen == null) return false;

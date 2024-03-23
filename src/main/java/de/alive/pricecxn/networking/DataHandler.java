@@ -72,7 +72,7 @@ public class DataHandler {
         System.out.println("refreshData 2");
 
         // Check the server connection asynchronously
-        return Mono.fromFuture(this.serverChecker.isConnected())
+        return this.serverChecker.isConnected()
                 .flatMap(isConnected -> {
                     if (!isConnected) {
                         return Mono.empty();
