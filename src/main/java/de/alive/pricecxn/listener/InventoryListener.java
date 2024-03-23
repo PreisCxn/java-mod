@@ -7,6 +7,7 @@ import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import de.alive.pricecxn.utils.TimeUtil;
@@ -19,11 +20,14 @@ import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public abstract class InventoryListener {
 
@@ -153,7 +157,7 @@ public abstract class InventoryListener {
             Mono<Void> mono = Mono.empty();
             if (this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
                 this.isOpen = false;
-                mono = mono.zipWith(onInventoryClose(client, client.player.currentScreenHandler)).then();
+                mono = mono.then(onInventoryClose(client, client.player.currentScreenHandler)).then();
             }
 
             if (client.currentScreen == null) {
@@ -168,17 +172,16 @@ public abstract class InventoryListener {
             if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 ScreenHandler handler = client.player.currentScreenHandler;
-                Mono.zip(initSlotsAsync(handler)
+                mono.then(initSlotsAsync(handler)
                                  .doOnSuccess((a) -> {
                                      this.isOpen = true;
                                      lastUpdate = System.currentTimeMillis();
-                                 }).then(onInventoryOpen(client, handler)), mono)
-                        .then()
+                                 }).then(onInventoryOpen(client, handler)))
                         .subscribe();
                 return;
             }
 
-            mono.zipWith(
+            mono.then(
                     hadItemsChangeAsync(client, client.player.currentScreenHandler)
                             .flatMap(hasChanged -> {
                                 if (hasChanged) {
@@ -261,7 +264,8 @@ public abstract class InventoryListener {
     }
 
     public Mono<Boolean> hadItemsChangeAsync(MinecraftClient client, ScreenHandler handler) {
-        return Mono.fromRunnable(() -> hadItemsChange(client, handler));
+        return Mono.fromSupplier(() -> hadItemsChange(client, handler))
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     public Mono<Void> initSlotsAsync(ScreenHandler handler) {

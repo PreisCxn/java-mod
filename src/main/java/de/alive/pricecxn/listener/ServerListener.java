@@ -4,6 +4,7 @@ import de.alive.pricecxn.utils.StringUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -38,14 +39,15 @@ public abstract class ServerListener {
             if(client.getCurrentServerEntry() == null) return;
             if(onServer.get()) return;
 
-            ips.stream()
+            Flux.fromIterable(ips)
                     .filter(ip -> client.getCurrentServerEntry().address.toLowerCase().contains(ip))
                     .filter(ip -> ignoredIps.stream().noneMatch(ignoredIp -> client.getCurrentServerEntry().address.toLowerCase().contains(ignoredIp)))
-                    .findFirst()
-                    .ifPresent(ip -> {
+                    .next()
+                    .flatMap(ip -> {
                         onServer.set(true);
-                        onServerJoin();
-                    });
+                        return onServerJoin();
+                    })
+                    .subscribe();
 
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

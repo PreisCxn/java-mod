@@ -10,17 +10,18 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class TabListener {
 
-    private String notInValue;
-    private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
-
     private static final int MAX_REFRESH = 15;
-
+    private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
+    private String notInValue;
     private DataAccess searches;
 
     public TabListener(@NotNull DataAccess searches) {
@@ -40,23 +41,24 @@ public abstract class TabListener {
         });
     }
 
-    public boolean refresh(@Nullable String notInValue) {
+    public Mono<Boolean> refresh(@Nullable String notInValue) {
         System.out.println("refresh");
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
-        if (gameHud == null) return false;
+        if (gameHud == null) return Mono.just(false);
         PlayerListHud playerListHud = gameHud.getPlayerListHud();
-        if (playerListHud == null) return false;
+        if (playerListHud == null) return Mono.just(false);
 
         System.out.println("refresh2");
 
         AtomicBoolean found = new AtomicBoolean(false);
 
+        AtomicReference<Mono<Void>> mono = new AtomicReference<>(Mono.empty());
         Arrays.stream(playerListHud.getClass().getDeclaredFields())
                 .peek(field -> field.setAccessible(true))
                 .map(field -> {
-                    try {
+                    try{
                         return field.get(playerListHud);
-                    } catch (IllegalAccessException e) {
+                    }catch(IllegalAccessException e){
                         System.out.println("error");
                         e.printStackTrace();
                         return null;
@@ -69,30 +71,31 @@ public abstract class TabListener {
                             .forEach(search -> {
                                 if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase()))
                                     return;
-                                this.handleData(value.toString());
+                                mono.set(mono.get().then(this.handleData(value.toString())).then());
                                 found.set(true);
                             });
                 });
 
-        return found.get();
+        return mono.get().then(Mono.just(found.get()));
     }
 
-    public Mono<Void> refreshAsync(@Nullable String notInValue, @Nullable int maxRefresh) {
+    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
         AtomicInteger attempts = new AtomicInteger(0);
         int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
 
-        return Mono.defer(() -> {
-            if (refresh(notInValue)) {
-                return Mono.empty();
-            }
+        return refresh(notInValue)
+                .flatMap(refresh -> {
+                    if (refresh) {
+                        return Mono.empty();
+                    }
 
-            if (attempts.incrementAndGet() >= finalMaxRefresh) {
-                return Mono.empty();
-            }
+                    if (attempts.incrementAndGet() >= finalMaxRefresh) {
+                        return Mono.empty();
+                    }
 
-            return Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L))
-                    .then(refreshAsync(notInValue, maxRefresh));
-        });
+                    return Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L))
+                            .then(refreshAsync(notInValue, maxRefresh));
+                });
     }
 
     public Mono<Void> refreshAsync() {
@@ -130,4 +133,5 @@ public abstract class TabListener {
     public void setNotInValue(String notInValue) {
         this.notInValue = notInValue;
     }
+
 }

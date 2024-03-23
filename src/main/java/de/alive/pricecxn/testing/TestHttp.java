@@ -14,7 +14,7 @@ public class TestHttp {
 
         Http.POST("/datahandler/auctionhouse", Http.jsonObjectConverter("{\"test\":true}")).doOnSuccess(aVoid -> {
             System.out.println("test");
-        });//todo subscribe
+        });
 
         System.out.println("test end");
         Thread.sleep(3000);

@@ -100,10 +100,9 @@ public class CxnListener extends ServerListener {
         if (!this.isOnServer().get())
             return Mono.empty();
 
-        return Mono.zip(
-                refreshItemData("pricecxn.data.item_data", false),
-                refreshItemData("pricecxn.data.nook_data", true)
-        ).then();
+        return refreshItemData("pricecxn.data.item_data", false)
+                .then(refreshItemData("pricecxn.data.nook_data", true))
+                .then();
 
     }
 
