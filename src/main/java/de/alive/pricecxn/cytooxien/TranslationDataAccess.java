@@ -8,6 +8,7 @@ import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -71,12 +72,12 @@ public enum TranslationDataAccess implements DataAccess {
     private final String id;
     private final List<String> backupData;
 
-    private DataHandler dataHandler = null;
+    private @Nullable DataHandler dataHandler = null;
 
-    private final Function<JsonElement, JsonElement> processData;
-    private final Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
+    private final @Nullable Function<JsonElement, JsonElement> processData;
+    private final @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData;
 
-    private final JsonElement defaultResult;
+    private final @NotNull JsonElement defaultResult;
 
     TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
         this.id = id;
@@ -104,11 +105,11 @@ public enum TranslationDataAccess implements DataAccess {
         this.dataHandler = dataHandler;
     }
 
-    public Function<JsonElement, JsonElement> getProcessData() {
+    public @Nullable Function<JsonElement, JsonElement> getProcessData() {
         return processData;
     }
 
-    public Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData() {
+    public @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData() {
         return equalData;
     }
 

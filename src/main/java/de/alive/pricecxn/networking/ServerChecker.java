@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import de.alive.pricecxn.networking.sockets.SocketMessageListener;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -17,7 +18,7 @@ public class ServerChecker {
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int DEFAULT_CHECK_INTERVAL = 300000; //5min
     private final boolean connected = false;
-    private final String uri;
+    private final @NotNull String uri;
     private final int checkInterval;
     private final long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
@@ -26,7 +27,7 @@ public class ServerChecker {
     private final CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
     private final CompletableFuture<String> minVersionFuture = new CompletableFuture<>();
 
-    private NetworkingState state = NetworkingState.OFFLINE;
+    private @NotNull NetworkingState state = NetworkingState.OFFLINE;
 
     private final Mono<String> minVersion = Mono.fromFuture(minVersionFuture);
 
@@ -60,7 +61,7 @@ public class ServerChecker {
      * This method is used to check if the server is reachable
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
-    public Mono<Boolean> checkConnection() {
+    public @NotNull Mono<Boolean> checkConnection() {
         return this.websocket.connectToWebSocketServer(this.uri)
                 .onErrorResume(throwable -> {
                     this.state = NetworkingState.OFFLINE;
@@ -103,15 +104,15 @@ public class ServerChecker {
         return state;
     }
 
-    public Mono<String> getServerMinVersion() {
+    public @NotNull Mono<String> getServerMinVersion() {
         return minVersion;
     }
 
-    public WebSocketConnector getWebsocket() {
+    public @NotNull WebSocketConnector getWebsocket() {
         return websocket;
     }
 
-    private void onWebsocketMessage(String message) {
+    private void onWebsocketMessage(@NotNull String message) {
         try{
             JsonObject json = JsonParser.parseString(message).getAsJsonObject();
             if (json.has("min-version")) {

@@ -31,9 +31,9 @@ public class PriceCxnItemStack {
     public static final String DISPLAY_NAME_KEY = "displayName";
     public static final String MC_CLIENT_LANG_KEY = "mcClientLang";
 
-    private final ItemStack item;
+    private final @NotNull ItemStack item;
 
-    private final Map<String, DataAccess> searchData;
+    private final @NotNull Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
 
@@ -111,7 +111,7 @@ public class PriceCxnItemStack {
         this(item, searchData, true);
     }
 
-    private JsonObject nbtToJson(ItemStack item) {
+    private @NotNull JsonObject nbtToJson(@NotNull ItemStack item) {
         JsonObject json = new JsonObject();
         NbtCompound nbt = item.getNbt();
 
@@ -217,17 +217,17 @@ public class PriceCxnItemStack {
         return this.data.toString();
     }
 
-    public JsonObject getData() {
+    public @NotNull JsonObject getData() {
         return data;
     }
 
-    public JsonObject getDataWithoutDisplay() {
+    public @NotNull JsonObject getDataWithoutDisplay() {
         JsonObject data = this.data.deepCopy();
         data.get(COMMENT_KEY).getAsJsonObject().remove("display");
         return data;
     }
 
-    private JsonObject getEqualData() {
+    private @NotNull JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
         if (hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
@@ -243,7 +243,7 @@ public class PriceCxnItemStack {
 
     }
 
-    public boolean isSameItem(PriceCxnItemStack item) {
+    public boolean isSameItem(@NotNull PriceCxnItemStack item) {
         if (!Objects.equals(this.getItemName(), item.getItemName()))
             return false; //wenn itemName nicht gleich => false
 

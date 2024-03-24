@@ -27,11 +27,11 @@ public class ItemShopListener extends InventoryListener {
     private final int itemStackSlot = 13;
     private final int buyItemSlot = 11;
     private final int sellItemSlot = 15;
-    private PriceCxnItemStack itemStack = null;
+    private @Nullable PriceCxnItemStack itemStack = null;
 
-    private PriceCxnItemStack buyItem = null;
+    private @Nullable PriceCxnItemStack buyItem = null;
 
-    private PriceCxnItemStack sellItem = null;
+    private @Nullable PriceCxnItemStack sellItem = null;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -53,7 +53,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
@@ -64,7 +64,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop close");
         if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
@@ -84,12 +84,12 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }
 
-    private Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
+    private @NotNull Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
         return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);

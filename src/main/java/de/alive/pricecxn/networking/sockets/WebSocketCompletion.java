@@ -18,14 +18,14 @@ public class WebSocketCompletion {
 
     private final CompletableFuture<String> future = new CompletableFuture<>();
     private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
-    private final WebSocketConnector connector;
+    private final @NotNull WebSocketConnector connector;
 
-    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String... data) {
+    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
         this.connector = connector;
 
         SocketMessageListener listener = new SocketMessageListener() {
             @Override
-            public void onMessage(String message) {
+            public void onMessage(@NotNull String message) {
                 if(message.contains(query)) {
                     try{
                         JsonObject json = JsonParser.parseString(message).getAsJsonObject();
@@ -56,7 +56,7 @@ public class WebSocketCompletion {
         }, DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
-    public Mono<String> getMono() {
+    public @NotNull Mono<String> getMono() {
         return Mono.fromFuture(future);
     }
 

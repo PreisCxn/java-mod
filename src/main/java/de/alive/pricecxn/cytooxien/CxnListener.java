@@ -18,6 +18,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -34,13 +36,13 @@ public class CxnListener extends ServerListener {
     private static final Logger LOGGER = Logger.getLogger(CxnListener.class.getName());
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
-    private final ThemeServerChecker themeChecker;
-    private final List<InventoryListener> listeners;
-    private final ServerChecker serverChecker;
+    private final @NotNull ThemeServerChecker themeChecker;
+    private final @NotNull List<InventoryListener> listeners;
+    private final @NotNull ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
     NetworkingState state = NetworkingState.OFFLINE;
     private final AtomicBoolean active = new AtomicBoolean(false);
-    private Boolean isRightVersion = null;
+    private @Nullable Boolean isRightVersion = null;
     private final AtomicBoolean listenerActive = new AtomicBoolean(false);
 
     public CxnListener() {
@@ -65,7 +67,7 @@ public class CxnListener extends ServerListener {
 
     }
 
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation, boolean force) {
+    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation, boolean force) {
 
         if (force || messageInformation.getLeft()) {
             if (MinecraftClient.getInstance().player != null) {
@@ -91,12 +93,12 @@ public class CxnListener extends ServerListener {
 
     }
 
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation) {
+    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation) {
         sendConnectionInformation(messageInformation, false);
     }
 
     @Override
-    public Mono<Void> onTabChange() {
+    public @NotNull Mono<Void> onTabChange() {
         if (!this.isOnServer().get())
             return Mono.empty();
 
@@ -107,7 +109,7 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public Mono<Void> onJoinEvent() {
+    public @NotNull Mono<Void> onJoinEvent() {
         if (!this.isOnServer().get())
             return Mono.empty();
         boolean activeBackup = this.active.get();
@@ -122,7 +124,7 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public Mono<Void> onServerJoin() {
+    public @NotNull Mono<Void> onServerJoin() {
 
         return checkConnectionAsync()
                 .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true))
@@ -161,7 +163,7 @@ public class CxnListener extends ServerListener {
         return data.get(dataKey).refresh(true);
     }
 
-    public Mono<Void> activate(boolean themeRefresh) {
+    public @NotNull Mono<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
         return initData()
@@ -182,7 +184,7 @@ public class CxnListener extends ServerListener {
                 .then();
     }
 
-    private Mono<Void> initData() {
+    private @NotNull Mono<Void> initData() {
         LOGGER.log(Level.INFO, "initData");
         if (!this.data.containsKey("pricecxn.data.item_data")) {
             //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
@@ -230,7 +232,7 @@ public class CxnListener extends ServerListener {
 
     }
 
-    private Mono<Void> refreshData(boolean forced) {
+    private @NotNull Mono<Void> refreshData(boolean forced) {
         return Flux.fromIterable(data.entrySet())
                 .flatMap(entry -> entry.getValue().refresh(forced))
                 .then();
@@ -267,7 +269,7 @@ public class CxnListener extends ServerListener {
      * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
      * (Mod Version > Server Min-Version -> true)
      */
-    public Mono<Boolean> isMinVersion() {
+    public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
                         .filter(value -> PriceCxnMod.getIntVersion(serverMinVersion)
@@ -276,7 +278,7 @@ public class CxnListener extends ServerListener {
                         .isPresent());
     }
 
-    public Mono<Boolean> isSpecialUser() {
+    public @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
 
@@ -285,7 +287,7 @@ public class CxnListener extends ServerListener {
                 .onErrorReturn(false);
     }
 
-    public Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
+    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
@@ -344,7 +346,7 @@ public class CxnListener extends ServerListener {
                 });
     }
 
-    public Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
+    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
         return Mono.fromCallable(() -> this.checkConnection(themeRefresh))
                 .subscribeOn(Schedulers.fromExecutor(ServerChecker.EXECUTOR))
                 .flatMap(result -> result);
@@ -354,7 +356,7 @@ public class CxnListener extends ServerListener {
         return checkConnectionAsync(true);
     }
 
-    public Optional<List<String>> getModUsers() {
+    public @NotNull Optional<List<String>> getModUsers() {
         List<String> stringList = new ArrayList<>();
 
         JsonArray array;
@@ -377,7 +379,7 @@ public class CxnListener extends ServerListener {
         }
     }
 
-    public AtomicBoolean isActive() {
+    public @NotNull AtomicBoolean isActive() {
         return active;
     }
 

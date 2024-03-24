@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class InventoryListener {
 
     private static final int REFRESH_INTERVAL = 200;
-    private final DataAccess inventoryTitles;
+    private final @NotNull DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
     private final List<Integer> slotNbt = new ArrayList<>();
 
@@ -52,11 +52,11 @@ public abstract class InventoryListener {
         init();
     }
 
-    public static Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                              @NotNull ScreenHandler handler,
-                                              @NotNull Pair<Integer, Integer> range,
-                                              @Nullable Map<String, DataAccess> searchData,
-                                              boolean addComment) {
+    public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                                       @NotNull ScreenHandler handler,
+                                                       @NotNull Pair<Integer, Integer> range,
+                                                       @Nullable Map<String, DataAccess> searchData,
+                                                       boolean addComment) {
         return Mono.fromRunnable(() -> {
             for (int i = range.getLeft(); i <= range.getRight(); i++) {
                 Slot slot = handler.getSlot(i);
@@ -99,11 +99,11 @@ public abstract class InventoryListener {
 
     }
 
-    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                         @NotNull ScreenHandler handler,
-                                                         final int slotIndex,
-                                                         @Nullable Map<String, DataAccess> searchData,
-                                                         boolean addComment) {
+    public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                                  @NotNull ScreenHandler handler,
+                                                                  final int slotIndex,
+                                                                  @Nullable Map<String, DataAccess> searchData,
+                                                                  boolean addComment) {
         Slot slot = handler.getSlot(slotIndex);
         if (slot.getStack().isEmpty()) return Optional.empty();
 
@@ -134,10 +134,10 @@ public abstract class InventoryListener {
         return updateItem(item, handler, slotIndex, null, true);
     }
 
-    public static Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                              @NotNull ScreenHandler handler,
-                                              @NotNull Pair<Integer, Integer> range,
-                                              @Nullable Map<String, DataAccess> searchData) {
+    public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
+                                                       @NotNull ScreenHandler handler,
+                                                       @NotNull Pair<Integer, Integer> range,
+                                                       @Nullable Map<String, DataAccess> searchData) {
         return updateItemsAsync(items, handler, range, searchData, true);
     }
 
@@ -257,12 +257,12 @@ public abstract class InventoryListener {
         return false;
     }
 
-    public Mono<Boolean> hadItemsChangeAsync(MinecraftClient client, ScreenHandler handler) {
+    public @NotNull Mono<Boolean> hadItemsChangeAsync(@NotNull MinecraftClient client, ScreenHandler handler) {
         return Mono.fromSupplier(() -> hadItemsChange(client, handler))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    public Mono<Void> initSlotsAsync(ScreenHandler handler) {
+    public @NotNull Mono<Void> initSlotsAsync(ScreenHandler handler) {
         return Mono.fromRunnable(() -> initSlots(handler));
     }
 
@@ -282,7 +282,7 @@ public abstract class InventoryListener {
         return slot.getStack().getNbt() == null ? slot.getStack().getName().hashCode() : slot.getStack().getNbt().hashCode();
     }
 
-    protected Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
+    protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
         CxnListener listener = PriceCxnModClient.CXN_LISTENER;
 
         if (instance == null || instance.player == null) {

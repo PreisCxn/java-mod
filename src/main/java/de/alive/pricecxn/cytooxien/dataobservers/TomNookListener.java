@@ -30,7 +30,7 @@ public class TomNookListener extends InventoryListener {
 
     private final DataAccess searchData = TranslationDataAccess.NOOK_BUY_SEARCH;
 
-    private String invBuyPrice = null;
+    private @Nullable String invBuyPrice = null;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -48,7 +48,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook open");
 
         items.clear();
@@ -57,7 +57,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook close");
 
         JsonArray array = new JsonArray();
@@ -82,7 +82,7 @@ public class TomNookListener extends InventoryListener {
         return Mono.empty();
     }
 
-    private String getBuyPriceFromInvName(@NotNull MinecraftClient client) {
+    private @Nullable String getBuyPriceFromInvName(@NotNull MinecraftClient client) {
         if (client.currentScreen == null || client.currentScreen.getTitle() == null)
             return null;
 
@@ -106,7 +106,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("TomNook updated");
         this.invBuyPrice = getBuyPriceFromInvName(client);
         return updateItemsAsync(this.items, handler, this.itemRange, null);

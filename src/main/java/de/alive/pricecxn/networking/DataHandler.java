@@ -15,15 +15,15 @@ public class DataHandler {
     public static final int MODUSER_REFRESH_INTERVAL = 1000 * 60 * 60 * 6; // 6 Stunden
     public static final int ITEM_REFRESH_INTERVAL = 1000 * 60 * 60 * 3; // 6 Stunden
     private static final Logger LOGGER = Logger.getLogger(DataHandler.class.getName());
-    private final ServerChecker serverChecker;
-    private final List<String> columnNames;
-    private final String keyColumnName;
+    private final @NotNull ServerChecker serverChecker;
+    private final @Nullable List<String> columnNames;
+    private final @Nullable String keyColumnName;
     private long lastUpdate = 0;
     private String uri;
     private int refreshInterval = 0;
-    private Map<String, List<String>> data = null;
-    private JsonArray dataArray = null;
-    private JsonObject dataObject = null;
+    private @Nullable Map<String, List<String>> data = null;
+    private @Nullable JsonArray dataArray = null;
+    private @Nullable JsonObject dataObject = null;
 
     /**
      * This constructor is used to create a DataHandler
@@ -34,7 +34,7 @@ public class DataHandler {
      * @param keyColumnName   The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess... dataAccess) {
+    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess @Nullable ... dataAccess) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
@@ -60,7 +60,7 @@ public class DataHandler {
      * @param isForced If the refresh is forced, the data will be refreshed even if it is up-to-date
      * @return A CompletableFuture which returns null if the refresh was successful
      */
-    public Mono<Void> refresh(boolean isForced) {
+    public @NotNull Mono<Void> refresh(boolean isForced) {
         LOGGER.log(Level.INFO, "refreshData 1");
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
@@ -101,7 +101,7 @@ public class DataHandler {
      * @param keyColumnName The name of the column that should be used as key
      * @return A CompletableFuture which returns the data as a Map with the key as the key and the values as a List
      */
-    private Mono<Map<String, List<String>>> getServerDataAsync(String url, List<String> columnNames, String keyColumnName) {
+    private @NotNull Mono<Map<String, List<String>>> getServerDataAsync(String url, @Nullable List<String> columnNames, @Nullable String keyColumnName) {
         return Http.GET(url, response -> response, jsonString -> jsonString)
                 .mapNotNull(jsonString -> {
                     if (JsonParser.parseString(jsonString).isJsonArray()) {
@@ -164,7 +164,7 @@ public class DataHandler {
         return dataObject;
     }
 
-    public void setDataAccess(DataAccess dataAccess) {
+    public void setDataAccess(@NotNull DataAccess dataAccess) {
         dataAccess.setDataHandler(this);
     }
 

@@ -5,6 +5,8 @@ import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -24,34 +26,34 @@ public class PriceText {
     private double priceAdder = 0;
     private double priceMultiplier = 1;
     private String identifierText = "";
-    private String searchingPoints = "";
+    private @NotNull String searchingPoints = "";
     private int searchingCount = 0;
-    private double[] prices = null;
+    private double @Nullable [] prices = null;
     private SearchingState isSearching = SearchingState.FINISHED;
 
     PriceText(boolean isSearching) {
         this.isSearching = isSearching ? SearchingState.SEARCHING : SearchingState.FINISHED;
     }
 
-    public static PriceText create() {
+    public static @NotNull PriceText create() {
         return PriceText.create(false);
     }
 
-    public static PriceText create(boolean isSearching) {
+    public static @NotNull PriceText create(boolean isSearching) {
         return new PriceText(isSearching);
     }
 
-    public PriceText withPrices(double... prices) {
+    public @NotNull PriceText withPrices(double... prices) {
         setPrices(prices);
         return this;
     }
 
-    public PriceText withIdentifierText(String identifierText) {
+    public @NotNull PriceText withIdentifierText(String identifierText) {
         this.identifierText = identifierText;
         return this;
     }
 
-    public PriceText withPriceMultiplier(double priceMultiplier) {
+    public @NotNull PriceText withPriceMultiplier(double priceMultiplier) {
         this.priceMultiplier = priceMultiplier;
         return this;
     }
@@ -60,7 +62,7 @@ public class PriceText {
         return withPriceMultiplier((double) priceMultiplier);
     }
 
-    public PriceText withPriceAdder(double priceAdder) {
+    public @NotNull PriceText withPriceAdder(double priceAdder) {
         this.priceAdder = priceAdder;
         return this;
     }
@@ -125,7 +127,7 @@ public class PriceText {
         }
     }
 
-    private Optional<MutableText> getPriceText(double price) {
+    private @NotNull Optional<MutableText> getPriceText(double price) {
         if (price == 0) return Optional.empty();
         return Optional
                 .of(MutableText
@@ -144,7 +146,7 @@ public class PriceText {
         return getPriceText(prices[prices.length - 1]);
     }
 
-    public static Text space() {
+    public static @NotNull Text space() {
         return Text.of(" ");
     }
 

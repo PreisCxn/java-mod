@@ -21,11 +21,11 @@ import static de.alive.pricecxn.PriceCxnMod.printDebug;
  */
 public class ThemeServerChecker extends TabListener {
 
-    private Modes mode = Modes.NOTHING;
+    private @NotNull Modes mode = Modes.NOTHING;
 
-    private final AtomicBoolean onServer;
+    private final @NotNull AtomicBoolean onServer;
 
-    private final ServerListener serverListener;
+    private final @Nullable ServerListener serverListener;
 
     public ThemeServerChecker(@Nullable ServerListener serverListener, @NotNull DataAccess searches, @NotNull AtomicBoolean onServer) {
         super(searches);
@@ -43,7 +43,7 @@ public class ThemeServerChecker extends TabListener {
 
     //check for the mode from the tab list
     @Override
-    protected Mono<Void> handleData(@NotNull String data) {
+    protected @NotNull Mono<Void> handleData(@NotNull String data) {
         String lowerCaseData = data.toLowerCase();
 
         if(lowerCaseData.contains(Modes.SKYBLOCK.toString().toLowerCase())) {

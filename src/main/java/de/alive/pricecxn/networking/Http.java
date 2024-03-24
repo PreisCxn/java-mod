@@ -25,11 +25,11 @@ public class Http {
 
     private static final @NotNull HttpClient client = HttpClient.newHttpClient();
 
-    public static <T, R> Mono<R> GET(String uri, Function<String, T> stringTFunction, Function<T, R> callback, String... headers) {
+    public static <T, R> @NotNull Mono<R> GET(String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String... headers) {
         return GET(API_URL, uri, stringTFunction, callback, headers);
     }
 
-    public static <T, R> Mono<R> GET(String baseUri, String uri, Function<String, T> stringTFunction, Function<T, R> callback, String... headers) {
+    public static <T, R> @NotNull Mono<R> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String @NotNull ... headers) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
@@ -110,7 +110,7 @@ public class Http {
         return put;
     }
 
-    public static @Nullable JsonObject jsonObjectConverter(String s) {
+    public static @Nullable JsonObject jsonObjectConverter(@NotNull String s) {
         try{
             return JsonParser.parseString(s).getAsJsonObject();
         }catch(JsonSyntaxException e){
@@ -120,7 +120,7 @@ public class Http {
     }
 
     @Contract("_ -> new")
-    public static @Nullable JsonArray jsonArrayConverter(String s) {
+    public static @Nullable JsonArray jsonArrayConverter(@NotNull String s) {
         try{
             return JsonParser.parseString(s).getAsJsonArray();
         }catch(JsonSyntaxException e){
@@ -129,7 +129,7 @@ public class Http {
         }
     }
 
-    public static Mono<Void> POST(@NotNull String uri, @Nullable JsonObject json) {
+    public static @NotNull Mono<Void> POST(@NotNull String uri, @Nullable JsonObject json) {
         return POST(uri, json, null, null).then();
     }
 

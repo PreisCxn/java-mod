@@ -1,5 +1,7 @@
 package de.alive.pricecxn.networking.sockets;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -24,10 +26,10 @@ public class WebSocketConnector {
     private Session session;
     private boolean isConnected = false;
     private ScheduledExecutorService pingExecutor;
-    private Boolean isConnectionEstablished = null;
+    private @Nullable Boolean isConnectionEstablished = null;
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(@NotNull Session session) {
         this.session = session;
         this.isConnected = true;
         isConnectionEstablished = true;
@@ -75,7 +77,7 @@ public class WebSocketConnector {
         LOGGER.log(Level.SEVERE, "WebSocket error", throwable);
     }
 
-    public Mono<Boolean> connectToWebSocketServer(String serverUri) {
+    public @NotNull Mono<Boolean> connectToWebSocketServer(@NotNull String serverUri) {
         return Mono.fromCallable(() -> {
             try {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();

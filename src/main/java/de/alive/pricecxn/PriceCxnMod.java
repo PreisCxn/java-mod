@@ -7,6 +7,7 @@ import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class PriceCxnMod implements ModInitializer {
 
 	}
 
-	public static void doDebug(Consumer<MinecraftClient> function){
+	public static void doDebug(@NotNull Consumer<MinecraftClient> function){
 		if(!PriceCxnMod.DEBUG_MODE) return;
 		if(MinecraftClient.getInstance() == null) return;
 		if(MinecraftClient.getInstance().player == null) return;
@@ -68,7 +69,7 @@ public class PriceCxnMod implements ModInitializer {
 		printDebug(message, true, false);
 	}
 
-	public static Optional<Integer> getIntVersion(@Nullable String version){
+	public static @NotNull Optional<Integer> getIntVersion(@Nullable String version){
 		if(DEBUG_MODE)
 			LOGGER.log(Level.INFO, "Version: " + version);
 		if(version == null)

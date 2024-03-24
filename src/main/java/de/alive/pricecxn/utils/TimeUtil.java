@@ -3,6 +3,7 @@ package de.alive.pricecxn.utils;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +55,7 @@ public class TimeUtil {
 
     }
 
-    public static Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
+    public static @NotNull Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
         long currentTimestamp = System.currentTimeMillis(); // Aktueller Unix-Timestamp in Millisekunden
 
         long difference = currentTimestamp - timestamp;
@@ -77,7 +78,7 @@ public class TimeUtil {
         return Optional.empty();
     }
 
-    public static Optional<Long> getStartTimeStamp(String timerString) {
+    public static @NotNull Optional<Long> getStartTimeStamp(@NotNull String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
             return Optional.empty();
 
@@ -113,7 +114,7 @@ public class TimeUtil {
      * @param timerString Der Timer-String.
      * @return Die Minuten als Integer.
      */
-    public static Optional<Integer> getMinutes(String timerString) {
+    public static @NotNull Optional<Integer> getMinutes(@NotNull String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
             return Optional.empty();
 
@@ -143,7 +144,7 @@ public class TimeUtil {
      * @param timerString Der Timer-String.
      * @return Die Stunden als Integer.
      */
-    public static Optional<Integer> getTime(String timerString, DataAccess search) {
+    public static @NotNull Optional<Integer> getTime(String timerString, @NotNull DataAccess search) {
 
         timerString = timerString.toLowerCase();
 

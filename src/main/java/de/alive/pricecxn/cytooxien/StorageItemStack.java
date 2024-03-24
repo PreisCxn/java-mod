@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import de.alive.pricecxn.utils.TimeUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -23,16 +25,16 @@ public class StorageItemStack {
 
     }
 
-    public void setup(JsonObject object, WebSocketConnector connector){
+    public void setup(@NotNull JsonObject object, WebSocketConnector connector){
         this.type = isOf(object, Type.VENDITORPL) ? Type.VENDITORPL : Type.ITEM_STORAGE;
         this.connector = connector;
         this.setup = true;
     }
 
-    public StorageItemStack(JsonObject object, WebSocketConnector connector) {
+    public StorageItemStack(@NotNull JsonObject object, WebSocketConnector connector) {
         setup(object, connector);
     }
-    public Mono<Void> search(Integer storageSearchResult) {
+    public @NotNull Mono<Void> search(Integer storageSearchResult) {
         if(!setup) return Mono.empty();
         if(changedStorage(storageSearchResult)) {
             //this.priceText = PriceText.create(true);
@@ -60,22 +62,22 @@ public class StorageItemStack {
         }));
     }
 
-    public PriceText getText() {
+    public @NotNull PriceText getText() {
         return this.priceText;
     }
 
-    public boolean changedStorage(Integer storage) {
+    public boolean changedStorage(@Nullable Integer storage) {
         return storage != null;
     }
 
-    public static boolean isOf(JsonObject data, Type item) {
+    public static boolean isOf(@NotNull JsonObject data, @NotNull Type item) {
         if(!data.has("item_search_key") || !data.has("pbv_search_key")
                 || data.get("item_search_key") == JsonNull.INSTANCE || data.get("pbv_search_key") == JsonNull.INSTANCE) return false;
 
         return data.get("item_search_key").getAsString().contains(item.getKey());
     }
 
-    public static boolean isOf(JsonObject data) {
+    public static boolean isOf(@NotNull JsonObject data) {
         return isOf(data, Type.VENDITORPL) || isOf(data, Type.ITEM_STORAGE);
     }
 
@@ -99,7 +101,7 @@ public class StorageItemStack {
             return key;
         }
 
-        public Optional<Double> getPrice(int amount) {
+        public @NotNull Optional<Double> getPrice(int amount) {
             if(amount <= this.startPrice) return Optional.of(0D);
             if(!priceMap.containsKey(amount)) return Optional.empty();
             return Optional.of(priceMap.get(amount));
@@ -110,7 +112,7 @@ public class StorageItemStack {
             return priceMap.containsKey(amount);
         }
 
-        public Mono<Void> requestAmount(int amount, WebSocketConnector connector) {
+        public @NotNull Mono<Void> requestAmount(int amount, @NotNull WebSocketConnector connector) {
             return new WebSocketCompletion(connector, this.query, String.valueOf(amount)).getMono().mapNotNull(s -> {
                 if (s == null) {
                     return null;
