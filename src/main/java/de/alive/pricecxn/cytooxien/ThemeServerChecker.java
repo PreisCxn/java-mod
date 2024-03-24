@@ -88,7 +88,7 @@ public class ThemeServerChecker extends TabListener {
         return Mono.empty();
     }
 
-    public Modes getMode() {
+    public @NotNull Modes getMode() {
         return mode;
     }
 }

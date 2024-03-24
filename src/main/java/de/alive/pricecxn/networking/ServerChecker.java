@@ -100,7 +100,7 @@ public class ServerChecker {
         this.websocket.removeMessageListener(listener);
     }
 
-    public NetworkingState getState() {
+    public @NotNull NetworkingState getState() {
         return state;
     }
 

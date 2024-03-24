@@ -249,7 +249,7 @@ public class CxnListener extends ServerListener {
         return data.get(key);
     }
 
-    public ServerChecker getServerChecker() {
+    public @NotNull ServerChecker getServerChecker() {
         return serverChecker;
     }
 
@@ -261,7 +261,7 @@ public class CxnListener extends ServerListener {
         this.listenerActive.set(false);
     }
 
-    public ThemeServerChecker getThemeChecker() {
+    public @NotNull ThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
 

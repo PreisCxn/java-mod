@@ -101,7 +101,7 @@ public enum TranslationDataAccess implements DataAccess {
         else return dataHandler.getData().get(id);
     }
 
-    public void setDataHandler(DataHandler dataHandler) {
+    public void setDataHandler(@Nullable DataHandler dataHandler) {
         this.dataHandler = dataHandler;
     }
 
@@ -121,7 +121,7 @@ public enum TranslationDataAccess implements DataAccess {
         return equalData != null;
     }
 
-    public JsonElement getDefaultResult() {
+    public @NotNull JsonElement getDefaultResult() {
         return defaultResult;
     }
 
