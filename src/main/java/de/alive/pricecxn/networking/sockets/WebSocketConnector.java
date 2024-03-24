@@ -20,7 +20,7 @@ public class WebSocketConnector {
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
-    private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private Session session;
     private boolean isConnected = false;
     private ScheduledExecutorService pingExecutor;

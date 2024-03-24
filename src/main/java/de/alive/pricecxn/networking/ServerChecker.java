@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 public class ServerChecker {
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int DEFAULT_CHECK_INTERVAL = 300000; //5min
-    private boolean connected = false;
+    private final boolean connected = false;
     private final String uri;
     private final int checkInterval;
     private final long lastCheck = 0;
