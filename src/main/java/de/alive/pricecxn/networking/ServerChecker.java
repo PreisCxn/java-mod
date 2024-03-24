@@ -42,27 +42,7 @@ public class ServerChecker {
         this.uri = uri == null ? WebSocketConnector.DEFAULT_WEBSOCKET_URI : uri;
         this.checkInterval = checkInterval < 0 ? DEFAULT_CHECK_INTERVAL : checkInterval;
 
-        this.websocket.addMessageListener(message -> {
-            try{
-                JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                if(json.has("min-version")) {
-                    this.minVersionFuture.complete(json.get("min-version").getAsString());
-                }
-
-                if(json.has("maintenance")) {
-                    if(json.get("maintenance").getAsBoolean())
-                        this.state = NetworkingState.MAINTENANCE;
-                    else
-                        this.state = NetworkingState.ONLINE;
-                    this.maintenanceFuture.complete(true);
-                }
-
-                minVersionFuture.thenRun(() -> maintenanceFuture.thenRun(() -> connectionFuture.complete(state != NetworkingState.OFFLINE)));
-
-            } catch (JsonSyntaxException ignored){
-                connectionFuture.complete(state != NetworkingState.OFFLINE);
-            }
-        });
+        this.websocket.addMessageListener(this::onWebsocketMessage);
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
 
         //checkConnection();
@@ -130,4 +110,27 @@ public class ServerChecker {
     public WebSocketConnector getWebsocket() {
         return websocket;
     }
+
+    private void onWebsocketMessage(String message) {
+        try{
+            JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+            if (json.has("min-version")) {
+                this.minVersionFuture.complete(json.get("min-version").getAsString());
+            }
+
+            if (json.has("maintenance")) {
+                if (json.get("maintenance").getAsBoolean())
+                    this.state = NetworkingState.MAINTENANCE;
+                else
+                    this.state = NetworkingState.ONLINE;
+                this.maintenanceFuture.complete(true);
+            }
+
+            minVersionFuture.thenRun(() -> maintenanceFuture.thenRun(() -> connectionFuture.complete(state != NetworkingState.OFFLINE)));
+
+        }catch(JsonSyntaxException ignored){
+            connectionFuture.complete(state != NetworkingState.OFFLINE);
+        }
+    }
+
 }
