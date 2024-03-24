@@ -45,10 +45,7 @@ public class PriceCxnItemStack {
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
-        if (searchData == null)
-            this.searchData = new HashMap<>();
-        else
-            this.searchData = searchData;
+        this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
         this.item = item;
         if(addTooltips)
