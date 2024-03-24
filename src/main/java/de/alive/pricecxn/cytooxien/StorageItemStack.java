@@ -33,13 +33,13 @@ public class StorageItemStack {
         setup(object, connector);
     }
     public Mono<Void> search(Integer storageSearchResult) {
-        if(!setup) return null;
+        if(!setup) return Mono.empty();
         if(changedStorage(storageSearchResult)) {
             //this.priceText = PriceText.create(true);
-        } else return null;
+        } else return Mono.empty();
 
         if(lastUpdate + REFRESH_AFTER_SECONDS * TimeUtil.TimeUnit.SECONDS.getMilliseconds() > System.currentTimeMillis())
-            return null;
+            return Mono.empty();
         lastUpdate = System.currentTimeMillis();
 
         Mono<Void> searchCompletion;
