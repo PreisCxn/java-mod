@@ -19,7 +19,7 @@ public class PriceCxnMod implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
-	private static final java.util.logging.Logger LOGGER = Logger.getLogger(PriceCxnMod.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PriceCxnMod.class.getName());
 	public static final Style DEFAULT_TEXT = Style.EMPTY.withColor(Formatting.GRAY);
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
