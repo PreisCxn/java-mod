@@ -57,11 +57,7 @@ public class ServerChecker {
                     this.maintenanceFuture.complete(true);
                 }
 
-                minVersionFuture.thenRun(() -> {
-                    maintenanceFuture.thenRun(() -> {
-                        connectionFuture.complete(state != NetworkingState.OFFLINE);
-                    });
-                });
+                minVersionFuture.thenRun(() -> maintenanceFuture.thenRun(() -> connectionFuture.complete(state != NetworkingState.OFFLINE)));
 
             } catch (JsonSyntaxException ignored){
                 connectionFuture.complete(state != NetworkingState.OFFLINE);

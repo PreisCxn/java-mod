@@ -80,9 +80,7 @@ public class ItemShopListener extends InventoryListener {
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        return sendData("/itemshop", object).doOnSuccess(aVoid -> {
-            printDebug("ItemShop data sent");
-        });
+        return sendData("/itemshop", object).doOnSuccess(aVoid -> printDebug("ItemShop data sent"));
     }
 
     @Override

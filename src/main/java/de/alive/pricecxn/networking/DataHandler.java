@@ -85,9 +85,7 @@ public class DataHandler {
                     this.data = data;
                     this.lastUpdate = System.currentTimeMillis();
                 })
-                .doOnError(ex -> {
-                    LOGGER.log(Level.SEVERE, "Failed to refresh data", ex);
-                })
+                .doOnError(ex -> LOGGER.log(Level.SEVERE, "Failed to refresh data", ex))
                 .then();
     }
 

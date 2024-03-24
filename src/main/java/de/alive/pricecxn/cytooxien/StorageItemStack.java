@@ -50,17 +50,14 @@ public class StorageItemStack {
             searchCompletion = type.requestAmount(storageSearchResult, this.connector);
         }
 
-        return searchCompletion.then().doOnSuccess(v -> {
+        return searchCompletion.then().doOnSuccess(v -> type.getPrice(storageSearchResult).ifPresentOrElse(price -> {
+            priceText.withPriceAdder(price);
+            priceText.finishSearching();
 
-            type.getPrice(storageSearchResult).ifPresentOrElse(price -> {
-                priceText.withPriceAdder(price);
-                priceText.finishSearching();
-
-            }, () -> {
-                priceText.withPriceAdder(0);
-                priceText.setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
-            });
-        });
+        }, () -> {
+            priceText.withPriceAdder(0);
+            priceText.setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
+        }));
     }
 
     public PriceText getText() {
