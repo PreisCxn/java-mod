@@ -72,7 +72,7 @@ public class WebSocketConnector {
 
     @OnError
     public void onError(Throwable throwable) {
-        throwable.printStackTrace();
+        LOGGER.log(Level.SEVERE, "WebSocket error", throwable);
     }
 
     public Mono<Boolean> connectToWebSocketServer(String serverUri) {
