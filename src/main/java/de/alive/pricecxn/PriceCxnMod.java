@@ -53,7 +53,8 @@ public class PriceCxnMod implements ModInitializer {
 	public static void printDebug(String message, boolean overlay, boolean sysOut){
 		doDebug((client) -> {
 			MutableText text = MutableText.of(new PlainTextContent.Literal(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
-			client.player.sendMessage(text, overlay);
+			if(client.player != null)
+			    client.player.sendMessage(text, overlay);
 			if(sysOut) System.out.println("[PCXN-DEBUG] : " + message);
 		});
 	}
