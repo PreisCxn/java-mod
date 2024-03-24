@@ -48,9 +48,9 @@ public abstract class ItemStackMixin {
     @Shadow
     private int count;
     @Unique
-    private Optional<JsonObject> nookPrice = Optional.empty();
+    private JsonObject nookPrice = null;
     @Unique
-    private Optional<JsonObject> pcxnPrice = Optional.empty();
+    private JsonObject pcxnPrice = null;
     @Unique
     private long lastUpdate = 0;
     @Unique
@@ -110,8 +110,8 @@ public abstract class ItemStackMixin {
         PriceText pcxnPriceText = PriceText.create();
 
 
-        if (pcxnPrice.isPresent() && pcxnPrice.get().has("pbv_search_key") && pcxnPrice.get().get("pbv_search_key") != JsonNull.INSTANCE) {
-            String pbvKey = pcxnPrice.get().get("pbv_search_key").getAsString();
+        if (pcxnPrice != null && pcxnPrice.has("pbv_search_key") && pcxnPrice.get("pbv_search_key") != JsonNull.INSTANCE) {
+            String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
             if (!this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY)) return;
             JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
             if (!nbtData.has("PublicBukkitValues")) return;
@@ -129,9 +129,9 @@ public abstract class ItemStackMixin {
                 return;
             }
 
-            if (StorageItemStack.isOf(pcxnPrice.get())) {
+            if (StorageItemStack.isOf(pcxnPrice)) {
 
-                storageItemStack.setup(pcxnPrice.get(), serverChecker.getWebsocket());
+                storageItemStack.setup(pcxnPrice, serverChecker.getWebsocket());
                 pcxnPriceText = storageItemStack.getText();
                 storageItemStack.search(pbvAmount).block();
 
@@ -154,25 +154,26 @@ public abstract class ItemStackMixin {
         int finalAmount = amount;
         PriceText finalPcxnPriceText = pcxnPriceText;
         System.out.println(finalPcxnPriceText.getPriceAdder());
-        pcxnPrice.ifPresent(jsonObject -> {
+        if(pcxnPrice != null){
             list.add(finalPcxnPriceText
-                    .withPrices(jsonObject.get("lower_price").getAsDouble(), jsonObject.get("upper_price").getAsDouble())
-                    .withPriceMultiplier(finalAmount)
-                    .getText());
-        });
+                             .withPrices(pcxnPrice.get("lower_price").getAsDouble(), pcxnPrice.get("upper_price").getAsDouble())
+                             .withPriceMultiplier(finalAmount)
+                             .getText());
+        }
 
-        nookPrice.ifPresent(jsonObject -> {
+        if(nookPrice != null){
             list.add(PriceText.create()
-                    .withIdentifierText("Tom Block:")
-                    .withPrices(jsonObject.get("price").getAsDouble())
-                    .withPriceMultiplier(finalAmount)
-                    .getText());
-        });
+                             .withIdentifierText("Tom Block:")
+                             .withPrices(nookPrice.get("price").getAsDouble())
+                             .withPriceMultiplier(finalAmount)
+                             .getText());
 
-        pcxnPrice.ifPresent(jsonObject -> {
+        }
+        if(pcxnPrice != null){
             list.add(PriceText.space());
 
-            Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate = TimeUtil.getTimestampDifference(Long.parseLong(jsonObject.get("timestamp").getAsString()));
+            Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate
+                    = TimeUtil.getTimestampDifference(Long.parseLong(pcxnPrice.get("timestamp").getAsString()));
 
             lastUpdate.ifPresent(s -> {
 
@@ -180,11 +181,9 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                        .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
+                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
             });
-
-        });
-
+        }
     }
 
     @Unique
@@ -200,21 +199,21 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    private Optional<JsonObject> findItemInfo(String dataKey, PriceCxnItemStack cxnItemStack) {
+    private JsonObject findItemInfo(String dataKey, PriceCxnItemStack cxnItemStack) {
         JsonObject cxnItemData = cxnItemStack.getDataWithoutDisplay();
-        if (cxnItemData == null) return Optional.empty();
+        if (cxnItemData == null) return null;
 
         JsonObject obj = PriceCxnModClient.CXN_LISTENER.getData(dataKey).getDataObject();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
-        if (obj == null) return Optional.empty();
+        if (obj == null) return null;
 
-        if (!obj.has("mode") || !obj.has("is_nook") || !obj.has("data") || !obj.has("is_mod")) return Optional.empty();
-        if (!obj.get("is_mod").getAsBoolean()) return Optional.empty();
-        if (!obj.get("mode").getAsString().equals(themeChecker.getMode().getTranslationKey())) return Optional.empty();
+        if (!obj.has("mode") || !obj.has("is_nook") || !obj.has("data") || !obj.has("is_mod")) return null;
+        if (!obj.get("is_mod").getAsBoolean()) return null;
+        if (!obj.get("mode").getAsString().equals(themeChecker.getMode().getTranslationKey())) return null;
 
         JsonArray array = obj.get("data").getAsJsonArray();
-        if (array.isEmpty()) return Optional.empty();
+        if (array.isEmpty()) return null;
 
         this.lastUpdate = System.currentTimeMillis();
 
@@ -241,7 +240,7 @@ public abstract class ItemStackMixin {
                 }
 
                 foundItems.add(i);
-                if (foundItems.size() > 1) return Optional.empty();
+                if (foundItems.size() > 1) return null;
 
             }
 
@@ -271,17 +270,17 @@ public abstract class ItemStackMixin {
                 }
 
                 foundItems.add(i);
-                if (foundItems.size() > 1) return Optional.empty();
+                if (foundItems.size() > 1) return null;
 
             }
 
         }
 
         if (foundItems.size() == 1) {
-            return Optional.ofNullable(array.get(foundItems.get(0)).getAsJsonObject());
+            return array.get(foundItems.get(0)).getAsJsonObject();
         }
 
-        return Optional.empty();
+        return null;
     }
 
 }
