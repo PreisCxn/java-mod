@@ -39,7 +39,7 @@ public class CxnListener extends ServerListener {
     private final ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
     NetworkingState state = NetworkingState.OFFLINE;
-    private AtomicBoolean active = null;
+    private AtomicBoolean active = new AtomicBoolean(false);
     private Boolean isRightVersion = null;
     private AtomicBoolean listenerActive = new AtomicBoolean(false);
 
@@ -166,13 +166,9 @@ public class CxnListener extends ServerListener {
 
         return initData()
                 .then(refreshData(true))
-                .then(Mono.defer(() -> {
-                    if (themeRefresh) {
-                        return this.themeChecker.refreshAsync();
-                    } else {
-                        return Mono.empty();
-                    }
-                }))
+                .then(Mono.just(this.themeChecker))
+                .filter(themeServerChecker -> themeRefresh)
+                .flatMap(ThemeServerChecker::refreshAsync)
                 .doOnSuccess(ignored -> {
                     activateListeners();
                     this.active.set(true);
@@ -182,7 +178,8 @@ public class CxnListener extends ServerListener {
                     LOGGER.log(Level.SEVERE, "Error while activating mod", ex);
                     deactivate();
                     return Mono.error(ex);
-                });
+                })
+                .then();
     }
 
     private Mono<Void> initData() {
@@ -234,11 +231,9 @@ public class CxnListener extends ServerListener {
     }
 
     private Mono<Void> refreshData(boolean forced) {
-        List<Mono<Void>> monos = new ArrayList<>();
-        for (Map.Entry<String, DataHandler> entry : data.entrySet()) {
-            monos.add(entry.getValue().refresh(forced));
-        }
-        return Flux.concat(monos).then();
+        return Flux.fromIterable(data.entrySet())
+                .flatMap(entry -> entry.getValue().refresh(forced))
+                .then();
     }
 
     public void deactivate() {
@@ -284,29 +279,28 @@ public class CxnListener extends ServerListener {
     public Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
+
         return new WebSocketCompletion(serverChecker.getWebsocket(), "isSpecialUser", MinecraftClient.getInstance().player.getUuidAsString()).getMono()
                 .map(s -> s.equals("true"))
                 .onErrorReturn(false);
     }
 
     public Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
-        AtomicBoolean activeBackup = this.active == null ? null : new AtomicBoolean(this.active.get());
+        boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
 
-        if (this.active == null) this.active = new AtomicBoolean(false);
-
         return Mono.zip(serverChecker.isConnected(), isMinVersion(), this.serverChecker.getServerMinVersion())
                 .flatMap(tuple3 -> {
-                    Boolean isConnected = tuple3.getT1();
-                    Boolean isMinVersion = tuple3.getT2();
+                    boolean isConnected = tuple3.getT1();
+                    boolean isMinVersion = tuple3.getT2();
                     String serverMinVersion = tuple3.getT3();
 
                     this.state = serverChecker.getState();
                     if (!isConnected) {
                         // Server nicht erreichbar
                         this.deactivate();
-                        return Mono.just(new Pair<>(activeBackup == null || activeBackup.get(), ActionNotification.SERVER_OFFLINE));
+                        return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                     } else if (!isMinVersion) {
                         // Version nicht korrekt
                         this.deactivate();
@@ -323,7 +317,7 @@ public class CxnListener extends ServerListener {
                             // Server im Online-Modus
 
                             return this.activate(themeRefresh)
-                                    .then(Mono.just(new Pair<>(activeBackup == null || !activeBackup.get(), ActionNotification.MOD_STARTED)));
+                                    .then(Mono.just(new Pair<>(!activeCache, ActionNotification.MOD_STARTED)));
 
                         } else if (serverCheckerState == NetworkingState.MAINTENANCE) {
                             return isSpecialUser()
@@ -332,7 +326,7 @@ public class CxnListener extends ServerListener {
                                             // Benutzer hat Berechtigung
                                             System.out.println("Benutzer hat Berechtigung");
                                             return this.activate(themeRefresh).then(
-                                                    Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || activeBackup == null || !activeBackup.get(), ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
+                                                    Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                                         } else {
                                             // Benutzer hat keine Berechtigung
                                             System.out.println("Benutzer hat keine Berechtigung");
@@ -344,7 +338,7 @@ public class CxnListener extends ServerListener {
                             // Server im Offline-Modus
                             System.out.println("Server im Offline-Modus");
                             this.deactivate();
-                            return Mono.just(new Pair<>(activeBackup == null || activeBackup.get(), ActionNotification.SERVER_OFFLINE));
+                            return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                         }
                     }
                 });
@@ -357,9 +351,7 @@ public class CxnListener extends ServerListener {
     }
 
     public Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync() {
-        return Mono.fromCallable(() -> this.checkConnection(true))
-                .subscribeOn(Schedulers.fromExecutor(ServerChecker.EXECUTOR))
-                .flatMap(result -> result);
+        return checkConnectionAsync(true);
     }
 
     public Optional<List<String>> getModUsers() {

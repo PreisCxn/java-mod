@@ -63,8 +63,8 @@ public class ThemeServerChecker extends TabListener {
             voidMono = voidMono.then(serverListener.onTabChange());
 
         printDebug("New Mode: " + this.mode.toString());
-        assert MinecraftClient.getInstance().player != null;
-        if(DEBUG_MODE)
+
+        if(DEBUG_MODE && MinecraftClient.getInstance().player != null)
             MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
 
         return voidMono;

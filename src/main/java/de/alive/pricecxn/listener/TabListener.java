@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class TabListener {
+
     private static final Logger LOGGER = Logger.getLogger(TabListener.class.getName());
     private static final int MAX_REFRESH = 15;
     private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
@@ -36,24 +37,40 @@ public abstract class TabListener {
             if (client.getCurrentServerEntry() == null) return;
             if (!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, refreshesAfterJoinEvent, 0)
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent)
                     .then(this.onJoinEvent())
                     .subscribe();
         });
     }
 
-    public Mono<Boolean> refresh(@Nullable String notInValue) {
-        LOGGER.finest("refresh");
+    public Mono<Void> refreshAsync() {
+        return refreshAsync(null, 0);
+    }
+
+    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
+        return refreshAsync(notInValue, maxRefresh, new AtomicInteger());
+    }
+
+    private Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, AtomicInteger attempts) {
+        int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
+
+        return refresh(notInValue)
+                .filter(aBoolean -> !aBoolean)
+                .filter(aBoolean -> attempts.incrementAndGet() < finalMaxRefresh)
+                .flatMap(refresh -> Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L)))
+                .flatMap(unused -> refreshAsync(notInValue, finalMaxRefresh, attempts));
+    }
+
+    private Mono<Boolean> refresh(@Nullable String notInValue) {
+        LOGGER.log(Level.INFO, "refresh");
+
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
         if (gameHud == null) return Mono.just(false);
+
         PlayerListHud playerListHud = gameHud.getPlayerListHud();
         if (playerListHud == null) return Mono.just(false);
 
-        LOGGER.finest("refresh2");
-
-        AtomicBoolean found = new AtomicBoolean(false);
-
-        Flux<Void> flux = Flux.fromArray(playerListHud.getClass().getDeclaredFields())
+        return Flux.fromArray(playerListHud.getClass().getDeclaredFields())
                 .doOnNext(field -> field.setAccessible(true))
                 .mapNotNull(field -> {
                     try{
@@ -66,39 +83,9 @@ public abstract class TabListener {
                 .filter(Objects::nonNull)
                 .flatMap(value -> Flux.fromIterable(this.searches.getData())
                         .filter(search -> value.toString().contains(search))
-                        .flatMap(search -> {
-                            if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())) {
-                                return Mono.empty();
-                            }
-                            found.set(true);
-                            return this.handleData(value.toString());
-                        })
-                );
-
-        return flux.then(Mono.just(found.get()));
-    }
-
-    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, int currentRefresh) {
-        AtomicInteger attempts = new AtomicInteger(currentRefresh);
-        int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
-
-        return refresh(notInValue)
-                .flatMap(refresh -> {
-                    if (refresh) {
-                        return Mono.empty();
-                    }
-
-                    if (attempts.incrementAndGet() >= finalMaxRefresh) {
-                        return Mono.empty();
-                    }
-
-                    return Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L))
-                            .then(refreshAsync(notInValue, maxRefresh, attempts.get()));
-                });
-    }
-
-    public Mono<Void> refreshAsync() {
-        return refreshAsync(null, 0, 0);
+                        .filter(search -> !(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())))
+                        .flatMap(search -> this.handleData(value.toString()).then(Mono.just(search)))
+                ).any(string -> true);
     }
 
     /**
