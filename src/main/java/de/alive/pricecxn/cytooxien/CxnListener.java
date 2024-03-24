@@ -9,6 +9,7 @@ import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.NetworkingState;
 import de.alive.pricecxn.networking.ServerChecker;
@@ -186,14 +187,10 @@ public class CxnListener extends ServerListener {
 
     private @NotNull Mono<Void> initData() {
         LOGGER.log(Level.INFO, "initData");
-        if (!this.data.containsKey("pricecxn.data.item_data")) {
-            //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
-        }
 
         if (!this.data.containsKey("pricecxn.data.mod_users")) {
             data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
         }
-        //...
 
         if (this.data.containsKey("cxnprice.translation"))
             return Mono.empty();
@@ -201,35 +198,41 @@ public class CxnListener extends ServerListener {
             return new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages")
                     .getMono()
                     .map(StringUtil::stringToList)
-                    .doOnSuccess(langList -> data.
-                            put("cxnprice.translation",
-                                new DataHandler(serverChecker,
-                                                "/settings/translations",
-                                                langList,
-                                                "translation_key",
-                                                DataHandler.TRANSLATION_REFRESH_INTERVAL,
-                                                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
-                                                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
-                                                TranslationDataAccess.INV_NOOK_SEARCH,
-                                                TranslationDataAccess.INV_TRADE_SEARCH,
-                                                TranslationDataAccess.TIMESTAMP_SEARCH,
-                                                TranslationDataAccess.SELLER_SEARCH,
-                                                TranslationDataAccess.BID_SEARCH,
-                                                TranslationDataAccess.AH_BUY_SEARCH,
-                                                TranslationDataAccess.THEME_SERVER_SEARCH,
-                                                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
-                                                TranslationDataAccess.NOOK_BUY_SEARCH,
-                                                TranslationDataAccess.SHOP_BUY_SEARCH,
-                                                TranslationDataAccess.SHOP_SELL_SEARCH,
-                                                TranslationDataAccess.TRADE_BUY_SEARCH,
-                                                TranslationDataAccess.HOUR_SEARCH,
-                                                TranslationDataAccess.MINUTE_SEARCH,
-                                                TranslationDataAccess.SECOND_SEARCH,
-                                                TranslationDataAccess.NOW_SEARCH,
-                                                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
-                                                TranslationDataAccess.CITYBUILD_INV_BLOCK
-                                ))).then();
+                    .doOnSuccess(this::createTranslationHandler).then();
+    }
 
+    private void createTranslationHandler(@NotNull List<String> langList) {
+
+        DataAccess[] translationAccess = {
+                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
+                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
+                TranslationDataAccess.INV_NOOK_SEARCH,
+                TranslationDataAccess.INV_TRADE_SEARCH,
+                TranslationDataAccess.TIMESTAMP_SEARCH,
+                TranslationDataAccess.SELLER_SEARCH,
+                TranslationDataAccess.BID_SEARCH,
+                TranslationDataAccess.AH_BUY_SEARCH,
+                TranslationDataAccess.THEME_SERVER_SEARCH,
+                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
+                TranslationDataAccess.NOOK_BUY_SEARCH,
+                TranslationDataAccess.SHOP_BUY_SEARCH,
+                TranslationDataAccess.SHOP_SELL_SEARCH,
+                TranslationDataAccess.TRADE_BUY_SEARCH,
+                TranslationDataAccess.HOUR_SEARCH,
+                TranslationDataAccess.MINUTE_SEARCH,
+                TranslationDataAccess.SECOND_SEARCH,
+                TranslationDataAccess.NOW_SEARCH,
+                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
+                TranslationDataAccess.CITYBUILD_INV_BLOCK
+        };
+
+
+        data.put("cxnprice.translation",
+                new DataHandler(serverChecker,
+                        "/settings/translations",
+                        langList,
+                        "translation_key",
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
     }
 
     private @NotNull Mono<Void> refreshData(boolean forced) {
@@ -361,7 +364,7 @@ public class CxnListener extends ServerListener {
 
         JsonArray array;
 
-        try{
+        try {
             array = this.data.get("pricecxn.data.mod_users").getDataArray();
 
             if (array == null) return Optional.empty();
@@ -374,7 +377,7 @@ public class CxnListener extends ServerListener {
             if (stringList.isEmpty()) return Optional.empty();
 
             return Optional.of(stringList);
-        }catch(Exception e){
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
