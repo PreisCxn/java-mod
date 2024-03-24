@@ -8,8 +8,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketCompletion {
+    private static final Logger LOGGER = Logger.getLogger(WebSocketCompletion.class.getName());
     public static final String QUERY_STRING = "pcxn?";
     private static final int DEFAULT_TIMEOUT = 5000;
 
@@ -41,7 +44,8 @@ public class WebSocketCompletion {
 
         this.connector.addMessageListener(listener);
         String queryString = QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", ""));
-        System.out.println(queryString);
+
+        LOGGER.log(Level.INFO, queryString);
         connector.sendMessage(queryString);
 
         timeoutExecutor.schedule(() -> {

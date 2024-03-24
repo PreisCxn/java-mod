@@ -16,10 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class PriceCxnItemStack {
-
+    private static final Logger LOGGER = Logger.getLogger(PriceCxnItemStack.class.getName());
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
@@ -75,7 +77,7 @@ public class PriceCxnItemStack {
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
-        System.out.println(itemName);
+        LOGGER.log(Level.INFO, itemName);
 
 
         /*

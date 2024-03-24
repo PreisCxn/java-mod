@@ -32,10 +32,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-
+    private static final Logger LOGGER = Logger.getLogger(ItemStackMixin.class.getName());
     @Shadow
     public abstract boolean isEmpty();
 
@@ -125,7 +127,7 @@ public abstract class ItemStackMixin {
             try {
                 pbvAmount = Integer.parseInt(pbvSearchResult);
             } catch (NumberFormatException e) {
-                System.err.println("fehler beim konvertieren des pbv Daten im Item: " + e);
+                LOGGER.log(Level.SEVERE, "fehler beim konvertieren des pbv Daten im Item: ", e);
                 return;
             }
 
@@ -153,7 +155,7 @@ public abstract class ItemStackMixin {
 
         int finalAmount = amount;
         PriceText finalPcxnPriceText = pcxnPriceText;
-        System.out.println(finalPcxnPriceText.getPriceAdder());
+        LOGGER.log(Level.INFO, String.valueOf(finalPcxnPriceText.getPriceAdder()));
         if(pcxnPrice != null){
             list.add(finalPcxnPriceText
                              .withPrices(pcxnPrice.get("lower_price").getAsDouble(), pcxnPrice.get("upper_price").getAsDouble())

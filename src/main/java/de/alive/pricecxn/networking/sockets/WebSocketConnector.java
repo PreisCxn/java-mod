@@ -100,7 +100,7 @@ public class WebSocketConnector {
         try{
             session.close();
         }catch(IOException e){
-            System.err.println(e.getMessage());
+            LOGGER.log(Level.SEVERE, "Failed to close WebSocket", e);
         }
     }
 

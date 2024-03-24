@@ -7,9 +7,11 @@ import net.minecraft.util.Pair;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TimeUtil {
-
+    private static final Logger LOGGER = Logger.getLogger(TimeUtil.class.getName());
     private static final DataAccess MINUTE_SEARCH = TranslationDataAccess.MINUTE_SEARCH;
     private static final DataAccess NOW_SEARCH = TranslationDataAccess.NOW_SEARCH;
     private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
@@ -82,9 +84,9 @@ public class TimeUtil {
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
         Optional<Integer> minutes = getTime(timerString, MINUTE_SEARCH);
 
-        System.out.println("timerString: " + timerString);
-        System.out.println("hours: " + hours.orElse(-1));
-        System.out.println("minutes: " + minutes.orElse(-1));
+        LOGGER.log(Level.INFO, "timerString: " + timerString);
+        LOGGER.log(Level.INFO, "hours: " + hours.orElse(-1));
+        LOGGER.log(Level.INFO, "minutes: " + minutes.orElse(-1));
 
         if(minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();

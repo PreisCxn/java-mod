@@ -61,15 +61,15 @@ public class DataHandler {
      * @return A CompletableFuture which returns null if the refresh was successful
      */
     public Mono<Void> refresh(boolean isForced) {
-        System.out.println("refreshData 1");
+        LOGGER.log(Level.INFO, "refreshData 1");
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
         if (!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
-            System.err.println("Data is already up-to-date");
+            LOGGER.log(Level.SEVERE, "Data is already up-to-date");
             return Mono.empty();
         }
 
-        System.out.println("refreshData 2");
+        LOGGER.log(Level.INFO, "refreshData 2");
 
         // Check the server connection asynchronously
         return this.serverChecker.isConnected()

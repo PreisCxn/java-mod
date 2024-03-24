@@ -60,7 +60,7 @@ public class CxnListener extends ServerListener {
 
         //checking connection and activating mod
         checkConnectionAsync(false)
-                .doOnSuccess((a) -> System.out.println("Mod active?" + this.active.get()))
+                .doOnSuccess((a) -> LOGGER.log(Level.INFO, "Mod active?" + this.active.get()))
                 .subscribe();
 
     }
@@ -132,7 +132,7 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onServerLeave() {
-        System.out.println("Cytooxien left : " + this.isOnServer().get());
+        LOGGER.log(Level.INFO, "Cytooxien left : " + this.isOnServer().get());
         deactivate();
     }
 
@@ -183,7 +183,7 @@ public class CxnListener extends ServerListener {
     }
 
     private Mono<Void> initData() {
-        System.out.println("initData");
+        LOGGER.log(Level.INFO, "initData");
         if (!this.data.containsKey("pricecxn.data.item_data")) {
             //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
         }
@@ -307,7 +307,7 @@ public class CxnListener extends ServerListener {
 
                         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
 
-                        System.out.println(isRightVersionBackup + " " + serverMinVersion);
+                        LOGGER.log(Level.INFO, isRightVersionBackup + " " + serverMinVersion);
                         this.isRightVersion = false;
                         return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
                     } else {
@@ -324,19 +324,19 @@ public class CxnListener extends ServerListener {
                                     .flatMap(isSpecialUser -> {
                                         if (isSpecialUser) {
                                             // Benutzer hat Berechtigung
-                                            System.out.println("Benutzer hat Berechtigung");
+                                            LOGGER.log(Level.INFO, "Benutzer hat Berechtigung");
                                             return this.activate(themeRefresh).then(
                                                     Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                                         } else {
                                             // Benutzer hat keine Berechtigung
-                                            System.out.println("Benutzer hat keine Berechtigung");
+                                            LOGGER.log(Level.INFO, "Benutzer hat keine Berechtigung");
                                             this.deactivate();
                                             return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
                                         }
                                     });
                         } else {
                             // Server im Offline-Modus
-                            System.out.println("Server im Offline-Modus");
+                            LOGGER.log(Level.INFO, "Server im Offline-Modus");
                             this.deactivate();
                             return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                         }

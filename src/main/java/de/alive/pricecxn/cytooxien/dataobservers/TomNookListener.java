@@ -17,11 +17,13 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class TomNookListener extends InventoryListener {
-
+    private static final Logger LOGGER = Logger.getLogger(TomNookListener.class.getName());
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
     private final Pair<Integer, Integer> itemRange = new Pair<>(13, 13);
@@ -70,8 +72,8 @@ public class TomNookListener extends InventoryListener {
             }
         }
 
-        System.out.println("Nook: " + array.size() + " items");
-        System.out.println(array);
+        LOGGER.log(Level.INFO, "Nook: " + array.size() + " items");
+        LOGGER.log(Level.INFO, array.toString());
 
 
         if(!array.isEmpty())
