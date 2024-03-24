@@ -1,9 +1,9 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.listener.TabListener;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;

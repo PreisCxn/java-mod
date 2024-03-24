@@ -1,15 +1,11 @@
 package de.alive.pricecxn.utils;
 
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
-import net.minecraft.text.Text;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.util.Pair;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public class TimeUtil {

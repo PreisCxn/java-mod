@@ -1,8 +1,9 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.PriceCxnMod;
-import de.alive.pricecxn.utils.TimeUtil;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;

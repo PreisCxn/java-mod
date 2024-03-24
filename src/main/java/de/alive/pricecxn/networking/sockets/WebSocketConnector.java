@@ -6,7 +6,6 @@ import reactor.core.scheduler.Schedulers;
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.*;
