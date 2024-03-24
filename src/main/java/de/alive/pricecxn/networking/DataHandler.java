@@ -116,7 +116,7 @@ public class DataHandler {
 
                     JsonArray array = this.dataArray;
 
-                    if (this.dataArray.isEmpty()) {
+                    if (this.dataArray == null || this.dataArray.isEmpty()) {
                         return null;
                     }
 

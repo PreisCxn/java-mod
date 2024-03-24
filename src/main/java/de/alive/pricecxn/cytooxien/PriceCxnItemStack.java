@@ -177,8 +177,6 @@ public class PriceCxnItemStack {
     public int hashCode() {
         JsonObject hash = this.data.deepCopy();
 
-        if (this.searchData == null) return hash.hashCode();
-
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
                 hash.remove(entry.getKey());

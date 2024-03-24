@@ -74,9 +74,6 @@ public abstract class ItemStackMixin {
 
         ItemStack itemStack = (ItemStack) (Object) this;
 
-        if (serverChecker == null) return;
-        if (themeChecker == null) return;
-
         Modes mode = themeChecker.getMode();
 
         if (mode == Modes.NOTHING || mode == Modes.LOBBY) return;
@@ -105,7 +102,7 @@ public abstract class ItemStackMixin {
 
         findInfo();
 
-        if (pcxnPrice.isEmpty() && nookPrice.isEmpty()) return;
+        if ((pcxnPrice == null || pcxnPrice.isEmpty()) && (nookPrice == null || nookPrice.isEmpty())) return;
 
         if (this.cxnItemStack == null) return;
 
@@ -205,7 +202,6 @@ public abstract class ItemStackMixin {
     @Unique
     private @Nullable JsonObject findItemInfo(String dataKey, @NotNull PriceCxnItemStack cxnItemStack) {
         JsonObject cxnItemData = cxnItemStack.getDataWithoutDisplay();
-        if (cxnItemData == null) return null;
 
         JsonObject obj = PriceCxnModClient.CXN_LISTENER.getData(dataKey).getDataObject();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();

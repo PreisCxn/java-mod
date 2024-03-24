@@ -72,7 +72,8 @@ public class PriceText {
     }
 
     private void sortPrices() {
-        Arrays.sort(prices);
+        if(prices != null)
+            Arrays.sort(prices);
     }
 
     public void setPrices(double[] prices) {
@@ -137,12 +138,12 @@ public class PriceText {
     }
 
     private Optional<MutableText> getLowerPriceText() {
-        if (prices.length == 0) return Optional.empty();
+        if (prices == null || prices.length == 0) return Optional.empty();
         return getPriceText(prices[0]);
     }
 
     private Optional<MutableText> getUpperPriceText() {
-        if (prices.length <= 1) return Optional.empty();
+        if (prices == null || prices.length <= 1) return Optional.empty();
         return getPriceText(prices[prices.length - 1]);
     }
 
