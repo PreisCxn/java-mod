@@ -27,7 +27,7 @@ public class TomNookListener extends InventoryListener {
 
     private final DataAccess searchData = TranslationDataAccess.NOOK_BUY_SEARCH;
 
-    private Optional<String> invBuyPrice = Optional.empty();
+    private String invBuyPrice = null;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -61,11 +61,11 @@ public class TomNookListener extends InventoryListener {
 
         if (!items.isEmpty()) {
             for (PriceCxnItemStack item : items) {
-                this.invBuyPrice.ifPresent(s -> {
+                if(this.invBuyPrice != null){
                     JsonObject obj = item.getData();
-                    obj.addProperty("buyPrice", this.invBuyPrice.get());
+                    obj.addProperty("buyPrice", this.invBuyPrice);
                     array.add(obj);
-                });
+                }
             }
         }
 
@@ -81,9 +81,9 @@ public class TomNookListener extends InventoryListener {
         return Mono.empty();
     }
 
-    private Optional<String> getBuyPriceFromInvName(@NotNull MinecraftClient client) {
+    private String getBuyPriceFromInvName(@NotNull MinecraftClient client) {
         if (client.currentScreen == null || client.currentScreen.getTitle() == null)
-            return Optional.empty();
+            return null;
 
         String screenTitle = client.currentScreen.getTitle().getString();
 
@@ -94,14 +94,14 @@ public class TomNookListener extends InventoryListener {
                 if(split.length == 2) {
                     String result = StringUtil.extractBetweenParts(screenTitle, split[0], split[1]);
                     if(result != null && StringUtil.isValidPrice(result)) {
-                        return Optional.of(result);
+                        return result;
                     }
                 }
 
             }
         }
 
-        return Optional.empty();
+        return null;
     }
 
     @Override
