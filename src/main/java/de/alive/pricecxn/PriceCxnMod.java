@@ -34,7 +34,7 @@ public class PriceCxnMod implements ModInitializer {
 					.setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
 			.append(MutableText.of(new PlainTextContent.Literal("] "))
 					.setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
-	public static final String MOD_VERSION = "2.0.1";//Version.MOD_VERSION;
+	public static final String MOD_VERSION = Version.MOD_VERSION;
 
 	@Override
 	public void onInitialize() {
