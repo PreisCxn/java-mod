@@ -86,9 +86,9 @@ public class ServerChecker {
     public Mono<Boolean> isConnected() {
         if (this.websocket.getIsConnected())
             return Mono.just(true);
-        else if(this.lastCheck == 0 || System.currentTimeMillis() - this.lastCheck > this.checkInterval)
+        else {
             return checkConnection();
-        else return Mono.just(false);
+        }
     }
 
     public void addSocketListener(SocketMessageListener listener) {
