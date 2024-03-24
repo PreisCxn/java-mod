@@ -73,14 +73,9 @@ public class DataHandler {
 
         // Check the server connection asynchronously
         return this.serverChecker.isConnected()
-                .flatMap(isConnected -> {
-                    if (!isConnected) {
-                        return Mono.empty();
-                    }
-
-                    // Request the data asynchronously
-                    return getServerDataAsync(this.uri, this.columnNames, this.keyColumnName);
-                })
+                .filter(aBoolean -> aBoolean)
+                .flatMap(isConnected ->
+                        getServerDataAsync(this.uri, this.columnNames, this.keyColumnName))
                 .doOnNext(data -> {
                     this.data = data;
                     this.lastUpdate = System.currentTimeMillis();
