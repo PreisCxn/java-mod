@@ -7,15 +7,14 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class TabListener {
 
@@ -35,7 +34,7 @@ public abstract class TabListener {
             if (client.getCurrentServerEntry() == null) return;
             if (!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, refreshesAfterJoinEvent)
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent, 0)
                     .then(this.onJoinEvent())
                     .subscribe();
         });
@@ -52,10 +51,9 @@ public abstract class TabListener {
 
         AtomicBoolean found = new AtomicBoolean(false);
 
-        AtomicReference<Mono<Void>> mono = new AtomicReference<>(Mono.empty());
-        Arrays.stream(playerListHud.getClass().getDeclaredFields())
-                .peek(field -> field.setAccessible(true))
-                .map(field -> {
+        Flux<Void> flux = Flux.fromArray(playerListHud.getClass().getDeclaredFields())
+                .doOnNext(field -> field.setAccessible(true))
+                .mapNotNull(field -> {
                     try{
                         return field.get(playerListHud);
                     }catch(IllegalAccessException e){
@@ -65,22 +63,22 @@ public abstract class TabListener {
                     }
                 })
                 .filter(Objects::nonNull)
-                .forEach(value -> {
-                    this.searches.getData().stream()
-                            .filter(search -> value.toString().contains(search))
-                            .forEach(search -> {
-                                if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase()))
-                                    return;
-                                mono.set(mono.get().then(this.handleData(value.toString())).then());
-                                found.set(true);
-                            });
-                });
+                .flatMap(value -> Flux.fromIterable(this.searches.getData())
+                        .filter(search -> value.toString().contains(search))
+                        .flatMap(search -> {
+                            if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())) {
+                                return Mono.empty();
+                            }
+                            found.set(true);
+                            return this.handleData(value.toString());
+                        })
+                );
 
-        return mono.get().then(Mono.just(found.get()));
+        return flux.then(Mono.just(found.get()));
     }
 
-    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
-        AtomicInteger attempts = new AtomicInteger(0);
+    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, int currentRefresh) {
+        AtomicInteger attempts = new AtomicInteger(currentRefresh);
         int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
 
         return refresh(notInValue)
@@ -94,12 +92,12 @@ public abstract class TabListener {
                     }
 
                     return Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L))
-                            .then(refreshAsync(notInValue, maxRefresh));
+                            .then(refreshAsync(notInValue, maxRefresh, attempts.get()));
                 });
     }
 
     public Mono<Void> refreshAsync() {
-        return refreshAsync(null, 0);
+        return refreshAsync(null, 0, 0);
     }
 
     /**
