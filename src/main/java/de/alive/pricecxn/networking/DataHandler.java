@@ -65,7 +65,7 @@ public class DataHandler {
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
         if (!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
-            LOGGER.log(Level.SEVERE, "Data is already up-to-date");
+            LOGGER.log(Level.INFO, "Data is already up-to-date");
             return Mono.empty();
         }
 
