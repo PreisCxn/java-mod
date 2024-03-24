@@ -19,7 +19,7 @@ public class ServerChecker {
     private boolean connected = false;
     private final String uri;
     private final int checkInterval;
-    private long lastCheck = 0;
+    private final long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
 
     private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();

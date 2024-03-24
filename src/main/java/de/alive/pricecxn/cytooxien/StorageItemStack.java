@@ -15,7 +15,7 @@ public class StorageItemStack {
     private static final int REFRESH_AFTER_SECONDS = 10;
     private long lastUpdate = 0;
     private boolean setup = false;
-    private PriceText priceText = PriceText.create(true);
+    private final PriceText priceText = PriceText.create(true);
     private Type type;
     private WebSocketConnector connector;
 

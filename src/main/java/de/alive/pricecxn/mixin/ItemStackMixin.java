@@ -54,7 +54,7 @@ public abstract class ItemStackMixin {
     @Unique
     private long lastUpdate = 0;
     @Unique
-    private StorageItemStack storageItemStack = new StorageItemStack();
+    private final StorageItemStack storageItemStack = new StorageItemStack();
     @Unique
     private String searchingString = "";
     @Unique

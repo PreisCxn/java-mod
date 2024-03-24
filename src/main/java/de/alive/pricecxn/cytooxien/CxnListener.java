@@ -39,9 +39,9 @@ public class CxnListener extends ServerListener {
     private final ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
     NetworkingState state = NetworkingState.OFFLINE;
-    private AtomicBoolean active = new AtomicBoolean(false);
+    private final AtomicBoolean active = new AtomicBoolean(false);
     private Boolean isRightVersion = null;
-    private AtomicBoolean listenerActive = new AtomicBoolean(false);
+    private final AtomicBoolean listenerActive = new AtomicBoolean(false);
 
     public CxnListener() {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);

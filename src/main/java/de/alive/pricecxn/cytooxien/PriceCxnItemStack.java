@@ -37,7 +37,7 @@ public class PriceCxnItemStack {
 
     private String itemName;
 
-    private String displayName;
+    private final String displayName;
 
     private int amount = 0;
 
