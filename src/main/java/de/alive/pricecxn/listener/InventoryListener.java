@@ -7,7 +7,6 @@ import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import de.alive.pricecxn.utils.TimeUtil;
@@ -23,15 +22,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public abstract class InventoryListener {
 
-    protected static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int REFRESH_INTERVAL = 200;
     private final DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
