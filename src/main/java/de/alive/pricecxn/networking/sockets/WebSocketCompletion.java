@@ -4,9 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -53,8 +52,8 @@ public class WebSocketCompletion {
         }, DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
-    public CompletableFuture<String> getFuture() {
-        return future;
+    public Mono<String> getMono() {
+        return Mono.fromFuture(future);
     }
 
     private void cancelTimeout() {

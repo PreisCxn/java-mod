@@ -1,41 +1,38 @@
 package de.alive.pricecxn.networking.sockets;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ClientEndpoint
 public class WebSocketConnector {
-    private Session session;
-
-    private boolean isConnected = false;
-
-    private ScheduledExecutorService pingExecutor;
 
     public static final String DEFAULT_WEBSOCKET_URI = "wss://socket.preiscxn.de";
-
-    private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private static final Logger LOGGER = Logger.getLogger(WebSocketConnector.class.getName());
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
+    private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private Session session;
+    private boolean isConnected = false;
+    private ScheduledExecutorService pingExecutor;
+    private Boolean isConnectionEstablished = null;
 
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
         this.isConnected = true;
-        connectionFuture.complete(true);
-        synchronized (openListeners) {
+        isConnectionEstablished = true;
+        synchronized(openListeners){
             for (SocketOpenListener listener : openListeners) {
                 listener.onOpen(session);
             }
@@ -44,18 +41,18 @@ public class WebSocketConnector {
         // Start sending pings every 30 seconds
         pingExecutor = Executors.newSingleThreadScheduledExecutor();
         pingExecutor.scheduleAtFixedRate(() -> {
-            try {
+            try{
                 session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
-            } catch (IOException e) {
-                e.printStackTrace();
+            }catch(IOException e){
+                LOGGER.log(Level.SEVERE, "Failed to send ping", e);
             }
         }, 30, 30, TimeUnit.SECONDS);
     }
 
     @OnMessage
     public void onMessage(String message) {
-        System.out.println("WebSocket message: " + message);
-        synchronized (messageListeners) {
+        LOGGER.log(Level.FINE, "WebSocket message: " + message);
+        synchronized(messageListeners){
             for (SocketMessageListener listener : messageListeners) {
                 listener.onMessage(message);
             }
@@ -65,13 +62,13 @@ public class WebSocketConnector {
     @OnClose
     public void onClose() {
         this.isConnected = false;
-        connectionFuture = new CompletableFuture<>();
-        synchronized (closeListeners) {
+        isConnectionEstablished = null;
+        synchronized(closeListeners){
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
             }
         }
-        System.out.println("WebSocket connection closed");
+        LOGGER.log(Level.FINEST, "WebSocket connection closed");
     }
 
     @OnError
@@ -79,60 +76,31 @@ public class WebSocketConnector {
         throwable.printStackTrace();
     }
 
-    public CompletableFuture<Boolean> connectToWebSocketServer(String serverUri) {
-        try {
-            System.out.println("connecting...123");
-            connectionFuture = new CompletableFuture<>();
-            System.out.println("test22131");
-            WebSocketContainer container = null;
+    public Mono<Boolean> connectToWebSocketServer(String serverUri) {
+        return Mono.fromCallable(() -> {
             try {
-                container = ContainerProvider.getWebSocketContainer();
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-                this.isConnected = false;
-                connectionFuture.complete(false);
-                System.out.println("connecting1...");
-            }
-            System.out.println("connecting2...");
-            if (container == null) {
-                this.isConnected = false;
-                connectionFuture.complete(false);
-                System.out.println("connecting2.1...");
-                return connectionFuture;
-            }
-            try {
+                WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                 container.connectToServer(this, new URI(serverUri));
-                System.out.println("connecting3...");
+                return true;
             } catch (Exception e) {
-                System.out.println("connecting4...");
-                System.err.println(e.getMessage());
-                this.isConnected = false;
-                connectionFuture.complete(false);
-                System.out.println("connecting5...");
+                LOGGER.log(Level.SEVERE, "Failed to connect to WebSocket server", e);
+                return false;
             }
-
-            return connectionFuture;
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            this.isConnected = false;
-            connectionFuture.complete(false);
-            System.out.println("connecting6...");
-            return connectionFuture;
-        }
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     public void sendMessage(String message) {
-        try {
+        try{
             session.getBasicRemote().sendText(message);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
+        }catch(IOException e){
+            LOGGER.log(Level.SEVERE, "Failed to send message", e);
         }
     }
 
     public void closeWebSocket() {
-        try {
+        try{
             session.close();
-        } catch (IOException e) {
+        }catch(IOException e){
             System.err.println(e.getMessage());
         }
     }
@@ -142,37 +110,37 @@ public class WebSocketConnector {
     }
 
     public void addMessageListener(SocketMessageListener listener) {
-        synchronized (messageListeners){
+        synchronized(messageListeners){
             messageListeners.add(listener);
         }
     }
 
     public void addCloseListener(SocketCloseListener listener) {
-        synchronized (closeListeners) {
+        synchronized(closeListeners){
             closeListeners.add(listener);
         }
     }
 
     public void addOpenListener(SocketOpenListener listener) {
-        synchronized (openListeners) {
+        synchronized(openListeners){
             openListeners.add(listener);
         }
     }
 
     public void removeMessageListener(SocketMessageListener listener) {
-        synchronized (messageListeners) {
+        synchronized(messageListeners){
             messageListeners.remove(listener);
         }
     }
 
     public void removeCloseListener(SocketCloseListener listener) {
-        synchronized (closeListeners){
+        synchronized(closeListeners){
             closeListeners.remove(listener);
         }
     }
 
     public void removeOpenListener(SocketOpenListener listener) {
-        synchronized (openListeners) {
+        synchronized(openListeners){
             openListeners.remove(listener);
         }
     }

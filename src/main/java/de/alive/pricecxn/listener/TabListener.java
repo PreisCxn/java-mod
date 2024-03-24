@@ -1,27 +1,29 @@
 package de.alive.pricecxn.listener;
 
 import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.PriceCxnModClient;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class TabListener {
 
-    private String notInValue;
-    private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
-
+    private static final Logger LOGGER = Logger.getLogger(TabListener.class.getName());
     private static final int MAX_REFRESH = 15;
-
+    private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
+    private String notInValue;
     private DataAccess searches;
 
     public TabListener(@NotNull DataAccess searches) {
@@ -35,79 +37,55 @@ public abstract class TabListener {
             if (client.getCurrentServerEntry() == null) return;
             if (!refreshAfterJoinEvent()) return;
 
-            refreshAsync(this.notInValue, refreshesAfterJoinEvent).thenRun(this::onJoinEvent);
+            refreshAsync(this.notInValue, refreshesAfterJoinEvent)
+                    .then(this.onJoinEvent())
+                    .subscribe();
         });
     }
 
-    public boolean refresh(@Nullable String notInValue) {
-        System.out.println("refresh");
+    public Mono<Void> refreshAsync() {
+        return refreshAsync(null, 0);
+    }
+
+    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
+        return refreshAsync(notInValue, maxRefresh, new AtomicInteger());
+    }
+
+    private Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, AtomicInteger attempts) {
+        int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
+
+        return refresh(notInValue)
+                .filter(aBoolean -> !aBoolean)
+                .filter(aBoolean -> attempts.incrementAndGet() < finalMaxRefresh)
+                .flatMap(refresh -> Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L)))
+                .flatMap(unused -> refreshAsync(notInValue, finalMaxRefresh, attempts));
+    }
+
+    private Mono<Boolean> refresh(@Nullable String notInValue) {
+        LOGGER.log(Level.INFO, "refresh");
+
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
-        if (gameHud == null) return false;
+        if (gameHud == null) return Mono.just(false);
+
         PlayerListHud playerListHud = gameHud.getPlayerListHud();
-        if (playerListHud == null) return false;
+        if (playerListHud == null) return Mono.just(false);
 
-        System.out.println("refresh2");
-
-        AtomicBoolean found = new AtomicBoolean(false);
-
-        Arrays.stream(playerListHud.getClass().getDeclaredFields())
-                .peek(field -> field.setAccessible(true))
-                .map(field -> {
-                    try {
+        return Flux.fromArray(playerListHud.getClass().getDeclaredFields())
+                .doOnNext(field -> field.setAccessible(true))
+                .mapNotNull(field -> {
+                    try{
                         return field.get(playerListHud);
-                    } catch (IllegalAccessException e) {
-                        System.out.println("error");
-                        e.printStackTrace();
+                    }catch(IllegalAccessException e){
+                        LOGGER.log(Level.SEVERE, "Error while accessing field", e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .forEach(value -> {
-                    this.searches.getData().stream()
-                            .filter(search -> value.toString().contains(search))
-                            .forEach(search -> {
-                                if (notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase()))
-                                    return;
-                                this.handleData(value.toString());
-                                found.set(true);
-                            });
-                });
-
-        return found.get();
-    }
-
-    public CompletableFuture<Void> refreshAsync(@Nullable String notInValue, @Nullable int maxRefresh) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-
-        AtomicInteger attempts = new AtomicInteger(0);
-
-        int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
-        Runnable refreshTask = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("try");
-                if (refresh(notInValue)) {
-                    System.out.println("found : " + notInValue);
-                    future.complete(null);
-                    return;
-                }
-
-                if (attempts.incrementAndGet() >= finalMaxRefresh) {
-                    future.complete(null);
-                    return;
-                }
-
-                PriceCxnModClient.EXECUTOR_SERVICE.schedule(this, 200 + attempts.get() * 50L, TimeUnit.MILLISECONDS);
-            }
-        };
-
-        PriceCxnModClient.EXECUTOR_SERVICE.schedule(refreshTask, 200, TimeUnit.MILLISECONDS);
-
-        return future;
-    }
-
-    public CompletableFuture<Void> refreshAsync() {
-        return refreshAsync(null, 0);
+                .flatMap(value -> Flux.fromIterable(this.searches.getData())
+                        .filter(search -> value.toString().contains(search))
+                        .filter(search -> !(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())))
+                        .flatMap(search -> this.handleData(value.toString()).then(Mono.just(search)))
+                ).any(string -> true);
     }
 
     /**
@@ -115,7 +93,7 @@ public abstract class TabListener {
      *
      * @param data The String line from the tab
      */
-    protected abstract void handleData(@NotNull String data);
+    protected abstract Mono<Void> handleData(@NotNull String data);
 
     /**
      * Decide if the refresh method should be called after the player joins a server or change the server on a network
@@ -124,7 +102,7 @@ public abstract class TabListener {
      */
     protected abstract boolean refreshAfterJoinEvent();
 
-    public abstract void onJoinEvent();
+    public abstract Mono<Void> onJoinEvent();
 
     protected int getRefreshesAfterJoinEvent() {
         return MAX_REFRESH / 2;
@@ -141,4 +119,5 @@ public abstract class TabListener {
     public void setNotInValue(String notInValue) {
         this.notInValue = notInValue;
     }
+
 }

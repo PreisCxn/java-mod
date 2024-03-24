@@ -7,6 +7,7 @@ import de.alive.pricecxn.networking.sockets.SocketMessageListener;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -21,13 +22,13 @@ public class ServerChecker {
     private long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
 
-    private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
-    private CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
-    private CompletableFuture<Void> minVersionFuture = new CompletableFuture<>();
+    private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private final CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
+    private final CompletableFuture<String> minVersionFuture = new CompletableFuture<>();
 
     private NetworkingState state = NetworkingState.OFFLINE;
 
-    private String serverMinVersion = null;
+    private final Mono<String> minVersion = Mono.fromFuture(minVersionFuture);
 
 
 
@@ -45,8 +46,7 @@ public class ServerChecker {
             try{
                 JsonObject json = JsonParser.parseString(message).getAsJsonObject();
                 if(json.has("min-version")) {
-                    this.serverMinVersion = json.get("min-version").getAsString();
-                    this.minVersionFuture.complete(null);
+                    this.minVersionFuture.complete(json.get("min-version").getAsString());
                 }
 
                 if(json.has("maintenance")) {
@@ -84,35 +84,22 @@ public class ServerChecker {
      * This method is used to check if the server is reachable
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
-    public CompletableFuture<Boolean> checkConnection() {
-        System.out.println("checking connection websocket");
-        connectionFuture = new CompletableFuture<>();
-        maintenanceFuture = new CompletableFuture<>();
-        minVersionFuture = new CompletableFuture<>();
-        CompletableFuture<Boolean> future = this.websocket.connectToWebSocketServer(this.uri).exceptionally(throwable -> {
-            System.out.println("websocket connection failed");
-            this.state = NetworkingState.OFFLINE;
-            connectionFuture.complete(false);
-            return false;
-        });
-
-        System.out.println("checking connection websocket2");
-
-        future.thenCompose(isConnected -> {
-            System.out.println("checking connection websocket3");
-            if(isConnected) {
-                System.out.println("websocket connected");
-                this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "maintenance");
-                this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "min-version");
-            } else {
-                System.out.println("websocket not connected");
-                connectionFuture.complete(false);
-            }
-            System.out.println("checking connection websocket4");
-            return null;
-        });
-
-        return connectionFuture;
+    public Mono<Boolean> checkConnection() {
+        return this.websocket.connectToWebSocketServer(this.uri)
+                .onErrorResume(throwable -> {
+                    this.state = NetworkingState.OFFLINE;
+                    connectionFuture.complete(false);
+                    return Mono.just(false);
+                })
+                .mapNotNull(isConnected -> {
+                    if (isConnected) {
+                        this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "maintenance");
+                        this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "min-version");
+                    } else {
+                        connectionFuture.complete(false);
+                    }
+                    return null;
+                });
     }
 
     /**
@@ -120,12 +107,12 @@ public class ServerChecker {
      * Only checks if the server is reachable if the last check was more than the check interval ago or the last check was never
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
-    public CompletableFuture<Boolean> isConnected() {
+    public Mono<Boolean> isConnected() {
         if (this.websocket.getIsConnected())
-            return CompletableFuture.completedFuture(true);
+            return Mono.just(true);
         else if(this.lastCheck == 0 || System.currentTimeMillis() - this.lastCheck > this.checkInterval)
             return checkConnection();
-        else return CompletableFuture.completedFuture(false);
+        else return Mono.just(false);
     }
 
     public void addSocketListener(SocketMessageListener listener) {
@@ -140,8 +127,8 @@ public class ServerChecker {
         return state;
     }
 
-    public String getServerMinVersion() {
-        return serverMinVersion;
+    public Mono<String> getServerMinVersion() {
+        return minVersion;
     }
 
     public WebSocketConnector getWebsocket() {

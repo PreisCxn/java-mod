@@ -5,18 +5,16 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import de.alive.pricecxn.utils.TimeUtil;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class StorageItemStack {
     private static final int REFRESH_AFTER_SECONDS = 10;
-    private CompletableFuture<Void> searchCompletion = null;
     private long lastUpdate = 0;
     private boolean setup = false;
-    private Integer storageSearchResult;
     private PriceText priceText = PriceText.create(true);
     private Type type;
     private WebSocketConnector connector;
@@ -34,30 +32,31 @@ public class StorageItemStack {
     public StorageItemStack(JsonObject object, WebSocketConnector connector) {
         setup(object, connector);
     }
-    public void search(Integer storageSearchResult) {
-        if(!setup) return;
+    public Mono<Void> search(Integer storageSearchResult) {
+        if(!setup) return null;
         if(changedStorage(storageSearchResult)) {
             //this.priceText = PriceText.create(true);
-        } else return;
-        if(isSearching()) return;
-        if(lastUpdate + REFRESH_AFTER_SECONDS * TimeUtil.TimeUnit.SECONDS.getMilliseconds() > System.currentTimeMillis()) return;
+        } else return null;
+
+        if(lastUpdate + REFRESH_AFTER_SECONDS * TimeUtil.TimeUnit.SECONDS.getMilliseconds() > System.currentTimeMillis())
+            return null;
         lastUpdate = System.currentTimeMillis();
 
-        searchCompletion = new CompletableFuture<>();
+        Mono<Void> searchCompletion;
 
         if(type.containsAmount(storageSearchResult)) {
-            searchCompletion.complete(null);
-        } else
+            searchCompletion = Mono.empty();
+        } else {
             searchCompletion = type.requestAmount(storageSearchResult, this.connector);
+        }
 
-        searchCompletion.thenRun(() -> {
-            System.out.println("finished");
+        return searchCompletion.then().doOnSuccess(v -> {
+
             type.getPrice(storageSearchResult).ifPresentOrElse(price -> {
                 priceText.withPriceAdder(price);
                 priceText.finishSearching();
-                System.out.println("Price: " + price);
+
             }, () -> {
-                System.out.println("Price2: " + storageSearchResult);
                 priceText.withPriceAdder(0);
                 priceText.setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
             });
@@ -68,19 +67,8 @@ public class StorageItemStack {
         return this.priceText;
     }
 
-    private boolean isSearching() {
-        if(searchCompletion == null) return false;
-
-        return searchCompletion.isDone();
-    }
-
     public boolean changedStorage(Integer storage) {
-        return Optional.ofNullable(storage)
-                .map(value -> {
-                    Optional.ofNullable(storageSearchResult).map(integer -> !value.equals(integer));
-                    return true;
-                })
-                .orElse(false);
+        return storage != null;
     }
 
     public static boolean isOf(JsonObject data, Type item) {
@@ -125,28 +113,20 @@ public class StorageItemStack {
             return priceMap.containsKey(amount);
         }
 
-        public CompletableFuture<Void> requestAmount(int amount, WebSocketConnector connector) {
-
-            CompletableFuture<Void> future = new CompletableFuture<>();
-
-            new WebSocketCompletion(connector, this.query, String.valueOf(amount)).getFuture().thenCompose(s -> {
-                if(s == null) {
-                    future.complete(null);
+        public Mono<Void> requestAmount(int amount, WebSocketConnector connector) {
+            return new WebSocketCompletion(connector, this.query, String.valueOf(amount)).getMono().mapNotNull(s -> {
+                if (s == null) {
                     return null;
                 }
+
                 try {
                     double price = Double.parseDouble(s);
                     priceMap.put(amount, price);
-                } catch (NumberFormatException e) {
-                    future.complete(null);
+                }catch(NumberFormatException e){
                     return null;
                 }
-                future.complete(null);
                 return null;
-
             });
-
-            return future;
         }
 
     }
