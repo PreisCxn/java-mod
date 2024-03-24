@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class TabListener {
-
+    private static final Logger LOGGER = Logger.getLogger(TabListener.class.getName());
     private static final int MAX_REFRESH = 15;
     private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
     private String notInValue;
@@ -41,13 +43,13 @@ public abstract class TabListener {
     }
 
     public Mono<Boolean> refresh(@Nullable String notInValue) {
-        System.out.println("refresh");
+        LOGGER.finest("refresh");
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
         if (gameHud == null) return Mono.just(false);
         PlayerListHud playerListHud = gameHud.getPlayerListHud();
         if (playerListHud == null) return Mono.just(false);
 
-        System.out.println("refresh2");
+        LOGGER.finest("refresh2");
 
         AtomicBoolean found = new AtomicBoolean(false);
 
@@ -57,8 +59,7 @@ public abstract class TabListener {
                     try{
                         return field.get(playerListHud);
                     }catch(IllegalAccessException e){
-                        System.out.println("error");
-                        e.printStackTrace();
+                        LOGGER.log(Level.SEVERE, "Error while accessing field", e);
                         return null;
                     }
                 })
