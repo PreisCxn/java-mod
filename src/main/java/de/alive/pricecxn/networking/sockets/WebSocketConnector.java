@@ -14,11 +14,12 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+
 @ClientEndpoint
 public class WebSocketConnector {
 
     public static final String DEFAULT_WEBSOCKET_URI = "wss://socket.preiscxn.de";
-    private static final Logger LOGGER = Logger.getLogger(WebSocketConnector.class.getName());
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
@@ -45,14 +46,14 @@ public class WebSocketConnector {
             try{
                 session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
             }catch(IOException e){
-                LOGGER.log(Level.SEVERE, "Failed to send ping", e);
+                LOGGER.error("Failed to send ping", e);
             }
         }, 30, 30, TimeUnit.SECONDS);
     }
 
     @OnMessage
     public void onMessage(String message) {
-        LOGGER.log(Level.FINE, "WebSocket message: " + message);
+        LOGGER.debug("WebSocket message: " + message);
         synchronized(messageListeners){
             for (SocketMessageListener listener : messageListeners) {
                 listener.onMessage(message);
@@ -69,12 +70,12 @@ public class WebSocketConnector {
                 listener.onClose();
             }
         }
-        LOGGER.log(Level.FINEST, "WebSocket connection closed");
+        LOGGER.debug("WebSocket connection closed");
     }
 
     @OnError
     public void onError(Throwable throwable) {
-        LOGGER.log(Level.SEVERE, "WebSocket error", throwable);
+        LOGGER.error("WebSocket error", throwable);
     }
 
     public @NotNull Mono<Boolean> connectToWebSocketServer(@NotNull String serverUri) {
@@ -84,7 +85,7 @@ public class WebSocketConnector {
                 container.connectToServer(this, new URI(serverUri));
                 return true;
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Failed to connect to WebSocket server", e);
+                LOGGER.error("Failed to connect to WebSocket server", e);
                 return false;
             }
         }).subscribeOn(Schedulers.boundedElastic());
@@ -94,7 +95,7 @@ public class WebSocketConnector {
         try{
             session.getBasicRemote().sendText(message);
         }catch(IOException e){
-            LOGGER.log(Level.SEVERE, "Failed to send message", e);
+            LOGGER.error("Failed to send message", e);
         }
     }
 
@@ -102,7 +103,7 @@ public class WebSocketConnector {
         try{
             session.close();
         }catch(IOException e){
-            LOGGER.log(Level.SEVERE, "Failed to close WebSocket", e);
+            LOGGER.error("Failed to close WebSocket", e);
         }
     }
 

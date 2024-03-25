@@ -20,10 +20,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class TomNookListener extends InventoryListener {
-    private static final Logger LOGGER = Logger.getLogger(TomNookListener.class.getName());
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
     private final Pair<Integer, Integer> itemRange = new Pair<>(13, 13);
@@ -72,8 +72,8 @@ public class TomNookListener extends InventoryListener {
             }
         }
 
-        LOGGER.log(Level.INFO, "Nook: " + array.size() + " items");
-        LOGGER.log(Level.INFO, array.toString());
+        LOGGER.debug("Nook: " + array.size() + " items");
+        LOGGER.debug(array.toString());
 
 
         if(!array.isEmpty())

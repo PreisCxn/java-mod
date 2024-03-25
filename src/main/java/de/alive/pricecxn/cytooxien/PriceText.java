@@ -14,10 +14,10 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
 public class PriceText {
-    private static final Logger LOGGER = Logger.getLogger(PriceText.class.getName());
     public static final MutableText COIN_TEXT = MutableText.of(new PlainTextContent.Literal("\uE202"))
             .setStyle(Style.EMPTY.withColor(Formatting.YELLOW));
     public static final Style PRICE_STYLE = Style.EMPTY.withColor(Formatting.GOLD);
@@ -83,8 +83,8 @@ public class PriceText {
 
     public MutableText getText() {
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
-        LOGGER.log(Level.INFO, "preise!!! ");
-        LOGGER.log(Level.INFO, String.valueOf(this.priceAdder));
+        LOGGER.debug("preise!!! ");
+        LOGGER.debug(String.valueOf(this.priceAdder));
         return getLowerPriceText().flatMap(text -> getUpperPriceText().map(mutableText -> MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
                         .append(text)
                         .append(MutableText.of(new PlainTextContent.Literal(
