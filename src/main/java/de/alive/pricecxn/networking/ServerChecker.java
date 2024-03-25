@@ -10,16 +10,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class ServerChecker {
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final int DEFAULT_CHECK_INTERVAL = 300000; //5min
+    private static final Duration DEFAULT_CHECK_INTERVAL = Duration.ofMinutes(5);
     private final boolean connected = false;
     private final @NotNull String uri;
-    private final int checkInterval;
+    private final Duration checkInterval;
     private final long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
 
@@ -39,9 +41,9 @@ public class ServerChecker {
      * @param uri           The uri of the server
      * @param checkInterval The interval in which the server is checked in milliseconds
      */
-    public ServerChecker(@Nullable String uri, int checkInterval) {
+    public ServerChecker(@Nullable String uri, @Nullable Duration checkInterval) {
         this.uri = uri == null ? WebSocketConnector.DEFAULT_WEBSOCKET_URI : uri;
-        this.checkInterval = checkInterval < 0 ? DEFAULT_CHECK_INTERVAL : checkInterval;
+        this.checkInterval = checkInterval == null ? DEFAULT_CHECK_INTERVAL : checkInterval;
 
         this.websocket.addMessageListener(this::onWebsocketMessage);
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
@@ -54,7 +56,7 @@ public class ServerChecker {
      * Uses the default check interval and uri
      */
     public ServerChecker() {
-        this(null, -1);
+        this(null, null);
     }
 
     /**
