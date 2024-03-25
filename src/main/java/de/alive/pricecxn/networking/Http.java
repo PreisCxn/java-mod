@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class Http {
-
+    protected static final String DEFAULT_API_URL = "https://api.preiscxn.de/api";
     public final String apiUrl;
 
     private final @NotNull HttpClient client = HttpClient.newHttpClient();
@@ -23,7 +23,7 @@ public class Http {
     private static final Http INSTANCE = new Http();
 
     protected Http() {
-        apiUrl = "https://api.preiscxn.de/api";
+        apiUrl = DEFAULT_API_URL;
     }
 
     public Http(String apiUrl) {
@@ -34,7 +34,11 @@ public class Http {
         return INSTANCE;
     }
 
-    public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    protected Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
         return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
     }
 
