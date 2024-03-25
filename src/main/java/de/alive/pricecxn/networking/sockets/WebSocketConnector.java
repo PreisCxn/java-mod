@@ -1,11 +1,11 @@
 package de.alive.pricecxn.networking.sockets;
 
-import jakarta.websocket.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
