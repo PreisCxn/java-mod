@@ -13,7 +13,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class HttpTest {
+    private static class HttpMocker extends Http {
+        private final HttpResponse<String> mockResponse;
 
+        public HttpMocker(HttpResponse<String> mockResponse) {
+            super();
+            this.mockResponse = mockResponse;
+        }
+
+        @Override
+        public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
+            return Mono.just(mockResponse);
+        }
+    }
     @Test
     public void getShouldReturnExpectedResultWhenStatusCodeIsSuccessful() {
         Function<String, String> stringFunction = Function.identity();
@@ -23,12 +35,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("Success");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction, callback);
 
@@ -46,12 +53,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("Error");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction, callback);
 
@@ -69,12 +71,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("Success");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
 
@@ -92,12 +89,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
 
@@ -115,12 +107,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("Error");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
 
@@ -138,12 +125,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("");
 
-        Http http = new Http() {
-            @Override
-            public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-                return Mono.just(mockResponse);
-            }
-        };
+        Http http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
 
