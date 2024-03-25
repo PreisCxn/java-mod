@@ -9,12 +9,13 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+
 public class DataHandler {
 
     public static final int TRANSLATION_REFRESH_INTERVAL = 1000 * 60 * 60; // 1 Stunde
     public static final int MODUSER_REFRESH_INTERVAL = 1000 * 60 * 60 * 6; // 6 Stunden
     public static final int ITEM_REFRESH_INTERVAL = 1000 * 60 * 60 * 3; // 6 Stunden
-    private static final Logger LOGGER = Logger.getLogger(DataHandler.class.getName());
     private final @NotNull ServerChecker serverChecker;
     private final @Nullable List<String> columnNames;
     private final @Nullable String keyColumnName;
@@ -61,15 +62,15 @@ public class DataHandler {
      * @return A CompletableFuture which returns null if the refresh was successful
      */
     public @NotNull Mono<Void> refresh(boolean isForced) {
-        LOGGER.log(Level.INFO, "refreshData 1");
+        LOGGER.debug("refreshData 1");
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
         if (!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
-            LOGGER.log(Level.INFO, "Data is already up-to-date");
+            LOGGER.debug("Data is already up-to-date");
             return Mono.empty();
         }
 
-        LOGGER.log(Level.INFO, "refreshData 2");
+        LOGGER.debug("refreshData 2");
 
         // Check the server connection asynchronously
         return this.serverChecker.isConnected()
@@ -80,7 +81,7 @@ public class DataHandler {
                     this.data = data;
                     this.lastUpdate = System.currentTimeMillis();
                 })
-                .doOnError(ex -> LOGGER.log(Level.SEVERE, "Failed to refresh data", ex))
+                .doOnError(ex -> LOGGER.error("Failed to refresh data", ex))
                 .then();
     }
 

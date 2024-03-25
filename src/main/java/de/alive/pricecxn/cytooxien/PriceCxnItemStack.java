@@ -20,8 +20,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+
 public class PriceCxnItemStack {
-    private static final Logger LOGGER = Logger.getLogger(PriceCxnItemStack.class.getName());
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
@@ -77,7 +78,7 @@ public class PriceCxnItemStack {
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
-        LOGGER.log(Level.INFO, itemName);
+        LOGGER.debug(itemName);
 
 
         /*

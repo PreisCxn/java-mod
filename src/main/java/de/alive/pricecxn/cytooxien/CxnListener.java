@@ -30,11 +30,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.MOD_TEXT;
 
 public class CxnListener extends ServerListener {
 
-    private static final Logger LOGGER = Logger.getLogger(CxnListener.class.getName());
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
     private final @NotNull ThemeServerChecker themeChecker;
@@ -63,7 +63,7 @@ public class CxnListener extends ServerListener {
 
         //checking connection and activating mod
         checkConnectionAsync(false)
-                .doOnSuccess((a) -> LOGGER.log(Level.INFO, "Mod active?" + this.active.get()))
+                .doOnSuccess((a) -> LOGGER.info("Mod active?" + this.active.get()))
                 .subscribe();
 
     }
@@ -135,7 +135,7 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onServerLeave() {
-        LOGGER.log(Level.INFO, "Cytooxien left : " + this.isOnServer().get());
+        LOGGER.debug("Cytooxien left : " + this.isOnServer().get());
         deactivate();
     }
 
@@ -178,7 +178,7 @@ public class CxnListener extends ServerListener {
                     isRightVersion = true;
                 })
                 .onErrorResume(ex -> {
-                    LOGGER.log(Level.SEVERE, "Error while activating mod", ex);
+                    LOGGER.error("Error while activating mod", ex);
                     deactivate();
                     return Mono.error(ex);
                 })
@@ -186,7 +186,7 @@ public class CxnListener extends ServerListener {
     }
 
     private @NotNull Mono<Void> initData() {
-        LOGGER.log(Level.INFO, "initData");
+        LOGGER.debug("initData");
 
         if (!this.data.containsKey("pricecxn.data.mod_users")) {
             data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
@@ -312,7 +312,7 @@ public class CxnListener extends ServerListener {
 
                         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
 
-                        LOGGER.log(Level.INFO, isRightVersionBackup + " " + serverMinVersion);
+                        LOGGER.info(isRightVersionBackup + " " + serverMinVersion);
                         this.isRightVersion = false;
                         return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
                     } else {
@@ -329,19 +329,19 @@ public class CxnListener extends ServerListener {
                                     .flatMap(isSpecialUser -> {
                                         if (isSpecialUser) {
                                             // Benutzer hat Berechtigung
-                                            LOGGER.log(Level.INFO, "Benutzer hat Berechtigung");
+                                            LOGGER.info("Benutzer hat Berechtigung");
                                             return this.activate(themeRefresh).then(
                                                     Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                                         } else {
                                             // Benutzer hat keine Berechtigung
-                                            LOGGER.log(Level.INFO, "Benutzer hat keine Berechtigung");
+                                            LOGGER.info("Benutzer hat keine Berechtigung");
                                             this.deactivate();
                                             return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
                                         }
                                     });
                         } else {
                             // Server im Offline-Modus
-                            LOGGER.log(Level.INFO, "Server im Offline-Modus");
+                            LOGGER.info("Server im Offline-Modus");
                             this.deactivate();
                             return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                         }

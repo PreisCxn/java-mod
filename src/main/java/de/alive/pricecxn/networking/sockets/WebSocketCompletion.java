@@ -11,8 +11,9 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+
 public class WebSocketCompletion {
-    private static final Logger LOGGER = Logger.getLogger(WebSocketCompletion.class.getName());
     public static final String QUERY_STRING = "pcxn?";
     private static final int DEFAULT_TIMEOUT = 5000;
 
@@ -45,7 +46,7 @@ public class WebSocketCompletion {
         this.connector.addMessageListener(listener);
         String queryString = QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", ""));
 
-        LOGGER.log(Level.INFO, queryString);
+        LOGGER.debug(queryString);
         connector.sendMessage(queryString);
 
         timeoutExecutor.schedule(() -> {

@@ -22,10 +22,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
 
 public class TradeListener extends InventoryListener {
-    private static final Logger LOGGER = Logger.getLogger(TradeListener.class.getName());
     private static final int INVENTORY_HEIGHT = 4;
     private static final int INVENTORY_WIDTH = 4;
     private static final int INVENTORY_SPACE_BETWEEN = 5;
@@ -136,7 +136,7 @@ public class TradeListener extends InventoryListener {
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
-        LOGGER.log(Level.INFO, result.toString());
+        LOGGER.debug(result.toString());
 
         return Optional.of(result);
     }

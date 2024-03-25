@@ -17,9 +17,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+
 public abstract class TabListener {
 
-    private static final Logger LOGGER = Logger.getLogger(TabListener.class.getName());
     private static final int MAX_REFRESH = 15;
     private final int refreshesAfterJoinEvent = getRefreshesAfterJoinEvent();
     private String notInValue;
@@ -61,7 +62,7 @@ public abstract class TabListener {
     }
 
     private @NotNull Mono<Boolean> refresh(@Nullable String notInValue) {
-        LOGGER.log(Level.INFO, "refresh");
+        LOGGER.debug("refresh");
 
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
         if (gameHud == null) return Mono.just(false);
@@ -75,7 +76,7 @@ public abstract class TabListener {
                     try{
                         return field.get(playerListHud);
                     }catch(IllegalAccessException e){
-                        LOGGER.log(Level.SEVERE, "Error while accessing field", e);
+                        LOGGER.error("Error while accessing field", e);
                         return null;
                     }
                 })
