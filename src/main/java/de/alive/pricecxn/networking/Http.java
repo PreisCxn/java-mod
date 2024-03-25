@@ -16,19 +16,33 @@ import java.util.logging.Logger;
 
 public class Http {
 
-    public static final String API_URL = "https://api.preiscxn.de/api";
+    public final String apiUrl;
 
-    private static final @NotNull HttpClient client = HttpClient.newHttpClient();
+    private final @NotNull HttpClient client = HttpClient.newHttpClient();
 
-    public static Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
+    private static final Http INSTANCE = new Http();
+
+    private Http() {
+        apiUrl = "https://api.preiscxn.de/api";
+    }
+
+    public Http(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
+
+    public static Http getInstance() {
+        return INSTANCE;
+    }
+
+    public Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
         return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
     }
 
-    public static <T, R> @NotNull Mono<R> GET(String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String... headers) {
-        return GET(API_URL, uri, stringTFunction, callback, headers);
+    public <T, R> @NotNull Mono<R> GET(String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String... headers) {
+        return GET(apiUrl, uri, stringTFunction, callback, headers);
     }
 
-    public static <T, R> @NotNull Mono<R> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String @NotNull ... headers) {
+    public <T, R> @NotNull Mono<R> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String @NotNull ... headers) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
@@ -53,14 +67,14 @@ public class Http {
                 });
     }
 
-    public static @NotNull Mono<Void> POST(@NotNull String uri, @Nullable JsonObject json) {
+    public @NotNull Mono<Void> POST(@NotNull String uri, @Nullable JsonObject json) {
         return POST(uri, json, null, null).then();
     }
 
-    public static <T, R> @NotNull Mono<R> POST(@NotNull String uri, @Nullable JsonObject json, @Nullable Function<String, T> stringTFunction, @Nullable Function<T, R> callback, @NotNull String @NotNull ... headers) {
+    public <T, R> @NotNull Mono<R> POST(@NotNull String uri, @Nullable JsonObject json, @Nullable Function<String, T> stringTFunction, @Nullable Function<T, R> callback, @NotNull String @NotNull ... headers) {
         HttpRequest.Builder post = HttpRequest
                 .newBuilder()
-                .uri(URI.create(API_URL + uri));
+                .uri(URI.create(apiUrl + uri));
 
         if (headers.length > 0)
             post = post.headers(headers);
@@ -97,7 +111,7 @@ public class Http {
                 });
     }
 
-    private static Logger getLogger(){
+    private Logger getLogger(){
         return Logger.getLogger(Http.class.getName());
     }
 

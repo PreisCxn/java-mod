@@ -308,7 +308,7 @@ public abstract class InventoryListener {
                 obj.addProperty("uuid", uuid);
                 obj.addProperty("username", instance.player.getName().getString());
                 obj.add("data", data);
-                return Http.POST("/datahandler/" + uri, obj).then();
+                return Http.getInstance().POST("/datahandler/" + uri, obj).then();
             } else
                 return Mono.error(new NullPointerException("Not connected"));
         }));
