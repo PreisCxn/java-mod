@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,11 +46,11 @@ public abstract class TabListener {
         return refreshAsync(null, 0);
     }
 
-    public Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
+    public @NotNull Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh) {
         return refreshAsync(notInValue, maxRefresh, new AtomicInteger());
     }
 
-    private Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, AtomicInteger attempts) {
+    private @NotNull Mono<Void> refreshAsync(@Nullable String notInValue, int maxRefresh, @NotNull AtomicInteger attempts) {
         int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
 
         return refresh(notInValue)
@@ -61,7 +60,7 @@ public abstract class TabListener {
                 .flatMap(unused -> refreshAsync(notInValue, finalMaxRefresh, attempts));
     }
 
-    private Mono<Boolean> refresh(@Nullable String notInValue) {
+    private @NotNull Mono<Boolean> refresh(@Nullable String notInValue) {
         LOGGER.log(Level.INFO, "refresh");
 
         InGameHud gameHud = MinecraftClient.getInstance().inGameHud;

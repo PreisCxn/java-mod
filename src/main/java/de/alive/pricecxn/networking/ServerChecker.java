@@ -6,6 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import de.alive.pricecxn.networking.sockets.SocketMessageListener;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -16,17 +17,17 @@ import java.util.concurrent.Executors;
 public class ServerChecker {
     public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int DEFAULT_CHECK_INTERVAL = 300000; //5min
-    private boolean connected = false;
-    private final String uri;
+    private final boolean connected = false;
+    private final @NotNull String uri;
     private final int checkInterval;
-    private long lastCheck = 0;
+    private final long lastCheck = 0;
     private final WebSocketConnector websocket = new WebSocketConnector();
 
     private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private final CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
     private final CompletableFuture<String> minVersionFuture = new CompletableFuture<>();
 
-    private NetworkingState state = NetworkingState.OFFLINE;
+    private @NotNull NetworkingState state = NetworkingState.OFFLINE;
 
     private final Mono<String> minVersion = Mono.fromFuture(minVersionFuture);
 
@@ -42,31 +43,7 @@ public class ServerChecker {
         this.uri = uri == null ? WebSocketConnector.DEFAULT_WEBSOCKET_URI : uri;
         this.checkInterval = checkInterval < 0 ? DEFAULT_CHECK_INTERVAL : checkInterval;
 
-        this.websocket.addMessageListener(message -> {
-            try{
-                JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                if(json.has("min-version")) {
-                    this.minVersionFuture.complete(json.get("min-version").getAsString());
-                }
-
-                if(json.has("maintenance")) {
-                    if(json.get("maintenance").getAsBoolean())
-                        this.state = NetworkingState.MAINTENANCE;
-                    else
-                        this.state = NetworkingState.ONLINE;
-                    this.maintenanceFuture.complete(true);
-                }
-
-                minVersionFuture.thenRun(() -> {
-                    maintenanceFuture.thenRun(() -> {
-                        connectionFuture.complete(state != NetworkingState.OFFLINE);
-                    });
-                });
-
-            } catch (JsonSyntaxException ignored){
-                connectionFuture.complete(state != NetworkingState.OFFLINE);
-            }
-        });
+        this.websocket.addMessageListener(this::onWebsocketMessage);
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
 
         //checkConnection();
@@ -84,7 +61,7 @@ public class ServerChecker {
      * This method is used to check if the server is reachable
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
-    public Mono<Boolean> checkConnection() {
+    public @NotNull Mono<Boolean> checkConnection() {
         return this.websocket.connectToWebSocketServer(this.uri)
                 .onErrorResume(throwable -> {
                     this.state = NetworkingState.OFFLINE;
@@ -110,9 +87,9 @@ public class ServerChecker {
     public Mono<Boolean> isConnected() {
         if (this.websocket.getIsConnected())
             return Mono.just(true);
-        else if(this.lastCheck == 0 || System.currentTimeMillis() - this.lastCheck > this.checkInterval)
+        else {
             return checkConnection();
-        else return Mono.just(false);
+        }
     }
 
     public void addSocketListener(SocketMessageListener listener) {
@@ -123,15 +100,38 @@ public class ServerChecker {
         this.websocket.removeMessageListener(listener);
     }
 
-    public NetworkingState getState() {
+    public @NotNull NetworkingState getState() {
         return state;
     }
 
-    public Mono<String> getServerMinVersion() {
+    public @NotNull Mono<String> getServerMinVersion() {
         return minVersion;
     }
 
-    public WebSocketConnector getWebsocket() {
+    public @NotNull WebSocketConnector getWebsocket() {
         return websocket;
     }
+
+    private void onWebsocketMessage(@NotNull String message) {
+        try{
+            JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+            if (json.has("min-version")) {
+                this.minVersionFuture.complete(json.get("min-version").getAsString());
+            }
+
+            if (json.has("maintenance")) {
+                if (json.get("maintenance").getAsBoolean())
+                    this.state = NetworkingState.MAINTENANCE;
+                else
+                    this.state = NetworkingState.ONLINE;
+                this.maintenanceFuture.complete(true);
+            }
+
+            minVersionFuture.thenRun(() -> maintenanceFuture.thenRun(() -> connectionFuture.complete(state != NetworkingState.OFFLINE)));
+
+        }catch(JsonSyntaxException ignored){
+            connectionFuture.complete(state != NetworkingState.OFFLINE);
+        }
+    }
+
 }

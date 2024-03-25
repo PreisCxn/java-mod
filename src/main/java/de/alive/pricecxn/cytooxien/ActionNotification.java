@@ -1,5 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 
 public enum ActionNotification {
@@ -27,7 +29,7 @@ public enum ActionNotification {
         this.variables = variables;
     }
 
-    public String[] getTextVariables() {
+    public String @NotNull [] getTextVariables() {
         String[] varBackup = Arrays.copyOf(this.variables, this.variables.length);
         this.variables = new String[0];
         return varBackup;

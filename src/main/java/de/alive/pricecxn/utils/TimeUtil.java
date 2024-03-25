@@ -1,19 +1,18 @@
 package de.alive.pricecxn.utils;
 
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
-import net.minecraft.text.Text;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TimeUtil {
-
+    private static final Logger LOGGER = Logger.getLogger(TimeUtil.class.getName());
     private static final DataAccess MINUTE_SEARCH = TranslationDataAccess.MINUTE_SEARCH;
     private static final DataAccess NOW_SEARCH = TranslationDataAccess.NOW_SEARCH;
     private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
@@ -56,7 +55,7 @@ public class TimeUtil {
 
     }
 
-    public static Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
+    public static @NotNull Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
         long currentTimestamp = System.currentTimeMillis(); // Aktueller Unix-Timestamp in Millisekunden
 
         long difference = currentTimestamp - timestamp;
@@ -79,16 +78,16 @@ public class TimeUtil {
         return Optional.empty();
     }
 
-    public static Optional<Long> getStartTimeStamp(String timerString) {
+    public static @NotNull Optional<Long> getStartTimeStamp(@NotNull String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
             return Optional.empty();
 
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
         Optional<Integer> minutes = getTime(timerString, MINUTE_SEARCH);
 
-        System.out.println("timerString: " + timerString);
-        System.out.println("hours: " + hours.orElse(-1));
-        System.out.println("minutes: " + minutes.orElse(-1));
+        LOGGER.log(Level.INFO, "timerString: " + timerString);
+        LOGGER.log(Level.INFO, "hours: " + hours.orElse(-1));
+        LOGGER.log(Level.INFO, "minutes: " + minutes.orElse(-1));
 
         if(minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();
@@ -115,7 +114,7 @@ public class TimeUtil {
      * @param timerString Der Timer-String.
      * @return Die Minuten als Integer.
      */
-    public static Optional<Integer> getMinutes(String timerString) {
+    public static @NotNull Optional<Integer> getMinutes(@NotNull String timerString) {
         if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
             return Optional.empty();
 
@@ -145,7 +144,7 @@ public class TimeUtil {
      * @param timerString Der Timer-String.
      * @return Die Stunden als Integer.
      */
-    public static Optional<Integer> getTime(String timerString, DataAccess search) {
+    public static @NotNull Optional<Integer> getTime(String timerString, @NotNull DataAccess search) {
 
         timerString = timerString.toLowerCase();
 

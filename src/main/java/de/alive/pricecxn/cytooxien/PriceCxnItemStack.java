@@ -7,23 +7,21 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import static net.minecraft.item.trim.ArmorTrim.NBT_KEY;
-
 public class PriceCxnItemStack {
-
+    private static final Logger LOGGER = Logger.getLogger(PriceCxnItemStack.class.getName());
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
@@ -33,15 +31,15 @@ public class PriceCxnItemStack {
     public static final String DISPLAY_NAME_KEY = "displayName";
     public static final String MC_CLIENT_LANG_KEY = "mcClientLang";
 
-    private final ItemStack item;
+    private final @NotNull ItemStack item;
 
-    private final Map<String, DataAccess> searchData;
+    private final @NotNull Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
 
     private String itemName;
 
-    private String displayName;
+    private final String displayName;
 
     private int amount = 0;
 
@@ -49,10 +47,7 @@ public class PriceCxnItemStack {
 
     public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
-        if (searchData == null)
-            this.searchData = new HashMap<>();
-        else
-            this.searchData = searchData;
+        this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
         this.item = item;
         if(addTooltips)
@@ -82,7 +77,7 @@ public class PriceCxnItemStack {
         if (addComment)
             data.add(COMMENT_KEY, nbtToJson(this.item));
 
-        System.out.println(itemName);
+        LOGGER.log(Level.INFO, itemName);
 
 
         /*
@@ -116,7 +111,7 @@ public class PriceCxnItemStack {
         this(item, searchData, true);
     }
 
-    private JsonObject nbtToJson(ItemStack item) {
+    private @NotNull JsonObject nbtToJson(@NotNull ItemStack item) {
         JsonObject json = new JsonObject();
         NbtCompound nbt = item.getNbt();
 
@@ -182,8 +177,6 @@ public class PriceCxnItemStack {
     public int hashCode() {
         JsonObject hash = this.data.deepCopy();
 
-        if (this.searchData == null) return hash.hashCode();
-
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
                 hash.remove(entry.getKey());
@@ -222,17 +215,17 @@ public class PriceCxnItemStack {
         return this.data.toString();
     }
 
-    public JsonObject getData() {
+    public @NotNull JsonObject getData() {
         return data;
     }
 
-    public JsonObject getDataWithoutDisplay() {
+    public @NotNull JsonObject getDataWithoutDisplay() {
         JsonObject data = this.data.deepCopy();
         data.get(COMMENT_KEY).getAsJsonObject().remove("display");
         return data;
     }
 
-    private JsonObject getEqualData() {
+    private @NotNull JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
         if (hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
@@ -248,7 +241,7 @@ public class PriceCxnItemStack {
 
     }
 
-    public boolean isSameItem(PriceCxnItemStack item) {
+    public boolean isSameItem(@NotNull PriceCxnItemStack item) {
         if (!Objects.equals(this.getItemName(), item.getItemName()))
             return false; //wenn itemName nicht gleich => false
 

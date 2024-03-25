@@ -8,21 +8,24 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketCompletion {
+    private static final Logger LOGGER = Logger.getLogger(WebSocketCompletion.class.getName());
     public static final String QUERY_STRING = "pcxn?";
     private static final int DEFAULT_TIMEOUT = 5000;
 
     private final CompletableFuture<String> future = new CompletableFuture<>();
     private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
-    private final WebSocketConnector connector;
+    private final @NotNull WebSocketConnector connector;
 
-    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String... data) {
+    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
         this.connector = connector;
 
         SocketMessageListener listener = new SocketMessageListener() {
             @Override
-            public void onMessage(String message) {
+            public void onMessage(@NotNull String message) {
                 if(message.contains(query)) {
                     try{
                         JsonObject json = JsonParser.parseString(message).getAsJsonObject();
@@ -41,7 +44,8 @@ public class WebSocketCompletion {
 
         this.connector.addMessageListener(listener);
         String queryString = QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", ""));
-        System.out.println(queryString);
+
+        LOGGER.log(Level.INFO, queryString);
         connector.sendMessage(queryString);
 
         timeoutExecutor.schedule(() -> {
@@ -52,7 +56,7 @@ public class WebSocketCompletion {
         }, DEFAULT_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
-    public Mono<String> getMono() {
+    public @NotNull Mono<String> getMono() {
         return Mono.fromFuture(future);
     }
 

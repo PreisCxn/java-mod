@@ -1,12 +1,13 @@
 package de.alive.pricecxn.networking.sockets;
 
+import jakarta.websocket.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.*;
@@ -21,14 +22,14 @@ public class WebSocketConnector {
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
-    private CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private Session session;
     private boolean isConnected = false;
     private ScheduledExecutorService pingExecutor;
-    private Boolean isConnectionEstablished = null;
+    private @Nullable Boolean isConnectionEstablished = null;
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(@NotNull Session session) {
         this.session = session;
         this.isConnected = true;
         isConnectionEstablished = true;
@@ -73,10 +74,10 @@ public class WebSocketConnector {
 
     @OnError
     public void onError(Throwable throwable) {
-        throwable.printStackTrace();
+        LOGGER.log(Level.SEVERE, "WebSocket error", throwable);
     }
 
-    public Mono<Boolean> connectToWebSocketServer(String serverUri) {
+    public @NotNull Mono<Boolean> connectToWebSocketServer(@NotNull String serverUri) {
         return Mono.fromCallable(() -> {
             try {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -101,7 +102,7 @@ public class WebSocketConnector {
         try{
             session.close();
         }catch(IOException e){
-            System.err.println(e.getMessage());
+            LOGGER.log(Level.SEVERE, "Failed to close WebSocket", e);
         }
     }
 

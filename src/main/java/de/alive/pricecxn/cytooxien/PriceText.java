@@ -1,17 +1,23 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.PriceCxnMod;
-import de.alive.pricecxn.utils.TimeUtil;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
 public class PriceText {
+    private static final Logger LOGGER = Logger.getLogger(PriceText.class.getName());
     public static final MutableText COIN_TEXT = MutableText.of(new PlainTextContent.Literal("\uE202"))
             .setStyle(Style.EMPTY.withColor(Formatting.YELLOW));
     public static final Style PRICE_STYLE = Style.EMPTY.withColor(Formatting.GOLD);
@@ -20,34 +26,34 @@ public class PriceText {
     private double priceAdder = 0;
     private double priceMultiplier = 1;
     private String identifierText = "";
-    private String searchingPoints = "";
+    private @NotNull String searchingPoints = "";
     private int searchingCount = 0;
-    private double[] prices = null;
+    private double @Nullable [] prices = null;
     private SearchingState isSearching = SearchingState.FINISHED;
 
     PriceText(boolean isSearching) {
         this.isSearching = isSearching ? SearchingState.SEARCHING : SearchingState.FINISHED;
     }
 
-    public static PriceText create() {
+    public static @NotNull PriceText create() {
         return PriceText.create(false);
     }
 
-    public static PriceText create(boolean isSearching) {
+    public static @NotNull PriceText create(boolean isSearching) {
         return new PriceText(isSearching);
     }
 
-    public PriceText withPrices(double... prices) {
+    public @NotNull PriceText withPrices(double... prices) {
         setPrices(prices);
         return this;
     }
 
-    public PriceText withIdentifierText(String identifierText) {
+    public @NotNull PriceText withIdentifierText(String identifierText) {
         this.identifierText = identifierText;
         return this;
     }
 
-    public PriceText withPriceMultiplier(double priceMultiplier) {
+    public @NotNull PriceText withPriceMultiplier(double priceMultiplier) {
         this.priceMultiplier = priceMultiplier;
         return this;
     }
@@ -56,7 +62,7 @@ public class PriceText {
         return withPriceMultiplier((double) priceMultiplier);
     }
 
-    public PriceText withPriceAdder(double priceAdder) {
+    public @NotNull PriceText withPriceAdder(double priceAdder) {
         this.priceAdder = priceAdder;
         return this;
     }
@@ -66,7 +72,8 @@ public class PriceText {
     }
 
     private void sortPrices() {
-        Arrays.sort(prices);
+        if(prices != null)
+            Arrays.sort(prices);
     }
 
     public void setPrices(double[] prices) {
@@ -76,8 +83,8 @@ public class PriceText {
 
     public MutableText getText() {
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
-        System.out.println("preise!!! ");
-        System.out.println(this.priceAdder);
+        LOGGER.log(Level.INFO, "preise!!! ");
+        LOGGER.log(Level.INFO, String.valueOf(this.priceAdder));
         return getLowerPriceText().flatMap(text -> getUpperPriceText().map(mutableText -> MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
                         .append(text)
                         .append(MutableText.of(new PlainTextContent.Literal(
@@ -121,7 +128,7 @@ public class PriceText {
         }
     }
 
-    private Optional<MutableText> getPriceText(double price) {
+    private @NotNull Optional<MutableText> getPriceText(double price) {
         if (price == 0) return Optional.empty();
         return Optional
                 .of(MutableText
@@ -131,16 +138,16 @@ public class PriceText {
     }
 
     private Optional<MutableText> getLowerPriceText() {
-        if (prices.length == 0) return Optional.empty();
+        if (prices == null || prices.length == 0) return Optional.empty();
         return getPriceText(prices[0]);
     }
 
     private Optional<MutableText> getUpperPriceText() {
-        if (prices.length <= 1) return Optional.empty();
+        if (prices == null || prices.length <= 1) return Optional.empty();
         return getPriceText(prices[prices.length - 1]);
     }
 
-    public static Text space() {
+    public static @NotNull Text space() {
         return Text.of(" ");
     }
 

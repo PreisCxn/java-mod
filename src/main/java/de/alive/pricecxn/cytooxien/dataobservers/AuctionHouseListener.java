@@ -1,10 +1,10 @@
 package de.alive.pricecxn.cytooxien.dataobservers;
 
 import com.google.gson.JsonArray;
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Pair;
@@ -49,7 +49,7 @@ public class AuctionHouseListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse open");
 
         items.clear();
@@ -57,7 +57,7 @@ public class AuctionHouseListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse close");
 
         JsonArray array = new JsonArray();
@@ -78,7 +78,7 @@ public class AuctionHouseListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("AuctionHouse updated");
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }

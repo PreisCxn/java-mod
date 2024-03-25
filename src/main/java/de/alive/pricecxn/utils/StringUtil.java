@@ -7,18 +7,22 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This class is used to provide some useful methods for Strings
  */
 public class StringUtil {
 
-    public static String removeLastChar(String text) {
+    public static String removeLastChar(@Nullable String text) {
         if (text == null || text.isEmpty()) {
             return text; // Wenn der Eingabestring leer ist oder null, gibt ihn unverändert zurück.
         }
@@ -26,7 +30,7 @@ public class StringUtil {
         return text.substring(0, text.length() - 1);
     }
 
-    public static String removeChars(String text) {
+    public static @NotNull String removeChars(@NotNull String text) {
         StringBuilder nurZahlen = new StringBuilder();
         for (int i = 0; i < text.length(); i++) {
             char zeichen = text.charAt(i);
@@ -69,7 +73,7 @@ public class StringUtil {
         return lowercaseList;
     }
 
-    public static List<String> stringToList(String input) {
+    public static @NotNull List<String> stringToList(@NotNull String input) {
         // Teilen Sie den Eingabestring an den Kommas auf
         String[] words = input.split(",\\s*");
 
@@ -77,7 +81,7 @@ public class StringUtil {
         return new ArrayList<>(Arrays.asList(words));
     }
 
-    public static List<String> getToolTips(ItemStack stack){
+    public static List<String> getToolTips(@Nullable ItemStack stack){
         if(stack == null) return null;
         List<String> result = new ArrayList<>();
 
@@ -91,7 +95,7 @@ public class StringUtil {
         return result;
     }
 
-    public static String extractBetweenParts(String s, String start, String end) {
+    public static @Nullable String extractBetweenParts(@NotNull String s, @NotNull String start, @NotNull String end) {
         int sIndex = s.indexOf(start);
         if (sIndex == -1) {
             return null; // start string not found
@@ -104,7 +108,7 @@ public class StringUtil {
         return s.substring(sIndex, eIndex);
     }
 
-    public static String getFirstSuffixStartingWith(List<String> strings, String prefix) {
+    public static @Nullable String getFirstSuffixStartingWith(@NotNull List<String> strings, @NotNull String prefix) {
         for (String s : strings) {
             if (s.startsWith(prefix)) {
                 return s.substring(prefix.length());
@@ -113,15 +117,15 @@ public class StringUtil {
         return null;
     }
 
-    public static boolean containsString(String string, List<String> searches) {
+    public static boolean containsString(@NotNull String string, @NotNull List<String> searches) {
         return searches.stream().anyMatch(string::contains);
     }
 
-    public static boolean isValidPrice(String s) {
+    public static boolean isValidPrice(@NotNull String s) {
         return s.matches("[0-9.,]*");
     }
 
-    public static JsonElement removeLastChar(JsonElement element) {
+    public static @NotNull JsonElement removeLastChar(@NotNull JsonElement element) {
         if (!element.isJsonPrimitive()) return JsonNull.INSTANCE;
         String string = element.getAsString();
         return new JsonPrimitive(string.substring(0, string.length() - 1));

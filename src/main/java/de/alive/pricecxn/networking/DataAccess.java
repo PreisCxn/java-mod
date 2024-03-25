@@ -2,6 +2,7 @@ package de.alive.pricecxn.networking;
 
 import com.google.gson.JsonElement;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
@@ -16,7 +17,7 @@ public interface DataAccess {
     boolean hasProcessData();
     boolean hasEqualData();
 
-    Function<JsonElement, JsonElement> getProcessData();
-    Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData();
+    @Nullable Function<JsonElement, JsonElement> getProcessData();
+    @Nullable Function<Pair<JsonElement, JsonElement>, Boolean> getEqualData();
 
 }

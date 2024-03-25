@@ -9,6 +9,7 @@ import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
+import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.NetworkingState;
 import de.alive.pricecxn.networking.ServerChecker;
@@ -18,6 +19,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -34,14 +37,14 @@ public class CxnListener extends ServerListener {
     private static final Logger LOGGER = Logger.getLogger(CxnListener.class.getName());
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
-    private final ThemeServerChecker themeChecker;
-    private final List<InventoryListener> listeners;
-    private final ServerChecker serverChecker;
+    private final @NotNull ThemeServerChecker themeChecker;
+    private final @NotNull List<InventoryListener> listeners;
+    private final @NotNull ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
     NetworkingState state = NetworkingState.OFFLINE;
-    private AtomicBoolean active = new AtomicBoolean(false);
-    private Boolean isRightVersion = null;
-    private AtomicBoolean listenerActive = new AtomicBoolean(false);
+    private final AtomicBoolean active = new AtomicBoolean(false);
+    private @Nullable Boolean isRightVersion = null;
+    private final AtomicBoolean listenerActive = new AtomicBoolean(false);
 
     public CxnListener() {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
@@ -60,12 +63,12 @@ public class CxnListener extends ServerListener {
 
         //checking connection and activating mod
         checkConnectionAsync(false)
-                .doOnSuccess((a) -> System.out.println("Mod active?" + this.active.get()))
+                .doOnSuccess((a) -> LOGGER.log(Level.INFO, "Mod active?" + this.active.get()))
                 .subscribe();
 
     }
 
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation, boolean force) {
+    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation, boolean force) {
 
         if (force || messageInformation.getLeft()) {
             if (MinecraftClient.getInstance().player != null) {
@@ -91,12 +94,12 @@ public class CxnListener extends ServerListener {
 
     }
 
-    public static void sendConnectionInformation(Pair<Boolean, ActionNotification> messageInformation) {
+    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation) {
         sendConnectionInformation(messageInformation, false);
     }
 
     @Override
-    public Mono<Void> onTabChange() {
+    public @NotNull Mono<Void> onTabChange() {
         if (!this.isOnServer().get())
             return Mono.empty();
 
@@ -107,7 +110,7 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public Mono<Void> onJoinEvent() {
+    public @NotNull Mono<Void> onJoinEvent() {
         if (!this.isOnServer().get())
             return Mono.empty();
         boolean activeBackup = this.active.get();
@@ -122,7 +125,7 @@ public class CxnListener extends ServerListener {
     }
 
     @Override
-    public Mono<Void> onServerJoin() {
+    public @NotNull Mono<Void> onServerJoin() {
 
         return checkConnectionAsync()
                 .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true))
@@ -132,7 +135,7 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onServerLeave() {
-        System.out.println("Cytooxien left : " + this.isOnServer().get());
+        LOGGER.log(Level.INFO, "Cytooxien left : " + this.isOnServer().get());
         deactivate();
     }
 
@@ -161,7 +164,7 @@ public class CxnListener extends ServerListener {
         return data.get(dataKey).refresh(true);
     }
 
-    public Mono<Void> activate(boolean themeRefresh) {
+    public @NotNull Mono<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
         return initData()
@@ -182,16 +185,12 @@ public class CxnListener extends ServerListener {
                 .then();
     }
 
-    private Mono<Void> initData() {
-        System.out.println("initData");
-        if (!this.data.containsKey("pricecxn.data.item_data")) {
-            //data.put("pricecxn.data.item_data", new DataHandler(serverChecker, "", List.of(""), "", 0));
-        }
+    private @NotNull Mono<Void> initData() {
+        LOGGER.log(Level.INFO, "initData");
 
         if (!this.data.containsKey("pricecxn.data.mod_users")) {
             data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
         }
-        //...
 
         if (this.data.containsKey("cxnprice.translation"))
             return Mono.empty();
@@ -199,38 +198,44 @@ public class CxnListener extends ServerListener {
             return new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages")
                     .getMono()
                     .map(StringUtil::stringToList)
-                    .doOnSuccess(langList -> data.
-                            put("cxnprice.translation",
-                                new DataHandler(serverChecker,
-                                                "/settings/translations",
-                                                langList,
-                                                "translation_key",
-                                                DataHandler.TRANSLATION_REFRESH_INTERVAL,
-                                                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
-                                                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
-                                                TranslationDataAccess.INV_NOOK_SEARCH,
-                                                TranslationDataAccess.INV_TRADE_SEARCH,
-                                                TranslationDataAccess.TIMESTAMP_SEARCH,
-                                                TranslationDataAccess.SELLER_SEARCH,
-                                                TranslationDataAccess.BID_SEARCH,
-                                                TranslationDataAccess.AH_BUY_SEARCH,
-                                                TranslationDataAccess.THEME_SERVER_SEARCH,
-                                                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
-                                                TranslationDataAccess.NOOK_BUY_SEARCH,
-                                                TranslationDataAccess.SHOP_BUY_SEARCH,
-                                                TranslationDataAccess.SHOP_SELL_SEARCH,
-                                                TranslationDataAccess.TRADE_BUY_SEARCH,
-                                                TranslationDataAccess.HOUR_SEARCH,
-                                                TranslationDataAccess.MINUTE_SEARCH,
-                                                TranslationDataAccess.SECOND_SEARCH,
-                                                TranslationDataAccess.NOW_SEARCH,
-                                                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
-                                                TranslationDataAccess.CITYBUILD_INV_BLOCK
-                                ))).then();
-
+                    .doOnSuccess(this::createTranslationHandler).then();
     }
 
-    private Mono<Void> refreshData(boolean forced) {
+    private void createTranslationHandler(@NotNull List<String> langList) {
+
+        DataAccess[] translationAccess = {
+                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
+                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
+                TranslationDataAccess.INV_NOOK_SEARCH,
+                TranslationDataAccess.INV_TRADE_SEARCH,
+                TranslationDataAccess.TIMESTAMP_SEARCH,
+                TranslationDataAccess.SELLER_SEARCH,
+                TranslationDataAccess.BID_SEARCH,
+                TranslationDataAccess.AH_BUY_SEARCH,
+                TranslationDataAccess.THEME_SERVER_SEARCH,
+                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
+                TranslationDataAccess.NOOK_BUY_SEARCH,
+                TranslationDataAccess.SHOP_BUY_SEARCH,
+                TranslationDataAccess.SHOP_SELL_SEARCH,
+                TranslationDataAccess.TRADE_BUY_SEARCH,
+                TranslationDataAccess.HOUR_SEARCH,
+                TranslationDataAccess.MINUTE_SEARCH,
+                TranslationDataAccess.SECOND_SEARCH,
+                TranslationDataAccess.NOW_SEARCH,
+                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
+                TranslationDataAccess.CITYBUILD_INV_BLOCK
+        };
+
+
+        data.put("cxnprice.translation",
+                new DataHandler(serverChecker,
+                        "/settings/translations",
+                        langList,
+                        "translation_key",
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
+    }
+
+    private @NotNull Mono<Void> refreshData(boolean forced) {
         return Flux.fromIterable(data.entrySet())
                 .flatMap(entry -> entry.getValue().refresh(forced))
                 .then();
@@ -247,7 +252,7 @@ public class CxnListener extends ServerListener {
         return data.get(key);
     }
 
-    public ServerChecker getServerChecker() {
+    public @NotNull ServerChecker getServerChecker() {
         return serverChecker;
     }
 
@@ -259,7 +264,7 @@ public class CxnListener extends ServerListener {
         this.listenerActive.set(false);
     }
 
-    public ThemeServerChecker getThemeChecker() {
+    public @NotNull ThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
 
@@ -267,7 +272,7 @@ public class CxnListener extends ServerListener {
      * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
      * (Mod Version > Server Min-Version -> true)
      */
-    public Mono<Boolean> isMinVersion() {
+    public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
                         .filter(value -> PriceCxnMod.getIntVersion(serverMinVersion)
@@ -276,7 +281,7 @@ public class CxnListener extends ServerListener {
                         .isPresent());
     }
 
-    public Mono<Boolean> isSpecialUser() {
+    public @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
 
@@ -285,7 +290,7 @@ public class CxnListener extends ServerListener {
                 .onErrorReturn(false);
     }
 
-    public Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
+    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
@@ -307,7 +312,7 @@ public class CxnListener extends ServerListener {
 
                         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
 
-                        System.out.println(isRightVersionBackup + " " + serverMinVersion);
+                        LOGGER.log(Level.INFO, isRightVersionBackup + " " + serverMinVersion);
                         this.isRightVersion = false;
                         return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
                     } else {
@@ -324,19 +329,19 @@ public class CxnListener extends ServerListener {
                                     .flatMap(isSpecialUser -> {
                                         if (isSpecialUser) {
                                             // Benutzer hat Berechtigung
-                                            System.out.println("Benutzer hat Berechtigung");
+                                            LOGGER.log(Level.INFO, "Benutzer hat Berechtigung");
                                             return this.activate(themeRefresh).then(
                                                     Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                                         } else {
                                             // Benutzer hat keine Berechtigung
-                                            System.out.println("Benutzer hat keine Berechtigung");
+                                            LOGGER.log(Level.INFO, "Benutzer hat keine Berechtigung");
                                             this.deactivate();
                                             return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
                                         }
                                     });
                         } else {
                             // Server im Offline-Modus
-                            System.out.println("Server im Offline-Modus");
+                            LOGGER.log(Level.INFO, "Server im Offline-Modus");
                             this.deactivate();
                             return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                         }
@@ -344,7 +349,7 @@ public class CxnListener extends ServerListener {
                 });
     }
 
-    public Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
+    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
         return Mono.fromCallable(() -> this.checkConnection(themeRefresh))
                 .subscribeOn(Schedulers.fromExecutor(ServerChecker.EXECUTOR))
                 .flatMap(result -> result);
@@ -354,12 +359,12 @@ public class CxnListener extends ServerListener {
         return checkConnectionAsync(true);
     }
 
-    public Optional<List<String>> getModUsers() {
+    public @NotNull Optional<List<String>> getModUsers() {
         List<String> stringList = new ArrayList<>();
 
         JsonArray array;
 
-        try{
+        try {
             array = this.data.get("pricecxn.data.mod_users").getDataArray();
 
             if (array == null) return Optional.empty();
@@ -372,12 +377,12 @@ public class CxnListener extends ServerListener {
             if (stringList.isEmpty()) return Optional.empty();
 
             return Optional.of(stringList);
-        }catch(Exception e){
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    public AtomicBoolean isActive() {
+    public @NotNull AtomicBoolean isActive() {
         return active;
     }
 

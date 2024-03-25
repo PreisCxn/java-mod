@@ -3,10 +3,10 @@ package de.alive.pricecxn.cytooxien.dataobservers;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
+import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
@@ -25,11 +27,11 @@ public class ItemShopListener extends InventoryListener {
     private final int itemStackSlot = 13;
     private final int buyItemSlot = 11;
     private final int sellItemSlot = 15;
-    private PriceCxnItemStack itemStack = null;
+    private @Nullable PriceCxnItemStack itemStack = null;
 
-    private PriceCxnItemStack buyItem = null;
+    private @Nullable PriceCxnItemStack buyItem = null;
 
-    private PriceCxnItemStack sellItem = null;
+    private @Nullable PriceCxnItemStack sellItem = null;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -51,7 +53,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
@@ -62,7 +64,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop close");
         if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
@@ -78,18 +80,16 @@ public class ItemShopListener extends InventoryListener {
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        return sendData("/itemshop", object).doOnSuccess(aVoid -> {
-            printDebug("ItemShop data sent");
-        });
+        return sendData("/itemshop", object).doOnSuccess(aVoid -> printDebug("ItemShop data sent"));
     }
 
     @Override
-    protected Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
         printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }
 
-    private Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
+    private @NotNull Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
         return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);

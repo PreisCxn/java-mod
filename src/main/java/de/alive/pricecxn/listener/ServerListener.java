@@ -79,7 +79,7 @@ public abstract class ServerListener {
      * Returns the AtomicBoolean that is used to check if the player is on the server
      * @return The AtomicBoolean
      */
-    public AtomicBoolean isOnServer(){
+    public @NotNull AtomicBoolean isOnServer(){
         return onServer;
     }
 
