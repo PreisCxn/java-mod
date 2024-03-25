@@ -22,7 +22,7 @@ public class Http {
 
     private static final Http INSTANCE = new Http();
 
-    private Http() {
+    protected Http() {
         apiUrl = "https://api.preiscxn.de/api";
     }
 
@@ -87,7 +87,7 @@ public class Http {
 
         return sendAsync(post.build())
                 .map(response -> Tuples.of(response.statusCode(), response.body()))
-                .<R>handle((tuple, sink) -> {
+                .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
                         if(stringTFunction == null || callback == null){
                             sink.complete();
@@ -104,10 +104,6 @@ public class Http {
                         getLogger().severe(errorMessage);
                         sink.error(new IllegalStateException(tuple.getT2()));
                     }
-                })
-                .onErrorResume(throwable -> {
-                    getLogger().severe(throwable.getMessage());
-                    return Mono.empty();
                 });
     }
 

@@ -36,6 +36,15 @@ dependencies {
 	include 'org.java-websocket:Java-WebSocket:1.5.5'
 	include 'io.projectreactor:reactor-core:3.4.13'
 
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+	testImplementation 'org.mockito:mockito-core:4.2.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:4.2.0'
+	testImplementation 'io.projectreactor:reactor-test:3.4.13'
+}
+
+test {
+	useJUnitPlatform()
 }
 
 base {
