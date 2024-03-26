@@ -1,7 +1,6 @@
 package de.alive.pricecxn.networking.sockets;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,9 +11,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
