@@ -41,9 +41,9 @@ public class ServerChecker {
      * @param uri           The uri of the server
      * @param checkInterval The interval in which the server is checked in milliseconds
      */
-    public ServerChecker(@Nullable String uri, @Nullable Duration checkInterval) {
-        this.uri = uri == null ? WebSocketConnector.DEFAULT_WEBSOCKET_URI : uri;
-        this.checkInterval = checkInterval == null ? DEFAULT_CHECK_INTERVAL : checkInterval;
+    public ServerChecker(@NotNull String uri, @NotNull Duration checkInterval) {
+        this.uri = uri;
+        this.checkInterval = checkInterval;
 
         this.websocket.addMessageListener(this::onWebsocketMessage);
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
@@ -56,7 +56,7 @@ public class ServerChecker {
      * Uses the default check interval and uri
      */
     public ServerChecker() {
-        this(null, null);
+        this(WebSocketConnector.DEFAULT_WEBSOCKET_URI, DEFAULT_CHECK_INTERVAL);
     }
 
     /**
