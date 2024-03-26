@@ -33,7 +33,13 @@ public class ServerChecker {
 
     private final Mono<String> minVersion = Mono.fromFuture(minVersionFuture);
 
-
+    /**
+     * This constructor is used to check if the server is reachable
+     * Uses the default check interval and uri
+     */
+    public ServerChecker() {
+        this(WebSocketConnector.DEFAULT_WEBSOCKET_URI, DEFAULT_CHECK_INTERVAL);
+    }
 
     /**
      * This constructor is used to check if the server is reachable
@@ -49,14 +55,6 @@ public class ServerChecker {
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
 
         //checkConnection();
-    }
-
-    /**
-     * This constructor is used to check if the server is reachable
-     * Uses the default check interval and uri
-     */
-    public ServerChecker() {
-        this(WebSocketConnector.DEFAULT_WEBSOCKET_URI, DEFAULT_CHECK_INTERVAL);
     }
 
     /**
