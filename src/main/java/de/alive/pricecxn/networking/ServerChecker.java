@@ -32,6 +32,8 @@ public class ServerChecker {
     private @NotNull NetworkingState state = NetworkingState.OFFLINE;
 
     private final Mono<String> minVersion = Mono.fromFuture(minVersionFuture);
+    private final Mono<Boolean> maintenance = Mono.fromFuture(maintenanceFuture);
+    private final Mono<Boolean> connection = Mono.fromFuture(connectionFuture);
 
     /**
      * This constructor is used to check if the server is reachable
@@ -53,6 +55,10 @@ public class ServerChecker {
 
         this.websocket.addMessageListener(this::onWebsocketMessage);
         this.websocket.addCloseListener(() -> this.state = NetworkingState.OFFLINE);
+
+        Mono.zip(minVersion, maintenance)
+                .doOnNext(objects -> connectionFuture.complete(state != NetworkingState.OFFLINE))
+                .subscribe();
 
         //checkConnection();
     }
@@ -126,8 +132,6 @@ public class ServerChecker {
                     this.state = NetworkingState.ONLINE;
                 this.maintenanceFuture.complete(true);
             }
-
-            minVersionFuture.thenRun(() -> maintenanceFuture.thenRun(() -> connectionFuture.complete(state != NetworkingState.OFFLINE)));
 
         }catch(JsonSyntaxException ignored){
             connectionFuture.complete(state != NetworkingState.OFFLINE);
