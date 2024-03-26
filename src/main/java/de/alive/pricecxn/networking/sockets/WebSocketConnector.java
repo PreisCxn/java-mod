@@ -61,6 +61,7 @@ public class WebSocketConnector {
 
     @OnClose
     public void onClose() {
+        this.session = null;
         this.isConnected = false;
         isConnectionEstablished = null;
         synchronized(closeListeners){
@@ -77,15 +78,16 @@ public class WebSocketConnector {
     }
 
     public @NotNull Mono<Session> establishWebSocketConnection(@NotNull String serverUri) {
-        return Mono.fromCallable(() -> {
-            try {
-                WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-                return container.connectToServer(this, new URI(serverUri));
-            } catch (Exception e) {
-                LOGGER.error("Failed to connect to WebSocket server", e);
-                return null;
-            }
-        }).subscribeOn(Schedulers.boundedElastic());
+        return Mono.justOrEmpty(this.session)
+                .switchIfEmpty(Mono.fromCallable(() -> {
+                    try{
+                        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+                        return container.connectToServer(this, new URI(serverUri));
+                    }catch(Exception e){
+                        LOGGER.error("Failed to connect to WebSocket server", e);
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.boundedElastic()));
     }
 
     public void sendMessage(String message) {
