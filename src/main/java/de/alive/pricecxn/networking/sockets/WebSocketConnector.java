@@ -11,8 +11,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
@@ -78,15 +76,14 @@ public class WebSocketConnector {
         LOGGER.error("WebSocket error", throwable);
     }
 
-    public @NotNull Mono<Boolean> connectToWebSocketServer(@NotNull String serverUri) {
+    public @NotNull Mono<Session> establishWebSocketConnection(@NotNull String serverUri) {
         return Mono.fromCallable(() -> {
             try {
                 WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-                container.connectToServer(this, new URI(serverUri));
-                return true;
+                return container.connectToServer(this, new URI(serverUri));
             } catch (Exception e) {
                 LOGGER.error("Failed to connect to WebSocket server", e);
-                return false;
+                return null;
             }
         }).subscribeOn(Schedulers.boundedElastic());
     }

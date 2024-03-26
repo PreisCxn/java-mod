@@ -7,11 +7,9 @@ import de.alive.pricecxn.networking.sockets.SocketMessageListener;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -68,20 +66,20 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public @NotNull Mono<Boolean> checkConnection() {
-        return this.websocket.connectToWebSocketServer(this.uri)
+        return this.websocket.establishWebSocketConnection(this.uri)
+                .hasElement()
                 .onErrorResume(throwable -> {
                     this.state = NetworkingState.OFFLINE;
                     connectionFuture.complete(false);
                     return Mono.just(false);
                 })
-                .mapNotNull(isConnected -> {
+                .doOnNext(isConnected -> {
                     if (isConnected) {
                         this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "maintenance");
                         this.websocket.sendMessage(WebSocketCompletion.QUERY_STRING + "min-version");
                     } else {
                         connectionFuture.complete(false);
                     }
-                    return null;
                 });
     }
 
