@@ -2,6 +2,7 @@ package de.alive.pricecxn.networking.sockets;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -25,6 +27,7 @@ public class WebSocketConnector {
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
     private Session session;
     private boolean isConnected = false;
+    private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
 
     @OnOpen
     public void onOpen(@NotNull Session session) {
@@ -37,7 +40,7 @@ public class WebSocketConnector {
         }
 
         // Start sending pings every 30 seconds
-        Flux.interval(Duration.ofSeconds(30))
+        disposables.add(Flux.interval(Duration.ofSeconds(30))
                 .flatMap(tick -> Mono.fromCallable(() -> {
                     try {
                         session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
@@ -46,7 +49,7 @@ public class WebSocketConnector {
                     }
                     return null;
                 }).subscribeOn(Schedulers.boundedElastic()))
-                .subscribe();
+                .subscribe());
     }
 
     @OnMessage
@@ -66,6 +69,11 @@ public class WebSocketConnector {
         synchronized(closeListeners){
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
+            }
+        }
+        synchronized(disposables){
+            for (Disposable disposable : disposables) {
+                disposable.dispose();
             }
         }
         LOGGER.debug("WebSocket connection closed");
