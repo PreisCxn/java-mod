@@ -2,6 +2,7 @@ package de.alive.pricecxn.networking.sockets;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -9,6 +10,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -39,15 +41,15 @@ public class WebSocketConnector {
         }
 
         // Start sending pings every 30 seconds
-        pingExecutor = Executors.newSingleThreadScheduledExecutor();
-        pingExecutor.scheduleAtFixedRate(() -> {
-            try{
-                session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
-            }catch(IOException e){
-                LOGGER.error("Failed to send ping", e);
-            }
-        }, 30, 30, TimeUnit.SECONDS);
-    }
+        Flux.interval(Duration.ofSeconds(30))
+                .flatMap(tick -> Mono.fromRunnable(() -> {
+                    try {
+                        session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to send ping", e);
+                    }
+                }))
+                .subscribe();    }
 
     @OnMessage
     public void onMessage(String message) {
