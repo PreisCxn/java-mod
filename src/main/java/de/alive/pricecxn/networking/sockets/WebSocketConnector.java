@@ -1,7 +1,8 @@
 package de.alive.pricecxn.networking.sockets;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -9,10 +10,9 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
@@ -23,17 +23,21 @@ public class WebSocketConnector {
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
-    private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
+    private final URI uri;
     private Session session;
-    private boolean isConnected = false;
-    private ScheduledExecutorService pingExecutor;
-    private @Nullable Boolean isConnectionEstablished = null;
+    private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
+
+    public WebSocketConnector() {
+        this(URI.create(DEFAULT_WEBSOCKET_URI));
+    }
+
+    public WebSocketConnector(URI uri) {
+        this.uri = uri;
+    }
 
     @OnOpen
     public void onOpen(@NotNull Session session) {
         this.session = session;
-        this.isConnected = true;
-        isConnectionEstablished = true;
         synchronized(openListeners){
             for (SocketOpenListener listener : openListeners) {
                 listener.onOpen(session);
@@ -41,14 +45,16 @@ public class WebSocketConnector {
         }
 
         // Start sending pings every 30 seconds
-        pingExecutor = Executors.newSingleThreadScheduledExecutor();
-        pingExecutor.scheduleAtFixedRate(() -> {
-            try{
-                session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
-            }catch(IOException e){
-                LOGGER.error("Failed to send ping", e);
-            }
-        }, 30, 30, TimeUnit.SECONDS);
+        disposables.add(Flux.interval(Duration.ofSeconds(30))
+                .flatMap(tick -> Mono.fromCallable(() -> {
+                    try {
+                        session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to send ping", e);
+                    }
+                    return null;
+                }).subscribeOn(Schedulers.boundedElastic()))
+                .subscribe());
     }
 
     @OnMessage
@@ -63,11 +69,16 @@ public class WebSocketConnector {
 
     @OnClose
     public void onClose() {
-        this.isConnected = false;
-        isConnectionEstablished = null;
+        this.session = null;
+
         synchronized(closeListeners){
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
+            }
+        }
+        synchronized(disposables){
+            for (Disposable disposable : disposables) {
+                disposable.dispose();
             }
         }
         LOGGER.debug("WebSocket connection closed");
@@ -78,17 +89,17 @@ public class WebSocketConnector {
         LOGGER.error("WebSocket error", throwable);
     }
 
-    public @NotNull Mono<Boolean> connectToWebSocketServer(@NotNull String serverUri) {
-        return Mono.fromCallable(() -> {
-            try {
-                WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-                container.connectToServer(this, new URI(serverUri));
-                return true;
-            } catch (Exception e) {
-                LOGGER.error("Failed to connect to WebSocket server", e);
-                return false;
-            }
-        }).subscribeOn(Schedulers.boundedElastic());
+    public @NotNull Mono<Session> establishWebSocketConnection() {
+        return Mono.justOrEmpty(this.session)
+                .switchIfEmpty(Mono.fromCallable(() -> {
+                    try{
+                        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+                        return container.connectToServer(this, this.uri);
+                    }catch(Exception e){
+                        LOGGER.error("Failed to connect to WebSocket server", e);
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.boundedElastic()));
     }
 
     public void sendMessage(String message) {
@@ -107,8 +118,8 @@ public class WebSocketConnector {
         }
     }
 
-    public boolean getIsConnected() {
-        return this.isConnected;
+    public Mono<Boolean> isConnected() {
+        return this.establishWebSocketConnection().hasElement();
     }
 
     public void addMessageListener(SocketMessageListener listener) {
