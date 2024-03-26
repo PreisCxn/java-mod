@@ -23,14 +23,21 @@ public class WebSocketConnector {
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
+    private final URI uri;
     private Session session;
-    private boolean isConnected = false;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
+
+    public WebSocketConnector() {
+        this(URI.create(DEFAULT_WEBSOCKET_URI));
+    }
+
+    public WebSocketConnector(URI uri) {
+        this.uri = uri;
+    }
 
     @OnOpen
     public void onOpen(@NotNull Session session) {
         this.session = session;
-        this.isConnected = true;
         synchronized(openListeners){
             for (SocketOpenListener listener : openListeners) {
                 listener.onOpen(session);
@@ -63,7 +70,7 @@ public class WebSocketConnector {
     @OnClose
     public void onClose() {
         this.session = null;
-        this.isConnected = false;
+
         synchronized(closeListeners){
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
@@ -82,12 +89,12 @@ public class WebSocketConnector {
         LOGGER.error("WebSocket error", throwable);
     }
 
-    public @NotNull Mono<Session> establishWebSocketConnection(@NotNull String serverUri) {
+    public @NotNull Mono<Session> establishWebSocketConnection() {
         return Mono.justOrEmpty(this.session)
                 .switchIfEmpty(Mono.fromCallable(() -> {
                     try{
                         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-                        return container.connectToServer(this, new URI(serverUri));
+                        return container.connectToServer(this, this.uri);
                     }catch(Exception e){
                         LOGGER.error("Failed to connect to WebSocket server", e);
                         return null;
@@ -111,8 +118,8 @@ public class WebSocketConnector {
         }
     }
 
-    public boolean getIsConnected() {
-        return this.isConnected;
+    public Mono<Boolean> isConnected() {
+        return this.establishWebSocketConnection().hasElement();
     }
 
     public void addMessageListener(SocketMessageListener listener) {
