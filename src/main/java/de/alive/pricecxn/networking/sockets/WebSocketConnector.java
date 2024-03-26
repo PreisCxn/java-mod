@@ -23,17 +23,13 @@ public class WebSocketConnector {
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
-    private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private Session session;
     private boolean isConnected = false;
-    private ScheduledExecutorService pingExecutor;
-    private @Nullable Boolean isConnectionEstablished = null;
 
     @OnOpen
     public void onOpen(@NotNull Session session) {
         this.session = session;
         this.isConnected = true;
-        isConnectionEstablished = true;
         synchronized(openListeners){
             for (SocketOpenListener listener : openListeners) {
                 listener.onOpen(session);
@@ -42,14 +38,16 @@ public class WebSocketConnector {
 
         // Start sending pings every 30 seconds
         Flux.interval(Duration.ofSeconds(30))
-                .flatMap(tick -> Mono.fromRunnable(() -> {
+                .flatMap(tick -> Mono.fromCallable(() -> {
                     try {
                         session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
                     } catch (IOException e) {
                         LOGGER.error("Failed to send ping", e);
                     }
-                }))
-                .subscribe();    }
+                    return null;
+                }).subscribeOn(Schedulers.boundedElastic()))
+                .subscribe();
+    }
 
     @OnMessage
     public void onMessage(String message) {
@@ -65,7 +63,6 @@ public class WebSocketConnector {
     public void onClose() {
         this.session = null;
         this.isConnected = false;
-        isConnectionEstablished = null;
         synchronized(closeListeners){
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
