@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
@@ -73,33 +71,8 @@ public abstract class ItemStackMixin {
         ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
-        ItemStack itemStack = (ItemStack) (Object) this;
-
-        Modes mode = themeChecker.getMode();
-
-        if (mode == Modes.NOTHING || mode == Modes.LOBBY) return;
-
-        MinecraftClient client = MinecraftClient.getInstance();
-
-        if (client.player == null || client.currentScreen == null) return;
-        if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
+        if(shouldCancel(themeChecker))
             return;
-
-        String title = client.currentScreen.getTitle().getString().toUpperCase();
-
-        List<String> invBlocks = mode == Modes.SKYBLOCK ?
-                TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData() :
-                mode == Modes.CITYBUILD ?
-                        TranslationDataAccess.CITYBUILD_INV_BLOCK.getData() :
-                        null;
-
-        if (invBlocks == null) return;
-
-        for(String s : invBlocks) {
-            if(title.contains(s.toUpperCase())) {
-                return;
-            }
-        }
 
         findInfo();
 
@@ -186,6 +159,38 @@ public abstract class ItemStackMixin {
                                  .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
             });
         }
+    }
+
+    @Unique
+    public boolean shouldCancel(ThemeServerChecker themeChecker){
+        Modes mode = themeChecker.getMode();
+
+        if (mode == Modes.NOTHING || mode == Modes.LOBBY)
+            return true;
+
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (client.player == null || client.currentScreen == null) return true;
+        if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
+            return true;
+
+        List<String> invBlocks = switch(mode){
+            case SKYBLOCK -> TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData();
+            case CITYBUILD -> TranslationDataAccess.CITYBUILD_INV_BLOCK.getData();
+            default -> null;
+        };
+
+        if (invBlocks == null)
+            return true;
+
+        String title = client.currentScreen.getTitle().getString().toUpperCase();
+        for (String s : invBlocks) {
+            if (title.contains(s.toUpperCase())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Unique
