@@ -305,6 +305,8 @@ public class CxnListener extends ServerListener {
                     if (!isConnected) {
                         // Server nicht erreichbar
                         this.deactivate();
+
+                        LOGGER.info("Server nicht erreichbar");
                         return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
                     } else if (!isMinVersion) {
                         // Version nicht korrekt
@@ -320,7 +322,7 @@ public class CxnListener extends ServerListener {
 
                         if (serverCheckerState == NetworkingState.ONLINE) {
                             // Server im Online-Modus
-
+                            LOGGER.info("Server im Online-Modus");
                             return this.activate(themeRefresh)
                                     .then(Mono.just(new Pair<>(!activeCache, ActionNotification.MOD_STARTED)));
 

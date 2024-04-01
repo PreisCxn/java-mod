@@ -119,7 +119,9 @@ public class WebSocketConnector {
     }
 
     public Mono<Boolean> isConnected() {
-        return this.establishWebSocketConnection().hasElement();
+        return Mono.justOrEmpty(this.session)
+                .flatMap(session -> Mono.just(session.isOpen()))
+                .switchIfEmpty(Mono.just(false));
     }
 
     public void addMessageListener(SocketMessageListener listener) {
