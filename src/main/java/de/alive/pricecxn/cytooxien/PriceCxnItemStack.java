@@ -111,56 +111,62 @@ public class PriceCxnItemStack {
     }
 
     private @NotNull JsonObject nbtToJson(@NotNull ItemStack item) {
-        JsonObject json = new JsonObject();
         NbtCompound nbt = item.getNbt();
+        if (nbt == null) return new JsonObject();
 
-        if (!item.hasNbt()) return json;
-        if (nbt == null) return json;
+        return nbtToJson(nbt);
+    }
+
+    private @NotNull JsonObject nbtToJson(@NotNull NbtCompound nbt) {
+        JsonObject json = new JsonObject();
 
         for (String key : nbt.getKeys()) {
             NbtElement nbtElement = nbt.get(key);
             if (nbtElement == null)
                 continue;
 
-            String nbtString = nbtElement.asString();
+            if(nbtElement instanceof NbtCompound nbtCompound){
+                json.add(key, nbtToJson(nbtCompound));
+            } else {
+                String nbtString = nbtElement.asString();
 
-            if (nbtString == null) continue;
+                if (nbtString == null) continue;
 
-            nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+                nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
 
-            JsonObject valueJson = null;
+                JsonObject valueJson = null;
 
-            //test if only Delete Pattern is needed
-            try {
-                valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-            } catch (IllegalStateException e) {
-                nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-                //test if JsonArray
-                try {
-                    JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
-                    json.add(key, array);
-                    continue;
-                } catch (IllegalStateException ignored) {
-                }
-
-                //test if JsonKey is missing
+                //test if only Delete Pattern is needed
                 try {
                     valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e2) {
+                } catch (IllegalStateException e) {
+                    nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+                    //test if JsonArray
+                    try {
+                        JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
+                        json.add(key, array);
+                        continue;
+                    } catch (IllegalStateException ignored) {
+                    }
+
+                    //test if JsonKey is missing
+                    try {
+                        valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+                    } catch (IllegalStateException e2) {
+                        //else add as normal String
+                        json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
+                    }
+
+                } catch (JsonParseException e) {
                     //else add as normal String
-                    json.addProperty(key, Optional.ofNullable(nbtElement).map(NbtElement::asString).orElse("null"));
+                    json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
                 }
 
-            } catch (JsonParseException e) {
-                //else add as normal String
-                json.addProperty(key, Optional.ofNullable(nbtElement).map(NbtElement::asString).orElse("null"));
+                if (valueJson != null) {
+                    json.add(key, valueJson);
+                }
             }
-
-            if (valueJson != null) {
-                json.add(key, valueJson);
-            }
-
         }
 
         return json;
