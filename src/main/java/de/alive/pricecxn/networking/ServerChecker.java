@@ -80,14 +80,9 @@ public class ServerChecker {
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
     public Mono<Boolean> isConnected() {
-        return this.websocket
-                .isConnected()
-                .flatMap(aBoolean -> {
-                    if (!aBoolean)
-                        return checkConnection();
-
-                    return Mono.just(true);
-                });
+        if(!this.websocket.isConnected())
+            return checkConnection();
+        return Mono.just(true);
     }
 
     public void addSocketListener(SocketMessageListener listener) {

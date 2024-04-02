@@ -118,10 +118,11 @@ public class WebSocketConnector {
         }
     }
 
-    public Mono<Boolean> isConnected() {
-        return Mono.justOrEmpty(this.session)
-                .flatMap(session -> Mono.just(session.isOpen()))
-                .switchIfEmpty(Mono.just(false));
+    public boolean isConnected() {
+        if(this.session == null){
+            return false;
+        }
+        return this.session.isOpen();
     }
 
     public void addMessageListener(SocketMessageListener listener) {
