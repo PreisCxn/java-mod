@@ -250,7 +250,9 @@ public abstract class ItemStackMixin {
 
             }
 
-        } else {
+        }
+
+        if(foundItems.isEmpty()) {
             String itemName = cxnItemStack.getItemName();
 
             outer:
