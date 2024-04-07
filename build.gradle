@@ -180,17 +180,3 @@ tasks.register('incrementPatchVersion') {
 		properties.store(propertiesFile.newWriter(), null)
 	}
 }
-
-tasks.register('commitPatch') {
-	dependsOn 'incrementPatchVersion'
-	doLast {
-		sleep 20000
-		exec {
-			commandLine 'git', 'add', 'gradle.properties'
-		}
-		sleep 10000
-		exec {
-			commandLine 'git', 'commit', '-m', 'Incremented patch version'
-		}
-	}
-}
