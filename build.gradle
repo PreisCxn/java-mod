@@ -153,7 +153,7 @@ tasks.register('incrementMinorVersion') {
 		def version = properties.getProperty('mod_version')
 		def versionParts = version.split('\\.')
 		versionParts[1] = (versionParts[1] as Integer) + 1
-		versionParts[0] = 0
+		versionParts[2] = 0
 
 		def newVersion = versionParts.join('.')
 		println "Increasing intermediate version to: $newVersion"
