@@ -8,7 +8,6 @@ group = project.maven_group
 
 repositories {
 	mavenCentral()
-	jcenter() // Fügen Sie dieses Repository hinzu
 
 	// Andere Repositories hier ...
 }
@@ -123,4 +122,75 @@ tasks.named('sourcesJar').configure {
 
 tasks.named('build').configure {
 	dependsOn 'generateVersion'
+}
+
+tasks.register('incrementMajorVersion') {
+	doLast {
+		def propertiesFile = file('gradle.properties')
+		def properties = new Properties()
+		properties.load(propertiesFile.newDataInputStream())
+
+		def version = properties.getProperty('mod_version')
+		def versionParts = version.split('\\.')
+		versionParts[0] = (versionParts[0] as Integer) + 1
+		versionParts[1] = 0
+		versionParts[2] = 0
+
+		def newVersion = versionParts.join('.')
+		println "Increasing major version to: $newVersion"
+
+		properties.setProperty('mod_version', newVersion)
+		properties.store(propertiesFile.newWriter(), null)
+	}
+}
+
+tasks.register('incrementMinorVersion') {
+	doLast {
+		def propertiesFile = file('gradle.properties')
+		def properties = new Properties()
+		properties.load(propertiesFile.newDataInputStream())
+
+		def version = properties.getProperty('mod_version')
+		def versionParts = version.split('\\.')
+		versionParts[1] = (versionParts[1] as Integer) + 1
+		versionParts[0] = 0
+
+		def newVersion = versionParts.join('.')
+		println "Increasing intermediate version to: $newVersion"
+
+		properties.setProperty('mod_version', newVersion)
+		properties.store(propertiesFile.newWriter(), null)
+	}
+}
+
+tasks.register('incrementPatchVersion') {
+	doLast {
+		def propertiesFile = file('gradle.properties')
+		def properties = new Properties()
+		properties.load(propertiesFile.newDataInputStream())
+
+		def version = properties.getProperty('mod_version')
+		def versionParts = version.split('\\.')
+		versionParts[2] = (versionParts[2] as Integer) + 1
+
+		def newVersion = versionParts.join('.')
+		println "Increasing minor version to: $newVersion"
+
+		properties.setProperty('mod_version', newVersion) // Ensure you're setting the correct property name
+		properties.store(propertiesFile.newWriter(), null)
+	}
+}
+
+tasks.register('commitPatch') {
+	dependsOn 'incrementPatchVersion'
+	doLast {
+		sleep 20000
+		exec {
+			commandLine 'git', 'add', 'gradle.properties'
+		}
+		sleep 10000
+		exec {
+			commandLine 'git', 'commit', '-m', 'Incremented patch version'
+		}
+	}
 }
