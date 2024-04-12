@@ -7,6 +7,7 @@ import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -73,7 +74,11 @@ public class AuctionHouseListener extends InventoryListener {
 
         if(!array.isEmpty())
             return sendData("/auctionhouse", array)
-                    .doOnSuccess(aVoid -> printDebug("AuctionHouse data sent: " + array.size() + " items"));
+                    .doOnSuccess(aVoid -> {
+                        if(client.player == null)
+                            return;
+                        client.player.sendMessage(Text.of( "AuctionHouse data sent: " + array.size() + " items"));
+                    });
         return Mono.empty();
     }
 

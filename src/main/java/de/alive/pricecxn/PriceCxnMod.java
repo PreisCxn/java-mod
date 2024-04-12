@@ -24,7 +24,7 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = System.getenv("DEBUG_MODE") != null && System.getenv("DEBUG_MODE").equals("true");
 	public static final String MOD_NAME = "PriceCxn";
 	public static final String MOD_VERSION = Version.MOD_VERSION;
 	public static final Logger LOGGER = LoggerFactory.getLogger(PriceCxnMod.class);
@@ -56,7 +56,7 @@ public class PriceCxnMod implements ModInitializer {
 			MutableText text = MutableText.of(new PlainTextContent.Literal(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
 			if(client.player != null)
 			    client.player.sendMessage(text, overlay);
-			if(sysOut) LOGGER.debug("[PCXN-DEBUG] : " + message);
+			if(sysOut) LOGGER.debug("[PCXN-DEBUG] : {}", message);
 		});
 	}
 
@@ -70,8 +70,7 @@ public class PriceCxnMod implements ModInitializer {
 	}
 
 	public static @NotNull Optional<Integer> getIntVersion(@Nullable String version){
-		if(DEBUG_MODE)
-			LOGGER.info( "Version: " + version);
+        LOGGER.debug("Version: {}", version);
 		if(version == null)
 			return Optional.empty();
 		version = version.replaceAll("\\.", "");
