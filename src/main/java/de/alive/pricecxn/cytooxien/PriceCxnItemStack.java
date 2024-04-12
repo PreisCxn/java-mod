@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
+import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
@@ -299,6 +300,87 @@ public class PriceCxnItemStack {
 
     public @NotNull Map<String, DataAccess> getSearchData() {
         return searchData;
+    }
+
+    public @Nullable JsonObject findItemInfo(String dataKey) {
+        if(PriceCxnModClient.CXN_LISTENER.getData(dataKey) == null)
+            return null;
+
+        JsonObject obj = PriceCxnModClient.CXN_LISTENER.getData(dataKey).getDataObject();
+        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+
+        if (obj == null) return null;
+
+        if (!obj.has("mode") || !obj.has("is_nook") || !obj.has("data") || !obj.has("is_mod")) return null;
+        if (!obj.get("is_mod").getAsBoolean()) return null;
+        if (!obj.get("mode").getAsString().equals(themeChecker.getMode().getTranslationKey())) return null;
+
+        JsonArray array = obj.get("data").getAsJsonArray();
+        if (array.isEmpty()) return null;
+
+        List<Integer> foundItems = new ArrayList<>();
+
+        //item ist special_item?
+        if (data.has(PriceCxnItemStack.COMMENT_KEY) &&
+            data.get(PriceCxnItemStack.COMMENT_KEY).isJsonObject() &&
+            data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
+            JsonObject nbtData = data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
+            String pbvString = nbtData.get("PublicBukkitValues").getAsJsonObject().toString();
+
+            outer:
+            for (int i = 0; i < array.size(); i++) {
+                JsonObject item = array.get(i).getAsJsonObject();
+                if (!item.has("item_search_key") || !item.get("item_search_key").getAsString().contains("special_item"))
+                    continue;
+
+                String searchKey = item.get("item_search_key").getAsString();
+                String[] searches = searchKey.split("\\.");
+
+                for (String s : searches) {
+                    if (!pbvString.contains(s)) continue outer;
+                }
+
+                foundItems.add(i);
+                if (foundItems.size() > 1) return null;
+
+            }
+
+        } else {
+
+            outer:
+            for (int i = 0; i < array.size(); i++) {
+                JsonObject item = array.get(i).getAsJsonObject();
+                if (!item.has("item_search_key") || item.get("item_search_key").getAsString().contains("special_item"))
+                    continue;
+
+                String searchKey = item.get("item_search_key").getAsString();
+                String[] searches = searchKey.split("&c>");
+                String itemNameSearch = searches[0];
+
+                if (!getItemName().equals(itemNameSearch)) continue;
+
+                if (searches.length > 1) {
+                    String[] nbtSearches = searches[1].split("\\.");
+                    String commentSearch = data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject().toString();
+
+                    for (String s : nbtSearches) {
+                        if (!commentSearch.contains(s)) continue outer;
+                    }
+
+                }
+
+                foundItems.add(i);
+                if (foundItems.size() > 1) return null;
+
+            }
+
+        }
+
+        if (foundItems.size() == 1) {
+            return array.get(foundItems.get(0)).getAsJsonObject();
+        }
+
+        return null;
     }
 
 }
