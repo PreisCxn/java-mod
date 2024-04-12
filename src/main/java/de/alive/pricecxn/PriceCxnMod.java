@@ -70,8 +70,7 @@ public class PriceCxnMod implements ModInitializer {
 	}
 
 	public static @NotNull Optional<Integer> getIntVersion(@Nullable String version){
-		if(DEBUG_MODE)
-			LOGGER.info( "Version: " + version);
+        LOGGER.debug("Version: {}", version);
 		if(version == null)
 			return Optional.empty();
 		version = version.replaceAll("\\.", "");
