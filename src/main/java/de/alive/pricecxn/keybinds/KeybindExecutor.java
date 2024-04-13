@@ -8,10 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public interface KeybindExecutor {
-
+    Map<Class<? extends KeybindExecutor>, KeyBinding> CLASS_KEY_BINDING_MAP = new HashMap<>();
     Map<KeyBinding, KeybindExecutor> KEY_BINDING_KEYBIND_EXECUTOR_MAP = new HashMap<>();
 
     static void register(KeyBinding keyBinding, KeybindExecutor keybindExecutor, boolean inInventory) {
+        CLASS_KEY_BINDING_MAP.put(keybindExecutor.getClass(), keyBinding);
         if (inInventory)
             KEY_BINDING_KEYBIND_EXECUTOR_MAP.put(keyBinding, keybindExecutor);
 

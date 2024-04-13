@@ -25,6 +25,8 @@
   "cxn_listener.display_prices.hours_singular": "hour",
   "cxn_listener.display_prices.days_plural": "days",
   "cxn_listener.display_prices.days_singular": "day",
+  "cxn_listener.display_prices.open_with_key_in_browser": "Press %s to view in browser",
 
   "cxn_listener.keys.open_in_browser": "Open item in browser"
+
 }

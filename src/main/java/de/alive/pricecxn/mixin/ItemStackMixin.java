@@ -6,12 +6,15 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.*;
+import de.alive.pricecxn.keybinds.KeybindExecutor;
+import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -158,6 +161,14 @@ public abstract class ItemStackMixin {
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
                                  .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
             });
+
+            if(pcxnPrice.has("item_info_url")){
+                KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+                list.add(Text.translatable(
+                        "cxn_listener.display_prices.open_with_key_in_browser",
+                        keyBinding.getBoundKeyLocalizedText())
+                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
+            }
         }
     }
 
