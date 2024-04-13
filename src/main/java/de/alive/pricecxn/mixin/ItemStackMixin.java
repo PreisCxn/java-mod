@@ -6,12 +6,15 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.*;
+import de.alive.pricecxn.keybinds.KeybindExecutor;
+import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -145,6 +148,18 @@ public abstract class ItemStackMixin {
 
         }
         if(pcxnPrice != null){
+            if(pcxnPrice.has("item_info_url")){
+                KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+                MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
+                                      keyBinding
+                                              .getBoundKeyLocalizedText()
+                                              .copy()
+                                              .setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
+                        .setStyle(Style.EMPTY.withColor(Formatting.GRAY));
+
+                list.add(text);
+            }
+
             list.add(PriceText.space());
 
             Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate
