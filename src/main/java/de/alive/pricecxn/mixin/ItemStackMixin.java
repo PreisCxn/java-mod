@@ -148,6 +148,17 @@ public abstract class ItemStackMixin {
 
         }
         if(pcxnPrice != null){
+            if(pcxnPrice.has("item_info_url")){
+                KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+                MutableText text = keyBinding.getBoundKeyLocalizedText().copy()
+                        .setStyle(Style.EMPTY.withColor(Formatting.GRAY))
+                        .append(Text.translatable("cxn_listener.display_prices.separator")
+                                        .setStyle(Style.EMPTY.withColor(Formatting.DARK_RED)))
+                        .append(Text.translatable("cxn_listener.display_prices.view_in_browser"));
+
+                list.add(text);
+            }
+
             list.add(PriceText.space());
 
             Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate
@@ -161,14 +172,6 @@ public abstract class ItemStackMixin {
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
                                  .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
             });
-
-            if(pcxnPrice.has("item_info_url")){
-                KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
-                list.add(Text.translatable(
-                        "cxn_listener.display_prices.open_with_key_in_browser",
-                        keyBinding.getBoundKeyLocalizedText())
-                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
-            }
         }
     }
 
