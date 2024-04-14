@@ -22,8 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.*;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -82,7 +81,7 @@ public class TradeListener extends InventoryListener {
 
                     Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
 
-                    printDebug(result.isPresent() ? result.get().getAsString() : "Failed to get result");
+                    printTester(result.isPresent() ? result.get().getAsString() : "Failed to get result");
 
                     return mono;
                 })

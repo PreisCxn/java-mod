@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.printTester;
 
 public class ItemShopListener extends InventoryListener {
 
@@ -80,7 +81,7 @@ public class ItemShopListener extends InventoryListener {
         object.add("sellPrice",  sellItem.getData().get("sellPrice"));
         object.add("buyPrice",  buyItem.getData().get("buyPrice"));
 
-        return sendData("/itemshop", object).doOnSuccess(aVoid -> printDebug("ItemShop data sent"));
+        return sendData("/itemshop", object).doOnSuccess(aVoid -> printTester("ItemShop data sent"));
     }
 
     @Override
