@@ -20,8 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.*;
 
 public class TomNookListener extends InventoryListener {
     private final List<PriceCxnItemStack> items = new ArrayList<>();
@@ -77,7 +76,7 @@ public class TomNookListener extends InventoryListener {
 
 
         if(!array.isEmpty())
-            return sendData("/tomnook", array).doOnSuccess(aVoid -> printDebug("Nook data sent"));
+            return sendData("/tomnook", array).doOnSuccess(aVoid -> printTester("Nook data sent"));
 
         return Mono.empty();
     }

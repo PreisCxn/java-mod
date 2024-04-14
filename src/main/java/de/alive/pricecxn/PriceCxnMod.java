@@ -24,7 +24,8 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-	public static final boolean DEBUG_MODE = System.getenv("DEBUG_MODE") != null && System.getenv("DEBUG_MODE").equals("true");
+	public static final boolean DEBUG_MODE = System.getenv("PCXN_DEBUG_MODE") != null && System.getenv("PCXN_DEBUG_MODE").equals("true");
+	public static final boolean TESTER_MODE = System.getenv("PCXN_TESTER_MODE") != null && System.getenv("PCXN_TESTER_MODE").equals("true");
 	public static final String MOD_NAME = "PriceCxn";
 	public static final String MOD_VERSION = Version.MOD_VERSION;
 	public static final Logger LOGGER = LoggerFactory.getLogger(PriceCxnMod.class);
@@ -50,6 +51,17 @@ public class PriceCxnMod implements ModInitializer {
 
 		function.accept(client);
 	}
+
+	public static void printTester(String message){
+        if (!PriceCxnMod.DEBUG_MODE && !PriceCxnMod.TESTER_MODE) return;
+        if(MinecraftClient.getInstance() == null) return;
+        if(MinecraftClient.getInstance().player == null) return;
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        MutableText text = MutableText.of(new PlainTextContent.Literal(message));
+        client.player.sendMessage(text, true);
+        LOGGER.debug("[PCXN-TESTER] : {}", message);
+    }
 
 	public static void printDebug(String message, boolean overlay, boolean sysOut){
 		doDebug((client) -> {

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.printTester;
 
 public class AuctionHouseListener extends InventoryListener {
 
@@ -77,7 +78,7 @@ public class AuctionHouseListener extends InventoryListener {
                     .doOnSuccess(aVoid -> {
                         if(client.player == null)
                             return;
-                        client.player.sendMessage(Text.of( "AuctionHouse data sent: " + array.size() + " items"));
+                        printTester( "AuctionHouse data sent: " + array.size() + " items");
                     });
         return Mono.empty();
     }
