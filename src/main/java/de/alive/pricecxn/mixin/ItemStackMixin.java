@@ -1,6 +1,5 @@
 package de.alive.pricecxn.mixin;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
@@ -34,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,6 +117,8 @@ public abstract class ItemStackMixin {
 
             }
         }
+
+        amount *= getTransactionAmountFactor(list);
 
         list.add(PriceText.space());
 
@@ -206,6 +206,36 @@ public abstract class ItemStackMixin {
         }
 
         return false;
+    }
+
+    @Unique
+    public int getTransactionAmountFactor(@NotNull List<Text> list){
+        MinecraftClient client = MinecraftClient.getInstance();
+        if(client.currentScreen == null)
+            return 1;
+
+        String inventoryTitle = client.currentScreen.getTitle().getString();
+        if(inventoryTitle == null)
+            return 1;
+
+        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().contains(inventoryTitle))
+            return 1;
+
+        for (Text text : list) {
+            for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData()) {
+                if (text.getString().contains(datum)) {
+                    String amount = StringUtil.removeChars(text.getString());
+                    try {
+                        return Integer.parseInt(amount);
+                    } catch (NumberFormatException e) {
+                        LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return 1;
     }
 
     @Unique
