@@ -1,6 +1,5 @@
 package de.alive.pricecxn.mixin;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
@@ -34,9 +33,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
@@ -85,40 +84,11 @@ public abstract class ItemStackMixin {
 
         int amount = this.cxnItemStack.getAmount();
 
-        PriceText pcxnPriceText = PriceText.create();
+        AtomicReference<PriceText> pcxnPriceText = new AtomicReference<>(PriceText.create());
 
 
-        if (pcxnPrice != null && pcxnPrice.has("pbv_search_key") && pcxnPrice.get("pbv_search_key") != JsonNull.INSTANCE) {
-            String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
-            if (!this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY)) return;
-            JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
-            if (!nbtData.has("PublicBukkitValues")) return;
-            JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
-            if (!pbvData.has(pbvKey)) return;
-
-            String pbvSearchResult = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
-
-            int pbvAmount = 0;
-
-            try {
-                pbvAmount = Integer.parseInt(pbvSearchResult);
-            } catch (NumberFormatException e) {
-                LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
-                return;
-            }
-
-            if (StorageItemStack.isOf(pcxnPrice)) {
-
-                storageItemStack.setup(pcxnPrice, serverChecker.getWebsocket());
-                pcxnPriceText = storageItemStack.getText();
-                storageItemStack.search(pbvAmount).block();
-
-            } else {
-
-                amount *= pbvAmount;
-
-            }
-        }
+        amount *= getPbvAmountFactor(serverChecker, pcxnPriceText);
+        amount *= getTransactionAmountFactor(list);
 
         list.add(PriceText.space());
 
@@ -130,10 +100,9 @@ public abstract class ItemStackMixin {
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         int finalAmount = amount;
-        PriceText finalPcxnPriceText = pcxnPriceText;
-        LOGGER.debug(String.valueOf(finalPcxnPriceText.getPriceAdder()));
+        LOGGER.debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
         if(pcxnPrice != null){
-            list.add(finalPcxnPriceText
+            list.add(pcxnPriceText.get()
                              .withPrices(pcxnPrice.get("lower_price").getAsDouble(), pcxnPrice.get("upper_price").getAsDouble())
                              .withPriceMultiplier(finalAmount)
                              .getText());
@@ -206,6 +175,78 @@ public abstract class ItemStackMixin {
         }
 
         return false;
+    }
+
+    @Unique
+    public int getPbvAmountFactor(ServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText) {
+        if (pcxnPrice == null
+                || !pcxnPrice.has("pbv_search_key")
+                || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
+                || this.cxnItemStack == null
+                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY))
+            return 1;
+
+        String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
+        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
+
+        if (!nbtData.has("PublicBukkitValues")) return 1;
+        JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
+        if (!pbvData.has(pbvKey)) return 1;
+
+        String pbvSearchResult = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
+
+        int pbvAmount;
+
+        try {
+            pbvAmount = Integer.parseInt(pbvSearchResult);
+        } catch (NumberFormatException e) {
+            LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
+            return 1;
+        }
+
+        if (StorageItemStack.isOf(pcxnPrice)) {
+
+            storageItemStack.setup(pcxnPrice, serverChecker.getWebsocket());
+            pcxnPriceText.set(storageItemStack.getText());
+            storageItemStack.search(pbvAmount).block();
+
+        } else {
+
+            return pbvAmount;
+
+        }
+
+        return 1;
+    }
+
+    @Unique
+    public int getTransactionAmountFactor(@NotNull List<Text> list){
+        MinecraftClient client = MinecraftClient.getInstance();
+        if(client.currentScreen == null)
+            return 1;
+
+        String inventoryTitle = client.currentScreen.getTitle().getString();
+        if(inventoryTitle == null)
+            return 1;
+
+        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().contains(inventoryTitle))
+            return 1;
+
+        for (Text text : list) {
+            for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData()) {
+                if (text.getString().contains(datum)) {
+                    String amount = StringUtil.removeChars(text.getString());
+                    try {
+                        return Integer.parseInt(amount);
+                    } catch (NumberFormatException e) {
+                        LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return 1;
     }
 
     @Unique

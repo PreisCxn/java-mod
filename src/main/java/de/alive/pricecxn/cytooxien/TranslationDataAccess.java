@@ -67,7 +67,11 @@ public enum TranslationDataAccess implements DataAccess {
 
     //Inv blocks
     SKYBLOCK_INV_BLOCK("cxnprice.translation.inv_block.skyblock", List.of("Inseln")),
-    CITYBUILD_INV_BLOCK("cxnprice.translation.inv_block.citybuild", List.of("Stadt"));
+    CITYBUILD_INV_BLOCK("cxnprice.translation.inv_block.citybuild", List.of("Stadt")),
+
+    //Transaction
+    TRANSACTION_COUNT("cxnprice.translation.transaction.count", List.of("Anzahl:")),
+    TRANSACTION_TITLE("cxnprice.translation.transaction.title", List.of("Deine Transaktionen"));
 
     private final String id;
     private final List<String> backupData;
