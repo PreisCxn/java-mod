@@ -71,9 +71,8 @@ public abstract class ItemStackMixin {
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
 
         ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
-        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
-        if(shouldCancel(themeChecker))
+        if(shouldCancel(list))
             return;
 
         findInfo();
@@ -146,7 +145,9 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public boolean shouldCancel(ThemeServerChecker themeChecker){
+    public boolean shouldCancel(List<Text> list){
+        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+
         Modes mode = themeChecker.getMode();
 
         if (mode == Modes.NOTHING || mode == Modes.LOBBY)
@@ -171,6 +172,14 @@ public abstract class ItemStackMixin {
         for (String s : invBlocks) {
             if (title.contains(s.toUpperCase())) {
                 return true;
+            }
+        }
+
+        for (Text text : list) {
+            for (String datum : TranslationDataAccess.VISIT_ISLAND.getData()) {
+                if (text.getString().contains(datum)) {
+                    return true;
+                }
             }
         }
 
