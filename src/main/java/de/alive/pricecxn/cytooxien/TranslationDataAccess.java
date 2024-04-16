@@ -71,7 +71,9 @@ public enum TranslationDataAccess implements DataAccess {
 
     //Transaction
     TRANSACTION_COUNT("cxnprice.translation.transaction.count", List.of("Anzahl:")),
-    TRANSACTION_TITLE("cxnprice.translation.transaction.title", List.of("Deine Transaktionen"));
+    TRANSACTION_TITLE("cxnprice.translation.transaction.title", List.of("Deine Transaktionen")),
+
+    VISIT_ISLAND("cxnprice.translation.visit.island", List.of("» Klicke um die Insel zu besuchen!"));
 
     private final String id;
     private final List<String> backupData;
