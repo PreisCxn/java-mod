@@ -25,3 +25,4 @@ jobs:
         run: python3 /opt/actions-runner/mod_poster.py
         env:
           PRICECXNAUTH: ${{ secrets.PRICECXNAUTH }}
+          REPO_DIR: ${{ github.workspace }}
