@@ -43,10 +43,8 @@ public abstract class ServerListener {
                     .filter(ip -> client.getCurrentServerEntry().address.toLowerCase().contains(ip))
                     .filter(ip -> ignoredIps.stream().noneMatch(ignoredIp -> client.getCurrentServerEntry().address.toLowerCase().contains(ignoredIp)))
                     .next()
-                    .flatMap(ip -> {
-                        onServer.set(true);
-                        return onServerJoin();
-                    })
+                    .doOnNext(s -> onServer.set(true))
+                    .flatMap(ip -> onServerJoin())
                     .subscribe();
 
         });
