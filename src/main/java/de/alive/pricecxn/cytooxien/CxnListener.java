@@ -53,7 +53,7 @@ public class CxnListener extends ServerListener {
 
         //checking connection and activating mod
         checkConnectionAsync(false)
-                .doOnSuccess((a) -> LOGGER.info("Mod active?" + this.active.get()))
+                .doOnSuccess((a) -> LOGGER.info("Mod active? {}", this.active.get()))
                 .subscribe();
 
     }
@@ -95,7 +95,7 @@ public class CxnListener extends ServerListener {
 
     @Override
     public void onServerLeave() {
-        LOGGER.debug("Cytooxien left : " + this.isOnServer().get());
+        LOGGER.debug("Cytooxien left : {}", this.isOnServer().get());
         deactivate();
     }
 
@@ -194,7 +194,7 @@ public class CxnListener extends ServerListener {
 
                         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
 
-                        LOGGER.info(isRightVersionBackup + " " + serverMinVersion);
+                        LOGGER.info("{} {}", isRightVersionBackup, serverMinVersion);
                         this.isRightVersion = false;
                         return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
                     } else {
@@ -256,6 +256,7 @@ public class CxnListener extends ServerListener {
 
             return stringList;
         } catch (Exception e) {
+            LOGGER.error("Error while getting mod users", e);
             return null;
         }
     }
