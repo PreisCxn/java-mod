@@ -33,7 +33,7 @@ public abstract class PlayerListEntryMixin {
         CxnListener listener = PriceCxnModClient.CXN_LISTENER;
 
         if(!listener.isOnServer().get()) return;
-        if(!listener.isActive().get()) return;
+        if(!listener.isActive()) return;
 
         List<String> modUsers = listener.getModUsers();
 
