@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This class is used to check if the player is on a specific server.
  */
 public abstract class ServerListener {
-    private static final String DEFAULT_IGNORED_IP = "beta";
-    private static final String DEFAULT_IP = "cytooxien";
 
     private final AtomicBoolean onServer = new AtomicBoolean(Boolean.FALSE);
     private final List<String> ips;
