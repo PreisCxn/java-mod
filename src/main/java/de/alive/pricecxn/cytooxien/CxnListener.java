@@ -65,11 +65,19 @@ public class CxnListener extends ServerListener {
 
     }
 
-    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation, boolean force) {
+    /**
+     * Sends a connection information message to the Minecraft player.
+     * This method is used to send messages to the player about the status of the connection.
+     * The message is only sent if the force parameter is true or the shouldSend parameter is true.
+     *
+     * @param shouldSend A boolean indicating whether the message should be sent.
+     * @param message An ActionNotification object containing the message to be sent.
+     * @param force A boolean that, if true, forces the message to be sent regardless of the shouldSend parameter.
+     */
+    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message, boolean force) {
 
-        if (force || messageInformation.getLeft()) {
+        if (force || shouldSend) {
             if (MinecraftClient.getInstance().player != null) {
-                ActionNotification message = messageInformation.getRight();
 
                 MutableText msg;
                 if (message.hasTextVariables()) {
@@ -91,8 +99,8 @@ public class CxnListener extends ServerListener {
 
     }
 
-    public static void sendConnectionInformation(@NotNull Pair<Boolean, ActionNotification> messageInformation) {
-        sendConnectionInformation(messageInformation, false);
+    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message) {
+        sendConnectionInformation(shouldSend, message, false);
     }
 
     @Override
@@ -114,7 +122,7 @@ public class CxnListener extends ServerListener {
 
         return checkConnectionAsync(true)
                 .flatMap(messageInformation -> {
-                    sendConnectionInformation(messageInformation);
+                    sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
                         return refreshData(false);
                     return Mono.empty();
@@ -125,7 +133,7 @@ public class CxnListener extends ServerListener {
     public @NotNull Mono<Void> onServerJoin() {
 
         return checkConnectionAsync(true)
-                .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true))
+                .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
                 .then();
 
     }
