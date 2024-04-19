@@ -99,6 +99,14 @@ public class CxnListener extends ServerListener {
 
     }
 
+    /**
+     * Sends a connection information message to the Minecraft player.
+     * This method is used to send messages to the player about the status of the connection.
+     * The message is only sent if the shouldSend parameter is true.
+     *
+     * @param shouldSend A boolean indicating whether the message should be sent.
+     * @param message An ActionNotification object containing the message to be sent.
+     */
     public static void sendConnectionInformation(boolean shouldSend, ActionNotification message) {
         sendConnectionInformation(shouldSend, message, false);
     }
