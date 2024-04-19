@@ -122,11 +122,6 @@ public class CxnListener extends ServerListener {
                 .then();
     }
 
-    private void createTranslationHandler(@NotNull List<String> langList) {
-
-
-    }
-
     private void deactivate() {
         if (!this.active.get()) return; //return wenn schon deaktiviert
 
