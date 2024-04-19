@@ -36,7 +36,6 @@ public class CxnListener extends ServerListener {
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
     private final @NotNull ThemeServerChecker themeChecker;
-    private final @NotNull List<InventoryListener> listeners;
     private final @NotNull ServerChecker serverChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
     NetworkingState state = NetworkingState.OFFLINE;
@@ -52,7 +51,7 @@ public class CxnListener extends ServerListener {
 
         //setting up theme checker and listeners
         this.themeChecker = new ThemeServerChecker(this, this.isOnServer());
-        listeners = List.of(
+        @NotNull List<InventoryListener> listeners = List.of(
                 new AuctionHouseListener(this.isOnServer(), listenerActive),
                 new ItemShopListener(this.isOnServer(), listenerActive),
                 new TomNookListener(this.isOnServer(), listenerActive),
@@ -351,7 +350,7 @@ public class CxnListener extends ServerListener {
 
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
         return Mono.fromCallable(() -> this.checkConnection(themeRefresh))
-                .subscribeOn(Schedulers.fromExecutor(ServerChecker.EXECUTOR))
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(result -> result);
     }
 
