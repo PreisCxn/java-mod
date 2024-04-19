@@ -7,7 +7,6 @@ import de.alive.pricecxn.cytooxien.dataobservers.AuctionHouseListener;
 import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
-import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
@@ -16,8 +15,6 @@ import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +26,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
-import static de.alive.pricecxn.PriceCxnMod.MOD_TEXT;
 
 public class CxnListener extends ServerListener {
 
@@ -63,52 +59,6 @@ public class CxnListener extends ServerListener {
 
     }
 
-    /**
-     * Sends a connection information message to the Minecraft player.
-     * This method is used to send messages to the player about the status of the connection.
-     * The message is only sent if the force parameter is true or the shouldSend parameter is true.
-     *
-     * @param shouldSend A boolean indicating whether the message should be sent.
-     * @param message An ActionNotification object containing the message to be sent.
-     * @param force A boolean that, if true, forces the message to be sent regardless of the shouldSend parameter.
-     */
-    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message, boolean force) {
-
-        if (force || shouldSend) {
-            if (MinecraftClient.getInstance().player != null) {
-
-                MutableText msg;
-                if (message.hasTextVariables()) {
-
-                    msg = MOD_TEXT.copy()
-                            .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
-                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
-
-                } else {
-
-                    msg = MOD_TEXT.copy()
-                            .append(Text.translatable(message.getTranslationKey()))
-                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
-
-                }
-                MinecraftClient.getInstance().player.sendMessage(msg);
-            }
-        }
-
-    }
-
-    /**
-     * Sends a connection information message to the Minecraft player.
-     * This method is used to send messages to the player about the status of the connection.
-     * The message is only sent if the shouldSend parameter is true.
-     *
-     * @param shouldSend A boolean indicating whether the message should be sent.
-     * @param message An ActionNotification object containing the message to be sent.
-     */
-    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message) {
-        sendConnectionInformation(shouldSend, message, false);
-    }
-
     @Override
     public @NotNull Mono<Void> onTabChange() {
         if (!this.isOnServer().get())
@@ -128,7 +78,7 @@ public class CxnListener extends ServerListener {
 
         return checkConnectionAsync(true)
                 .flatMap(messageInformation -> {
-                    sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
+                    CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
                         return refreshData(false);
                     return Mono.empty();
@@ -139,7 +89,7 @@ public class CxnListener extends ServerListener {
     public @NotNull Mono<Void> onServerJoin() {
 
         return checkConnectionAsync(true)
-                .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
+                .doOnSuccess(messageInformation -> CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
                 .then();
 
     }
