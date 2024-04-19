@@ -293,7 +293,7 @@ public abstract class InventoryListener {
         JsonObject obj = new JsonObject();
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
-        return listener.checkConnectionAsync().then(Mono.defer(() -> {
+        return listener.checkConnectionAsync(true).then(Mono.defer(() -> {
             if (listener.isActive().get()) {
                 if (PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
                     return Mono.error(new NullPointerException("Theme Checker is null"));

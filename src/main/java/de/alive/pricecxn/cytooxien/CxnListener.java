@@ -27,8 +27,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.MOD_TEXT;
@@ -115,7 +113,7 @@ public class CxnListener extends ServerListener {
             return Mono.empty();
         boolean activeBackup = this.active.get();
 
-        return checkConnectionAsync()
+        return checkConnectionAsync(true)
                 .flatMap(messageInformation -> {
                     sendConnectionInformation(messageInformation);
                     if (activeBackup)
@@ -127,7 +125,7 @@ public class CxnListener extends ServerListener {
     @Override
     public @NotNull Mono<Void> onServerJoin() {
 
-        return checkConnectionAsync()
+        return checkConnectionAsync(true)
                 .doOnSuccess(messageInformation -> CxnListener.sendConnectionInformation(messageInformation, true))
                 .then();
 
@@ -355,10 +353,6 @@ public class CxnListener extends ServerListener {
         return Mono.fromCallable(() -> this.checkConnection(themeRefresh))
                 .subscribeOn(Schedulers.fromExecutor(ServerChecker.EXECUTOR))
                 .flatMap(result -> result);
-    }
-
-    public Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync() {
-        return checkConnectionAsync(true);
     }
 
     public @NotNull Optional<List<String>> getModUsers() {
