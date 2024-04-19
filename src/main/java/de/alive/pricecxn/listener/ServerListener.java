@@ -39,9 +39,10 @@ public abstract class ServerListener {
             if(client.getCurrentServerEntry() == null) return;
             if(onServer.get()) return;
 
+            String lowerCasedAddress = client.getCurrentServerEntry().address.toLowerCase();
             Flux.fromIterable(ips)
-                    .filter(ip -> client.getCurrentServerEntry().address.toLowerCase().contains(ip))
-                    .filter(ip -> ignoredIps.stream().noneMatch(ignoredIp -> client.getCurrentServerEntry().address.toLowerCase().contains(ignoredIp)))
+                    .filter(lowerCasedAddress::contains)
+                    .filter(ip -> ignoredIps.stream().noneMatch(lowerCasedAddress::contains))
                     .next()
                     .doOnNext(s -> onServer.set(true))
                     .flatMap(ip -> onServerJoin())
