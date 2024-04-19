@@ -51,12 +51,10 @@ public class CxnListener extends ServerListener {
 
         //setting up theme checker and listeners
         this.themeChecker = new ThemeServerChecker(this, this.isOnServer());
-        @NotNull List<InventoryListener> listeners = List.of(
-                new AuctionHouseListener(this.isOnServer(), listenerActive),
-                new ItemShopListener(this.isOnServer(), listenerActive),
-                new TomNookListener(this.isOnServer(), listenerActive),
-                new TradeListener(this.isOnServer(), listenerActive)
-        );
+        new AuctionHouseListener(this.isOnServer(), listenerActive);
+        new ItemShopListener(this.isOnServer(), listenerActive);
+        new TomNookListener(this.isOnServer(), listenerActive);
+        new TradeListener(this.isOnServer(), listenerActive);
 
         //checking connection and activating mod
         checkConnectionAsync(false)
