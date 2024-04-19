@@ -16,7 +16,9 @@ import reactor.core.scheduler.Schedulers;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
-
+/**
+ * This class manages the connection to the server and handles the state of the connection.
+ */
 public class CxnConnectionManager {
 
     private final CxnDataHandler dataHandler;
@@ -26,84 +28,132 @@ public class CxnConnectionManager {
     private @Nullable Boolean isRightVersion = null;
     private @NotNull NetworkingState state = NetworkingState.OFFLINE;
     private final AtomicBoolean listenerActive;
-
+    /**
+     * Constructor for the CxnConnectionManager class.
+     * @param dataHandler Handles data related operations.
+     * @param serverChecker Checks the server status.
+     * @param themeChecker Checks the theme status.
+     * @param listenerActive Indicates if the listener is active.
+     */
     public CxnConnectionManager(CxnDataHandler dataHandler, ServerChecker serverChecker, ThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
         this.dataHandler = dataHandler;
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
         this.listenerActive = listenerActive;
     }
-
+    /**
+     * Checks the connection to the server asynchronously.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(boolean themeRefresh) {
         return Mono.fromCallable(() -> checkConnection(themeRefresh))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(result -> result);
     }
-
+    /**
+     * Checks the connection to the server.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
 
         return Mono.zip(serverChecker.isConnected(), isMinVersion(), this.serverChecker.getServerMinVersion())
-                .flatMap(tuple3 -> {
-                    boolean isConnected = tuple3.getT1();
-                    boolean isMinVersion = tuple3.getT2();
-                    String serverMinVersion = tuple3.getT3();
-
-                    this.state = serverChecker.getState();
-                    if (!isConnected) {
-                        // Server nicht erreichbar
-                        this.deactivate();
-
-                        LOGGER.info("Server nicht erreichbar");
-                        return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
-                    } else if (!isMinVersion) {
-                        // Version nicht korrekt
-                        this.deactivate();
-
-                        ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
-
-                        LOGGER.info("{} {}", isRightVersionBackup, serverMinVersion);
-                        this.isRightVersion = false;
-                        return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
+                .flatMap(tuple3 -> processConnectionStatus(themeRefresh, tuple3.getT1(), tuple3.getT2(), tuple3.getT3(), activeCache, isRightVersionBackup, stateBackup));
+    }
+    /**
+     * Processes the connection status.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @param isConnected Indicates if the server is connected.
+     * @param isMinVersion Indicates if the server version is the minimum required version.
+     * @param serverMinVersion The minimum version of the server.
+     * @param activeCache The cache of the active status.
+     * @param isRightVersionBackup A backup of the isRightVersion status.
+     * @param stateBackup A backup of the state.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> processConnectionStatus(boolean themeRefresh, boolean isConnected, boolean isMinVersion, String serverMinVersion, boolean activeCache, Boolean isRightVersionBackup, NetworkingState stateBackup) {
+        this.state = serverChecker.getState();
+        if (!isConnected) {
+            return handleServerNotReachable(activeCache);
+        } else if (!isMinVersion) {
+            return handleIncorrectVersion(serverMinVersion, isRightVersionBackup);
+        } else {
+            return handleServerOnline(themeRefresh, activeCache, stateBackup);
+        }
+    }
+    /**
+     * Handles the case when the server is not reachable.
+     * @param activeCache The cache of the active status.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
+    private Mono<Pair<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
+        this.deactivate();
+        LOGGER.info("Server nicht erreichbar");
+        return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
+    }
+    /**
+     * Handles the case when the server version is incorrect.
+     * @param serverMinVersion The minimum version of the server.
+     * @param isRightVersionBackup A backup of the isRightVersion status.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
+    private Mono<Pair<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, Boolean isRightVersionBackup) {
+        this.deactivate();
+        ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
+        LOGGER.info("{} {}", isRightVersionBackup, serverMinVersion);
+        this.isRightVersion = false;
+        return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
+    }
+    /**
+     * Handles the case when the server is online.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @param activeCache The cache of the active status.
+     * @param stateBackup A backup of the state.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
+    private Mono<Pair<Boolean, ActionNotification>> handleServerOnline(boolean themeRefresh, boolean activeCache, NetworkingState stateBackup) {
+        NetworkingState serverCheckerState = serverChecker.getState();
+        if (serverCheckerState == NetworkingState.ONLINE) {
+            LOGGER.info("Server im Online-Modus");
+            return this.activate(themeRefresh)
+                    .then(Mono.just(new Pair<>(!activeCache, ActionNotification.MOD_STARTED)));
+        } else if (serverCheckerState == NetworkingState.MAINTENANCE) {
+            return handleMaintenance(themeRefresh, activeCache, stateBackup);
+        } else {
+            LOGGER.info("Server im Offline-Modus");
+            this.deactivate();
+            return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
+        }
+    }
+    /**
+     * Handles the case when the server is in maintenance mode.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @param activeCache The cache of the active status.
+     * @param stateBackup A backup of the state.
+     * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
+     */
+    private Mono<Pair<Boolean, ActionNotification>> handleMaintenance(boolean themeRefresh, boolean activeCache, NetworkingState stateBackup) {
+        return isSpecialUser()
+                .flatMap(isSpecialUser -> {
+                    if (isSpecialUser) {
+                        LOGGER.info("Benutzer hat Berechtigung");
+                        return this.activate(themeRefresh).then(
+                                Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                     } else {
-                        NetworkingState serverCheckerState = serverChecker.getState();
-
-                        if (serverCheckerState == NetworkingState.ONLINE) {
-                            // Server im Online-Modus
-                            LOGGER.info("Server im Online-Modus");
-                            return this.activate(themeRefresh)
-                                    .then(Mono.just(new Pair<>(!activeCache, ActionNotification.MOD_STARTED)));
-
-                        } else if (serverCheckerState == NetworkingState.MAINTENANCE) {
-                            return isSpecialUser()
-                                    .flatMap(isSpecialUser -> {
-                                        if (isSpecialUser) {
-                                            // Benutzer hat Berechtigung
-                                            LOGGER.info("Benutzer hat Berechtigung");
-                                            return this.activate(themeRefresh).then(
-                                                    Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
-                                        } else {
-                                            // Benutzer hat keine Berechtigung
-                                            LOGGER.info("Benutzer hat keine Berechtigung");
-                                            this.deactivate();
-                                            return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
-                                        }
-                                    });
-                        } else {
-                            // Server im Offline-Modus
-                            LOGGER.info("Server im Offline-Modus");
-                            this.deactivate();
-                            return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
-                        }
+                        LOGGER.info("Benutzer hat keine Berechtigung");
+                        this.deactivate();
+                        return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
                     }
                 });
     }
 
     /**
-     * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
-     * (Mod Version > Server Min-Version → true)
+     * Checks if the server version is the minimum required version.
+     * @return A Mono object containing a Boolean indicating if the server version is the minimum required version.
      */
     public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
@@ -113,7 +163,10 @@ public class CxnConnectionManager {
                                 .isPresent())
                         .isPresent());
     }
-
+    /**
+     * Checks if the user is a special user.
+     * @return A Mono object containing a Boolean indicating if the user is a special user.
+     */
     public @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
@@ -122,7 +175,11 @@ public class CxnConnectionManager {
                 .map(s -> s.equals("true"))
                 .onErrorReturn(false);
     }
-
+    /**
+     * Activates the connection manager.
+     * @param themeRefresh Indicates if the theme should be refreshed.
+     * @return A Mono object.
+     */
     public @NotNull Mono<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
@@ -143,7 +200,9 @@ public class CxnConnectionManager {
                 })
                 .then();
     }
-
+    /**
+     * Deactivates the connection manager.
+     */
     public void deactivate() {
         if (!this.active.get()) return; //return wenn schon deaktiviert
 
@@ -159,7 +218,10 @@ public class CxnConnectionManager {
         this.listenerActive.set(false);
     }
 
-
+    /**
+     * Checks if the connection manager is active.
+     * @return A Boolean indicating if the connection manager is active.
+     */
     public boolean isActive() {
         return this.active.get();
     }
