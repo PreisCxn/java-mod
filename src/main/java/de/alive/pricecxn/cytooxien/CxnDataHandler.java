@@ -74,10 +74,6 @@ public class CxnDataHandler {
                 .then();
     }
 
-    public void putData(String key, DataHandler dataHandler) {
-        data.put(key, dataHandler);
-    }
-
     public DataHandler get(String key) {
         return data.get(key);
     }
@@ -107,7 +103,7 @@ public class CxnDataHandler {
         };
 
 
-        putData("cxnprice.translation",
+        data.put("cxnprice.translation",
                             new DataHandler(serverChecker,
                                             "/settings/translations",
                                             langList,
