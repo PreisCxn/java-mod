@@ -1,7 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.dataobservers.AuctionHouseListener;
 import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
@@ -13,12 +12,10 @@ import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.NetworkingState;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
-import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -33,7 +30,7 @@ public class CxnListener extends ServerListener {
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
     private final @NotNull ThemeServerChecker themeChecker;
     private final @NotNull ServerChecker serverChecker;
-    private final Map<String, DataHandler> data = new HashMap<>();
+    private final CxnDataHandler dataHandler;
     NetworkingState state = NetworkingState.OFFLINE;
     private final AtomicBoolean active = new AtomicBoolean(false);
     private @Nullable Boolean isRightVersion = null;
@@ -47,6 +44,9 @@ public class CxnListener extends ServerListener {
 
         //setting up theme checker and listeners
         this.themeChecker = new ThemeServerChecker(this, this.isOnServer());
+
+        this.dataHandler = new CxnDataHandler(serverChecker, themeChecker);
+
         new AuctionHouseListener(this.isOnServer(), listenerActive);
         new ItemShopListener(this.isOnServer(), listenerActive);
         new TomNookListener(this.isOnServer(), listenerActive);
@@ -64,8 +64,8 @@ public class CxnListener extends ServerListener {
         if (!this.isOnServer().get())
             return Mono.empty();
 
-        return refreshItemData("pricecxn.data.item_data", false)
-                .then(refreshItemData("pricecxn.data.nook_data", true))
+        return dataHandler.refreshItemData("pricecxn.data.item_data", false)
+                .then(dataHandler.refreshItemData("pricecxn.data.nook_data", true))
                 .then();
 
     }
@@ -80,7 +80,7 @@ public class CxnListener extends ServerListener {
                 .flatMap(messageInformation -> {
                     CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
-                        return refreshData(false);
+                        return dataHandler.refreshData(false);
                     return Mono.empty();
                 });
     }
@@ -100,36 +100,12 @@ public class CxnListener extends ServerListener {
         deactivate();
     }
 
-    private Mono<Void> refreshItemData(String dataKey, boolean isNook) {
-        if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
-
-            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK)) {
-                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
-            } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD)) {
-                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
-            } else return Mono.empty();
-
-        } else {
-            JsonObject jsonObject = data.get(dataKey).getDataObject();
-            if (jsonObject == null || !jsonObject.has("mode")) return Mono.empty();
-            String mode = jsonObject.get("mode").getAsString();
-
-            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK) && !mode.equals(Modes.SKYBLOCK.getTranslationKey())) {
-                data.get(dataKey).setUri("/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"));
-            } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD) && !mode.equals(Modes.CITYBUILD.getTranslationKey())) {
-                data.get(dataKey).setUri("/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"));
-            } else return Mono.empty();
-
-        }
-
-        return data.get(dataKey).refresh(true);
-    }
 
     private @NotNull Mono<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
-        return initData()
-                .then(refreshData(true))
+        return dataHandler.initData()
+                .then(dataHandler.refreshData(true))
                 .then(Mono.just(this.themeChecker))
                 .filter(themeServerChecker -> themeRefresh)
                 .flatMap(ThemeServerChecker::refreshAsync)
@@ -144,22 +120,6 @@ public class CxnListener extends ServerListener {
                     return Mono.error(ex);
                 })
                 .then();
-    }
-
-    private @NotNull Mono<Void> initData() {
-        LOGGER.debug("initData");
-
-        if (!this.data.containsKey("pricecxn.data.mod_users")) {
-            data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
-        }
-
-        if (this.data.containsKey("cxnprice.translation"))
-            return Mono.empty();
-        else
-            return new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages")
-                    .getMono()
-                    .map(StringUtil::stringToList)
-                    .doOnSuccess(this::createTranslationHandler).then();
     }
 
     private void createTranslationHandler(@NotNull List<String> langList) {
@@ -188,18 +148,12 @@ public class CxnListener extends ServerListener {
         };
 
 
-        data.put("cxnprice.translation",
+        dataHandler.putData("cxnprice.translation",
                 new DataHandler(serverChecker,
                         "/settings/translations",
                         langList,
                         "translation_key",
                         DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
-    }
-
-    private @NotNull Mono<Void> refreshData(boolean forced) {
-        return Flux.fromIterable(data.entrySet())
-                .flatMap(entry -> entry.getValue().refresh(forced))
-                .then();
     }
 
     private void deactivate() {
@@ -210,7 +164,7 @@ public class CxnListener extends ServerListener {
     }
 
     public DataHandler getData(String key) {
-        return data.get(key);
+        return dataHandler.get(key);
     }
 
     public @NotNull ServerChecker getServerChecker() {
@@ -324,7 +278,7 @@ public class CxnListener extends ServerListener {
         JsonArray array;
 
         try {
-            array = this.data.get("pricecxn.data.mod_users").getDataArray();
+            array = this.dataHandler.get("pricecxn.data.mod_users").getDataArray();
 
             if (array == null) return Optional.empty();
 
