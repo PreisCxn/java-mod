@@ -7,7 +7,6 @@ import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
 import de.alive.pricecxn.listener.ServerListener;
-import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.NetworkingState;
 import de.alive.pricecxn.networking.ServerChecker;
@@ -238,7 +237,7 @@ public class CxnListener extends ServerListener {
                 .flatMap(result -> result);
     }
 
-    public @NotNull Optional<List<String>> getModUsers() {
+    public @Nullable List<String> getModUsers() {
         List<String> stringList = new ArrayList<>();
 
         JsonArray array;
@@ -246,18 +245,18 @@ public class CxnListener extends ServerListener {
         try {
             array = this.dataHandler.get("pricecxn.data.mod_users").getDataArray();
 
-            if (array == null) return Optional.empty();
+            if (array == null) return null;
 
-            array.asList().forEach(element -> {
+            array.forEach(element -> {
                 if (!element.isJsonNull())
                     stringList.add(element.getAsString());
             });
 
-            if (stringList.isEmpty()) return Optional.empty();
+            if (stringList.isEmpty()) return null;
 
-            return Optional.of(stringList);
+            return stringList;
         } catch (Exception e) {
-            return Optional.empty();
+            return null;
         }
     }
 
