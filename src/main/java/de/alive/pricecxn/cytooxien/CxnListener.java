@@ -125,7 +125,7 @@ public class CxnListener extends ServerListener {
         return data.get(dataKey).refresh(true);
     }
 
-    public @NotNull Mono<Void> activate(boolean themeRefresh) {
+    private @NotNull Mono<Void> activate(boolean themeRefresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
         return initData()
@@ -202,7 +202,7 @@ public class CxnListener extends ServerListener {
                 .then();
     }
 
-    public void deactivate() {
+    private void deactivate() {
         if (!this.active.get()) return; //return wenn schon deaktiviert
 
         deactivateListeners();
@@ -233,7 +233,7 @@ public class CxnListener extends ServerListener {
      * Gibt zurück, ob die Min-Version des Servers die aktuelle Version der Mod erfüllt.
      * (Mod Version > Server Min-Version -> true)
      */
-    public @NotNull Mono<Boolean> isMinVersion() {
+    private @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
                         .filter(value -> PriceCxnMod.getIntVersion(serverMinVersion)
@@ -242,7 +242,7 @@ public class CxnListener extends ServerListener {
                         .isPresent());
     }
 
-    public @NotNull Mono<Boolean> isSpecialUser() {
+    private @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
 
@@ -251,7 +251,7 @@ public class CxnListener extends ServerListener {
                 .onErrorReturn(false);
     }
 
-    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(boolean themeRefresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
