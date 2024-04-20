@@ -33,7 +33,6 @@ public class HttpTest {
     @Test
     public void getShouldReturnExpectedResultWhenStatusCodeIsSuccessful() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
@@ -41,7 +40,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction, callback);
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -51,7 +50,6 @@ public class HttpTest {
     @Test
     public void getShouldReturnExpectedResultWhenStatusCodeIsSuccessfulWithHeaders() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
@@ -59,7 +57,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction, callback, "header1", "value1");
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction,"header1", "value1");
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -69,7 +67,6 @@ public class HttpTest {
     @Test
     public void getShouldReturnErrorWhenStatusCodeIsNotSuccessful() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
@@ -77,7 +74,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction, callback);
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -87,7 +84,6 @@ public class HttpTest {
     @Test
     public void postShouldReturnExpectedResultWhenStatusCodeIsSuccessfulAndBodyIsNotEmpty() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
@@ -95,7 +91,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
+        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -105,7 +101,6 @@ public class HttpTest {
     @Test
     public void postShouldReturnExpectedResultWhenStatusCodeIsSuccessfulAndBodyIsEmpty() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
@@ -113,7 +108,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
+        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("")
@@ -123,7 +118,6 @@ public class HttpTest {
     @Test
     public void postShouldReturnErrorWhenStatusCodeIsNotSuccessfulAndBodyIsNotEmpty() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
@@ -131,7 +125,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
+        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -141,7 +135,6 @@ public class HttpTest {
     @Test
     public void postShouldReturnErrorWhenStatusCodeIsNotSuccessfulAndBodyIsEmpty() {
         Function<String, String> stringFunction = Function.identity();
-        Function<String, String> callback = Function.identity();
 
         HttpResponse<String> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
@@ -149,7 +142,7 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction, callback);
+        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -190,7 +183,7 @@ public class HttpTest {
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test GET
-        Mono<String> result = http.GET("/test", Function.identity(), Function.identity());
+        Mono<String> result = http.GET("/test", Function.identity());
         StepVerifier.create(result).expectNext("Success").verifyComplete();
     }
 

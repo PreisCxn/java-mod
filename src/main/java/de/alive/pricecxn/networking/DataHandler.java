@@ -103,7 +103,7 @@ public class DataHandler {
      * @return A CompletableFuture which returns the data as a Map with the key as the key and the values as a List
      */
     private @NotNull Mono<Map<String, List<String>>> getServerDataAsync(String url, @Nullable List<String> columnNames, @Nullable String keyColumnName) {
-        return Http.getInstance().GET(url, response -> response, jsonString -> jsonString)
+        return Http.getInstance().GET(url, response -> response)
                 .mapNotNull(jsonString -> {
                     if (JsonParser.parseString(jsonString).isJsonArray()) {
                         dataArray = JsonParser.parseString(jsonString).getAsJsonArray();

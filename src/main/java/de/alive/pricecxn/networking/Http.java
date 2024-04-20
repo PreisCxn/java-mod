@@ -42,11 +42,11 @@ public class Http {
         return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
     }
 
-    public <T, R> @NotNull Mono<R> GET(String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String... headers) {
-        return GET(apiUrl, uri, stringTFunction, callback, headers);
+    public <T> @NotNull Mono<T> GET(String uri, @NotNull Function<String, T> stringTFunction, String... headers) {
+        return GET(apiUrl, uri, stringTFunction, headers);
     }
 
-    public <T, R> @NotNull Mono<R> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, @NotNull Function<T, R> callback, String @NotNull ... headers) {
+    public <T> @NotNull Mono<T> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, String @NotNull ... headers) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
@@ -58,10 +58,7 @@ public class Http {
                 .map(response -> Tuples.of(response.statusCode(), response.body()))
                 .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
-                        T apply = stringTFunction.apply(tuple.getT2());
-                        if (apply != null)
-                            sink.next(callback.apply(apply));
-
+                        sink.next(stringTFunction.apply(tuple.getT2()));
                         sink.complete();
                     } else {
                         String errorMessage = "Received wrong success code: " + tuple.getT1() + "(" + baseUri + uri + ")";
@@ -75,7 +72,7 @@ public class Http {
         return POST(uri, json, null, null).then();
     }
 
-    public <T, R> @NotNull Mono<R> POST(@NotNull String uri, @Nullable JsonObject json, @Nullable Function<String, T> stringTFunction, @Nullable Function<T, R> callback, @NotNull String @NotNull ... headers) {
+    public <T> @NotNull Mono<T> POST(@NotNull String uri, @Nullable JsonObject json, @Nullable Function<String, T> stringTFunction, @NotNull String @NotNull ... headers) {
         HttpRequest.Builder post = HttpRequest
                 .newBuilder()
                 .uri(URI.create(apiUrl + uri));
@@ -93,14 +90,11 @@ public class Http {
                 .map(response -> Tuples.of(response.statusCode(), response.body()))
                 .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
-                        if(stringTFunction == null || callback == null){
+                        if(stringTFunction == null){
                             sink.complete();
                             return;
                         }
-
-                        T apply = stringTFunction.apply(tuple.getT2());
-                        if (apply != null)
-                            sink.next(callback.apply(apply));
+                        sink.next(stringTFunction.apply(tuple.getT2()));
 
                         sink.complete();
                     } else {
