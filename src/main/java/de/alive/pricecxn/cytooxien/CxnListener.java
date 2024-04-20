@@ -44,7 +44,7 @@ public class CxnListener extends ServerListener {
         new TradeListener(this.isOnServer(), listenerActive);
 
         //checking connection and activating mod
-        connectionManager.checkConnectionAsync(false)
+        connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.NONE)
                 .doOnSuccess((a) -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
                 .subscribe();
 
@@ -67,7 +67,7 @@ public class CxnListener extends ServerListener {
             return Mono.empty();
         boolean activeBackup = connectionManager.isActive();
 
-        return connectionManager.checkConnectionAsync(true)
+        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
                 .flatMap(messageInformation -> {
                     CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
@@ -79,7 +79,7 @@ public class CxnListener extends ServerListener {
     @Override
     public @NotNull Mono<Void> onServerJoin() {
 
-        return connectionManager.checkConnectionAsync(true)
+        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
                 .doOnSuccess(messageInformation -> CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
                 .then();
 
