@@ -1,6 +1,5 @@
 package de.alive.pricecxn.cytooxien;
 
-import com.google.gson.JsonArray;
 import de.alive.pricecxn.cytooxien.dataobservers.AuctionHouseListener;
 import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
 import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
@@ -110,27 +109,7 @@ public class CxnListener extends ServerListener {
 
 
     public @Nullable List<String> getModUsers() {
-        List<String> stringList = new ArrayList<>();
-
-        JsonArray array;
-
-        try {
-            array = this.dataHandler.get("pricecxn.data.mod_users").getDataArray();
-
-            if (array == null) return null;
-
-            array.forEach(element -> {
-                if (!element.isJsonNull())
-                    stringList.add(element.getAsString());
-            });
-
-            if (stringList.isEmpty()) return null;
-
-            return stringList;
-        } catch (Exception e) {
-            LOGGER.error("Error while getting mod users", e);
-            return null;
-        }
+        return dataHandler.getModUsers();
     }
 
     public boolean isActive() {

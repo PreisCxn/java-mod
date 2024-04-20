@@ -1,5 +1,6 @@
 package de.alive.pricecxn.cytooxien;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
@@ -7,9 +8,11 @@ import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +118,27 @@ public class CxnDataHandler {
         return data.get(key);
     }
 
-    public @NotNull ServerChecker getServerChecker() {
-        return serverChecker;
+    public @Nullable List<String> getModUsers() {
+        List<String> stringList = new ArrayList<>();
+
+        JsonArray array;
+
+        try {
+            array = data.get("pricecxn.data.mod_users").getDataArray();
+
+            if (array == null) return null;
+
+            array.forEach(element -> {
+                if (!element.isJsonNull())
+                    stringList.add(element.getAsString());
+            });
+
+            if (stringList.isEmpty()) return null;
+
+            return stringList;
+        } catch (Exception e) {
+            LOGGER.error("Error while getting mod users", e);
+            return null;
+        }
     }
 }
