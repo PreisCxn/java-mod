@@ -116,8 +116,9 @@ public abstract class ItemStackMixin {
 
         }
         if(pcxnPrice != null){
-            if(pcxnPrice.has("item_info_url")){
-                KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+
+            KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+            if(pcxnPrice.has("item_info_url") && !keyBinding.isUnbound()){
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
                                       keyBinding
                                               .getBoundKeyLocalizedText()
