@@ -129,9 +129,9 @@ public abstract class InventoryListener {
         return Optional.of(newItem);
     }
 
-    public static Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                         @NotNull ScreenHandler handler,
-                                                         final int slotIndex) {
+    public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
+                                                                  @NotNull ScreenHandler handler,
+                                                                  final int slotIndex) {
         return updateItem(item, handler, slotIndex, null, true);
     }
 
@@ -312,7 +312,7 @@ public abstract class InventoryListener {
         }));
     }
 
-    protected Mono<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
+    protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
         return sendData(datahandlerUri, MinecraftClient.getInstance(), data);
     }
 

@@ -3,6 +3,7 @@ package de.alive.pricecxn.networking.cdn;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import de.alive.pricecxn.networking.Http;
+import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -27,18 +28,18 @@ public class ModDeliveryAgent {
         this.http = Http.getInstance();
     }
 
-    public static ModDeliveryAgent getInstance() {
+    public static @NotNull ModDeliveryAgent getInstance() {
         if (instance == null) {
             instance = new ModDeliveryAgent();
         }
         return instance;
     }
 
-    public String getModPath() {
+    public @NotNull String getModPath() {
         return BASE_URL + MOD_PATH;
     }
 
-    public Mono<List<String>> getModVersions() {
+    public @NotNull Mono<List<String>> getModVersions() {
         return LIST_VERSIONS.generateResponse(jsonElements -> {
             List<String> versions = new ArrayList<>();
             for (int i = 0; i < jsonElements.size(); i++)
@@ -47,7 +48,7 @@ public class ModDeliveryAgent {
         });
     }
 
-    public Mono<String> getNewestVersion() {
+    public @NotNull Mono<String> getNewestVersion() {
         return NEWEST_VERSION.generateResponse(Function.identity());
     }
 
@@ -62,7 +63,7 @@ public class ModDeliveryAgent {
             this.stringTFunction = stringTFunction;
         }
 
-        public <P> Mono<P> generateResponse(Function<T, P> function) {
+        public <P> @NotNull Mono<P> generateResponse(@NotNull Function<T, P> function) {
             return http.GET(BASE_URL, MOD_PATH + "?" + this.type)
                     .map(stringTFunction)
                     .map(function);

@@ -90,7 +90,7 @@ public class CxnConnectionManager {
      * @param activeCache The cache of the active status.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private Mono<Pair<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
         this.deactivate();
         LOGGER.info("Server nicht erreichbar");
         return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
@@ -101,7 +101,7 @@ public class CxnConnectionManager {
      * @param isRightVersionBackup A backup of the isRightVersion status.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private Mono<Pair<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, Boolean isRightVersionBackup) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, @Nullable Boolean isRightVersionBackup) {
         this.deactivate();
         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
         LOGGER.info("{} {}", isRightVersionBackup, serverMinVersion);
@@ -115,7 +115,7 @@ public class CxnConnectionManager {
      * @param stateBackup A backup of the state.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private Mono<Pair<Boolean, ActionNotification>> handleServerOnline(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerOnline(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
         NetworkingState serverCheckerState = serverChecker.getState();
         if (serverCheckerState == NetworkingState.ONLINE) {
             LOGGER.info("Server im Online-Modus");
@@ -136,7 +136,7 @@ public class CxnConnectionManager {
      * @param stateBackup A backup of the state.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private Mono<Pair<Boolean, ActionNotification>> handleMaintenance(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleMaintenance(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
         return isSpecialUser()
                 .flatMap(isSpecialUser -> {
                     if (isSpecialUser) {
@@ -234,7 +234,7 @@ public class CxnConnectionManager {
      * @param message An ActionNotification object containing the message to be sent.
      * @param force A boolean that, if true, forces the message to be sent regardless of the shouldSend parameter.
      */
-    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message, boolean force) {
+    public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message, boolean force) {
 
         if (force || shouldSend) {
             if (MinecraftClient.getInstance().player != null) {
@@ -267,7 +267,7 @@ public class CxnConnectionManager {
      * @param shouldSend A boolean indicating whether the message should be sent.
      * @param message An ActionNotification object containing the message to be sent.
      */
-    public static void sendConnectionInformation(boolean shouldSend, ActionNotification message) {
+    public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message) {
         sendConnectionInformation(shouldSend, message, false);
     }
 

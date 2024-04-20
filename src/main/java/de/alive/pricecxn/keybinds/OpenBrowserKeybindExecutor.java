@@ -4,11 +4,12 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Util;
+import org.jetbrains.annotations.NotNull;
 
 public class OpenBrowserKeybindExecutor implements KeybindExecutor {
     private static final String URL_PREFIX = "https://preiscxn.de/";
     @Override
-    public void onKeybindPressed(ItemStack itemStack) {
+    public void onKeybindPressed(@NotNull ItemStack itemStack) {
         PriceCxnItemStack priceCxnItemStack = new PriceCxnItemStack(itemStack, null, true, false);
 
         JsonObject data = priceCxnItemStack.findItemInfo("pricecxn.data.item_data");

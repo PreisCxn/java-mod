@@ -43,7 +43,7 @@ public abstract class TabListener {
         });
     }
 
-    public Mono<Void> refreshAsync() {
+    public @NotNull Mono<Void> refreshAsync() {
         return refreshAsync(null, 0);
     }
 

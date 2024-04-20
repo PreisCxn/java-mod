@@ -58,7 +58,7 @@ public class PriceText {
         return this;
     }
 
-    public PriceText withPriceMultiplier(int priceMultiplier) {
+    public @NotNull PriceText withPriceMultiplier(int priceMultiplier) {
         return withPriceMultiplier((double) priceMultiplier);
     }
 
@@ -137,12 +137,12 @@ public class PriceText {
                         .setStyle(PRICE_STYLE));
     }
 
-    private Optional<MutableText> getLowerPriceText() {
+    private @NotNull Optional<MutableText> getLowerPriceText() {
         if (prices == null || prices.length == 0) return Optional.empty();
         return getPriceText(prices[0]);
     }
 
-    private Optional<MutableText> getUpperPriceText() {
+    private @NotNull Optional<MutableText> getUpperPriceText() {
         if (prices == null || prices.length <= 1) return Optional.empty();
         return getPriceText(prices[prices.length - 1]);
     }

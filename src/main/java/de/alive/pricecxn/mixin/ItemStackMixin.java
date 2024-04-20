@@ -146,7 +146,7 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public boolean shouldCancel(List<Text> list){
+    public boolean shouldCancel(@NotNull List<Text> list){
         ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
         Modes mode = themeChecker.getMode();
@@ -188,7 +188,7 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public int getPbvAmountFactor(ServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText) {
+    public int getPbvAmountFactor(@NotNull ServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
         if (pcxnPrice == null
                 || !pcxnPrice.has("pbv_search_key")
                 || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE

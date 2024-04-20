@@ -39,7 +39,7 @@ public class Http {
         return apiUrl;
     }
 
-    protected Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
+    protected @NotNull Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
         return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
     }
 
@@ -47,7 +47,7 @@ public class Http {
         return GET(DEFAULT_API_URL, uri);
     }
 
-    public Mono<String> GET(String baseUri, String uri) {
+    public @NotNull Mono<String> GET(String baseUri, String uri) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
@@ -66,7 +66,7 @@ public class Http {
                 });
     }
 
-    public Mono<String> POST(@NotNull String uri, @Nullable JsonObject json) {
+    public @NotNull Mono<String> POST(@NotNull String uri, @Nullable JsonObject json) {
         HttpRequest.Builder post = HttpRequest
                 .newBuilder()
                 .uri(URI.create(apiUrl + uri));

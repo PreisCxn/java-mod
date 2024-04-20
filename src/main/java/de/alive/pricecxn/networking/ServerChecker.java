@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 public class ServerChecker {
 
-    private final WebSocketConnector websocket;
+    private final @NotNull WebSocketConnector websocket;
 
     private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();
     private final CompletableFuture<Boolean> maintenanceFuture = new CompletableFuture<>();
@@ -78,7 +78,7 @@ public class ServerChecker {
      *
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
-    public Mono<Boolean> isConnected() {
+    public @NotNull Mono<Boolean> isConnected() {
         if(!this.websocket.isConnected())
             return checkConnection();
         return Mono.just(true);

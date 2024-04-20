@@ -54,11 +54,11 @@ public abstract class ServerListener {
         });
     }
 
-    public Mono<Void> onTabChange(){
+    public @NotNull Mono<Void> onTabChange(){
         return Mono.empty();
     }
 
-    public Mono<Void> onJoinEvent(){
+    public @NotNull Mono<Void> onJoinEvent(){
         return Mono.empty();
     }
 

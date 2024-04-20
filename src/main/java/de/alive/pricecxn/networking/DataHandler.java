@@ -90,7 +90,7 @@ public class DataHandler {
      *
      * @return A CompletableFuture which returns null if the refresh was successful
      */
-    public Mono<Void> refresh() {
+    public @NotNull Mono<Void> refresh() {
         return refresh(false);
     }
 

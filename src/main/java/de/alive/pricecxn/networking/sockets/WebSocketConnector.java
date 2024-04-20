@@ -1,6 +1,7 @@
 package de.alive.pricecxn.networking.sockets;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +25,7 @@ public class WebSocketConnector {
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
     private final URI uri;
-    private Session session;
+    private @Nullable Session session;
     private final List<Disposable> disposables = new CopyOnWriteArrayList<>();
 
     public WebSocketConnector() {
