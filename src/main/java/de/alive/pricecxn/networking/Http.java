@@ -15,12 +15,11 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class Http {
+
     protected static final String DEFAULT_API_URL = "https://api.preiscxn.de/api";
-    public final String apiUrl;
-
-    private final @NotNull HttpClient client = HttpClient.newHttpClient();
-
     private static final Http INSTANCE = new Http();
+    public final String apiUrl;
+    private final @NotNull HttpClient client = HttpClient.newHttpClient();
 
     protected Http() {
         apiUrl = DEFAULT_API_URL;
@@ -34,6 +33,8 @@ public class Http {
         return INSTANCE;
     }
 
+    private static <T> void applyPushPromise(HttpRequest initiatingRequest, HttpRequest pushPromiseRequest, Function<HttpResponse.BodyHandler<T>, CompletableFuture<HttpResponse<T>>> acceptor) { }
+
     public String getApiUrl() {
         return apiUrl;
     }
@@ -42,23 +43,20 @@ public class Http {
         return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
     }
 
-    public <T> @NotNull Mono<T> GET(String uri, @NotNull Function<String, T> stringTFunction, String... headers) {
-        return GET(apiUrl, uri, stringTFunction, headers);
+    public Mono<String> GET(String uri) {
+        return GET(DEFAULT_API_URL, uri);
     }
 
-    public <T> @NotNull Mono<T> GET(String baseUri, String uri, @NotNull Function<String, T> stringTFunction, String @NotNull ... headers) {
+    public Mono<String> GET(String baseUri, String uri) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
 
-        if (headers.length > 0)
-            get = get.headers(headers);
-
         return sendAsync(get.build())
                 .map(response -> Tuples.of(response.statusCode(), response.body()))
                 .handle((tuple, sink) -> {
-                    if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
-                        sink.next(stringTFunction.apply(tuple.getT2()));
+                    if (tuple.getT1() >= 200 && tuple.getT1() < 399) {
+                        sink.next(tuple.getT2());
                         sink.complete();
                     } else {
                         String errorMessage = "Received wrong success code: " + tuple.getT1() + "(" + baseUri + uri + ")";
@@ -68,17 +66,10 @@ public class Http {
                 });
     }
 
-    public @NotNull Mono<Void> POST(@NotNull String uri, @Nullable JsonObject json) {
-        return POST(uri, json, null, null).then();
-    }
-
-    public <T> @NotNull Mono<T> POST(@NotNull String uri, @Nullable JsonObject json, @Nullable Function<String, T> stringTFunction, @NotNull String @NotNull ... headers) {
+    public Mono<String> POST(@NotNull String uri, @Nullable JsonObject json) {
         HttpRequest.Builder post = HttpRequest
                 .newBuilder()
                 .uri(URI.create(apiUrl + uri));
-
-        if (headers.length > 0)
-            post = post.headers(headers);
 
         if (json == null)
             post = post.POST(HttpRequest.BodyPublishers.noBody());
@@ -90,12 +81,7 @@ public class Http {
                 .map(response -> Tuples.of(response.statusCode(), response.body()))
                 .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
-                        if(stringTFunction == null){
-                            sink.complete();
-                            return;
-                        }
-                        sink.next(stringTFunction.apply(tuple.getT2()));
-
+                        sink.next(tuple.getT2());
                         sink.complete();
                     } else {
                         String errorMessage = "Received wrong success code: " + tuple.getT1() + "(" + uri + ")";
@@ -105,11 +91,9 @@ public class Http {
                 });
     }
 
-    private Logger getLogger(){
+    private Logger getLogger() {
         return Logger.getLogger(Http.class.getName());
     }
-
-    private static <T> void applyPushPromise(HttpRequest initiatingRequest, HttpRequest pushPromiseRequest, Function<HttpResponse.BodyHandler<T>, CompletableFuture<HttpResponse<T>>> acceptor) { }
 
 }
 

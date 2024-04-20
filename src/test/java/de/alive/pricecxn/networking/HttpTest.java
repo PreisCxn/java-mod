@@ -40,7 +40,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction);
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -57,7 +58,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction,"header1", "value1");
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -74,7 +76,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test", stringFunction);
+        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -91,7 +94,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
+        Mono<String> result = http.POST("/test", new JsonObject())
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("Success")
@@ -108,7 +112,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
+        Mono<String> result = http.POST("/test", new JsonObject())
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectNext("")
@@ -125,7 +130,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
+        Mono<String> result = http.POST("/test", new JsonObject())
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -142,7 +148,8 @@ public class HttpTest {
 
         Http http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject(), stringFunction);
+        Mono<String> result = http.POST("/test", new JsonObject())
+                .map(stringFunction);
 
         StepVerifier.create(result)
                 .expectError(IllegalStateException.class)
@@ -183,7 +190,7 @@ public class HttpTest {
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test GET
-        Mono<String> result = http.GET("/test", Function.identity());
+        Mono<String> result = http.GET("/test");
         StepVerifier.create(result).expectNext("Success").verifyComplete();
     }
 
@@ -199,7 +206,8 @@ public class HttpTest {
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test POST
-        Mono<Void> result = http.POST("/test", new JsonObject());
+        Mono<Void> result = http.POST("/test", new JsonObject())
+                .then();
         StepVerifier.create(result).verifyComplete();
     }
 }
