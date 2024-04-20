@@ -57,7 +57,7 @@ public abstract class TabListener {
         return refresh(notInValue)
                 .filter(aBoolean -> !aBoolean)
                 .filter(aBoolean -> attempts.incrementAndGet() < finalMaxRefresh)
-                .flatMap(refresh -> Mono.delay(Duration.ofMillis(200 + attempts.get() * 50L)))
+                .flatMap(refresh -> Mono.delay(Duration.ofMillis(500 + attempts.get() * 50L)))
                 .flatMap(unused -> refreshAsync(notInValue, finalMaxRefresh, attempts));
     }
 
