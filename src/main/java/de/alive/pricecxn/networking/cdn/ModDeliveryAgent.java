@@ -63,7 +63,9 @@ public class ModDeliveryAgent {
         }
 
         public <P> Mono<P> generateResponse(Function<T, P> function) {
-            return http.GET(BASE_URL, MOD_PATH + "?" + this.type, stringTFunction, function);
+            return http.GET(BASE_URL, MOD_PATH + "?" + this.type)
+                    .map(stringTFunction)
+                    .map(function);
         }
 
     }
