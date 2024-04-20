@@ -16,7 +16,6 @@ import java.util.concurrent.Executors;
 
 public class ServerChecker {
 
-    public static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     private final WebSocketConnector websocket;
 
     private final CompletableFuture<Boolean> connectionFuture = new CompletableFuture<>();

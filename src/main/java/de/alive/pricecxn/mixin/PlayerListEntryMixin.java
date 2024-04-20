@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Mixin(PlayerListEntry.class)
 public abstract class PlayerListEntryMixin {
@@ -34,11 +33,11 @@ public abstract class PlayerListEntryMixin {
         CxnListener listener = PriceCxnModClient.CXN_LISTENER;
 
         if(!listener.isOnServer().get()) return;
-        if(!listener.isActive().get()) return;
+        if(!listener.isActive()) return;
 
-        Optional<List<String>> optional = listener.getModUsers();
+        List<String> modUsers = listener.getModUsers();
 
-        if(optional.isEmpty()) return;
+        if(modUsers == null) return;
 
         String[] strings = originalDisplayName.getString().split(" ");
         List<String> displayList = new ArrayList<>(Arrays.asList(strings));
@@ -47,7 +46,7 @@ public abstract class PlayerListEntryMixin {
 
         String playerName = displayList.get(1).replace(" ", "");
 
-        if(!optional.get().contains(playerName)) return;
+        if(!modUsers.contains(playerName)) return;
 
         MutableText text = MutableText.of(new PlainTextContent.Literal("")).setStyle(Style.EMPTY.withColor(Formatting.WHITE));
         text.append(originalDisplayName).append("\uE202 ");

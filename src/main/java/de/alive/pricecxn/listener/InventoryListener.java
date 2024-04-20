@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxnModClient;
+import de.alive.pricecxn.cytooxien.CxnConnectionManager;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
@@ -293,13 +294,10 @@ public abstract class InventoryListener {
         JsonObject obj = new JsonObject();
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
-        return listener.checkConnectionAsync().then(Mono.defer(() -> {
-            if (listener.isActive().get()) {
-                if (PriceCxnModClient.CXN_LISTENER.getThemeChecker() == null) {
-                    return Mono.error(new NullPointerException("Theme Checker is null"));
-                }
+        return listener.getConnectionManager().checkConnectionAsync(CxnConnectionManager.Refresh.THEME).then(Mono.defer(() -> {
+            if (listener.isActive()) {
                 Modes mode = listener.getThemeChecker().getMode();
-                if (mode == null || mode == Modes.NOTHING) {
+                if (mode == Modes.NOTHING) {
                     return Mono.error(new NullPointerException("Mode is null"));
                 }
 

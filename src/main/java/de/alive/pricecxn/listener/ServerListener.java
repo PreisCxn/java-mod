@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This class is used to check if the player is on a specific server.
  */
 public abstract class ServerListener {
-    private static final String DEFAULT_IGNORED_IP = "beta";
-    private static final String DEFAULT_IP = "cytooxien";
 
     private final AtomicBoolean onServer = new AtomicBoolean(Boolean.FALSE);
     private final List<String> ips;
@@ -39,14 +37,13 @@ public abstract class ServerListener {
             if(client.getCurrentServerEntry() == null) return;
             if(onServer.get()) return;
 
+            String lowerCasedAddress = client.getCurrentServerEntry().address.toLowerCase();
             Flux.fromIterable(ips)
-                    .filter(ip -> client.getCurrentServerEntry().address.toLowerCase().contains(ip))
-                    .filter(ip -> ignoredIps.stream().noneMatch(ignoredIp -> client.getCurrentServerEntry().address.toLowerCase().contains(ignoredIp)))
+                    .filter(lowerCasedAddress::contains)
+                    .filter(ip -> ignoredIps.stream().noneMatch(lowerCasedAddress::contains))
                     .next()
-                    .flatMap(ip -> {
-                        onServer.set(true);
-                        return onServerJoin();
-                    })
+                    .doOnNext(s -> onServer.set(true))
+                    .flatMap(ip -> onServerJoin())
                     .subscribe();
 
         });
