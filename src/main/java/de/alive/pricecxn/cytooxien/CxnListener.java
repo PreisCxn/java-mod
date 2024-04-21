@@ -12,13 +12,13 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class CxnListener extends ServerListener {
 
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
-    private final @NotNull ThemeServerChecker themeChecker;
+    private final @NotNull IThemeServerChecker themeChecker;
     private final @NotNull ServerChecker serverChecker;
     private final @NotNull CxnDataHandler dataHandler;
     private final @NotNull CxnConnectionManager connectionManager;
@@ -110,7 +110,7 @@ public class CxnListener extends ServerListener {
         return serverChecker;
     }
 
-    public @NotNull ThemeServerChecker getThemeChecker() {
+    public @NotNull IThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
 

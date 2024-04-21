@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
@@ -20,8 +21,8 @@ import reactor.core.scheduler.Schedulers;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
-import static de.alive.pricecxn.PriceCxnMod.printTester;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -130,7 +131,7 @@ public class TradeListener extends InventoryListener {
 
         JsonObject result = items.get(0).getData();
 
-        result.remove(PriceCxnItemStack.AMOUNT_KEY);
+        result.remove(PriceCxnItemStackImpl.AMOUNT_KEY);
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 

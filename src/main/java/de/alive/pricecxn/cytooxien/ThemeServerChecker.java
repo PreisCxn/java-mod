@@ -13,13 +13,13 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.DEBUG_MODE;
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.LogPrinter.DEBUG_MODE;
+import static de.alive.pricecxn.LogPrinter.printDebug;
 
 /**
  * This class is used to check the theme server for the current mode.
  */
-public class ThemeServerChecker extends TabListener {
+public class ThemeServerChecker extends TabListener implements IThemeServerChecker {
 
     private @NotNull Modes mode = Modes.NOTHING;
 
@@ -88,6 +88,7 @@ public class ThemeServerChecker extends TabListener {
         return Mono.empty();
     }
 
+    @Override
     public @NotNull Modes getMode() {
         return mode;
     }

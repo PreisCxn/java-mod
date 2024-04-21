@@ -15,7 +15,8 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
+
 /**
  * This class manages the connection to the server and handles the state of the connection.
  */
@@ -23,7 +24,7 @@ public class CxnConnectionManager {
 
     private final CxnDataHandler dataHandler;
     private final ServerChecker serverChecker;
-    private final ThemeServerChecker themeChecker;
+    private final IThemeServerChecker themeChecker;
     private final AtomicBoolean active = new AtomicBoolean(false);
     private @Nullable Boolean isRightVersion = null;
     private @NotNull NetworkingState state = NetworkingState.OFFLINE;
@@ -35,7 +36,7 @@ public class CxnConnectionManager {
      * @param themeChecker Checks the theme status.
      * @param listenerActive Indicates if the listener is active.
      */
-    public CxnConnectionManager(CxnDataHandler dataHandler, ServerChecker serverChecker, ThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
+    public CxnConnectionManager(CxnDataHandler dataHandler, ServerChecker serverChecker, IThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
         this.dataHandler = dataHandler;
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
@@ -187,7 +188,7 @@ public class CxnConnectionManager {
                 .then(dataHandler.refreshData(true))
                 .then(Mono.just(themeChecker))
                 .filter(themeServerChecker -> refresh == Refresh.THEME)
-                .flatMap(ThemeServerChecker::refreshAsync)
+                .flatMap(IThemeServerChecker::refreshAsync)
                 .doOnSuccess(ignored -> {
                     activateListeners();
                     this.active.set(true);

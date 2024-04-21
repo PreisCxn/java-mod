@@ -1,5 +1,6 @@
 package de.alive.pricecxn.utils;
 
+import de.alive.pricecxn.LogPrinter;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.util.Pair;
@@ -8,8 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 
 public class TimeUtil {
     private static final DataAccess MINUTE_SEARCH = TranslationDataAccess.MINUTE_SEARCH;
@@ -84,9 +83,9 @@ public class TimeUtil {
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
         Optional<Integer> minutes = getTime(timerString, MINUTE_SEARCH);
 
-        LOGGER.debug("timerString: " + timerString);
-        LOGGER.debug("hours: " + hours.orElse(-1));
-        LOGGER.debug("minutes: " + minutes.orElse(-1));
+        LogPrinter.LOGGER.debug("timerString: {}", timerString);
+        LogPrinter.LOGGER.debug("hours: {}", hours.orElse(-1));
+        LogPrinter.LOGGER.debug("minutes: {}", minutes.orElse(-1));
 
         if(minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();

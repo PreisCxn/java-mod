@@ -11,10 +11,8 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-public class ServerChecker {
+public class ServerChecker implements IServerChecker {
 
     private final @NotNull WebSocketConnector websocket;
 
@@ -54,6 +52,7 @@ public class ServerChecker {
      *
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
+    @Override
     public @NotNull Mono<Boolean> checkConnection() {
         return this.websocket.establishWebSocketConnection()
                 .hasElement()
@@ -78,28 +77,34 @@ public class ServerChecker {
      *
      * @return A CompletableFuture which returns true if the server is reachable and false if not
      */
+    @Override
     public @NotNull Mono<Boolean> isConnected() {
         if(!this.websocket.isConnected())
             return checkConnection();
         return Mono.just(true);
     }
 
+    @Override
     public void addSocketListener(SocketMessageListener listener) {
         this.websocket.addMessageListener(listener);
     }
 
+    @Override
     public void removeSocketListener(SocketMessageListener listener) {
         this.websocket.removeMessageListener(listener);
     }
 
+    @Override
     public @NotNull NetworkingState getState() {
         return state;
     }
 
+    @Override
     public @NotNull Mono<String> getServerMinVersion() {
         return minVersion;
     }
 
+    @Override
     public @NotNull WebSocketConnector getWebsocket() {
         return websocket;
     }

@@ -8,10 +8,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class WebSocketCompletion {
     public static final String QUERY_STRING = "pcxn?";

@@ -1,7 +1,6 @@
 package de.alive.pricecxn;
 
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
@@ -9,12 +8,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.logging.Level;
+
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class PriceCxnMod implements ModInitializer {
 	// This logger is used to write text to the console and the log file.
@@ -23,12 +20,8 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style DEFAULT_TEXT = Style.EMPTY.withColor(Formatting.GRAY);
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
-	public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-	public static final boolean DEBUG_MODE = System.getenv("PCXN_DEBUG_MODE") != null && System.getenv("PCXN_DEBUG_MODE").equals("true");
-	public static final boolean TESTER_MODE = System.getenv("PCXN_TESTER_MODE") != null && System.getenv("PCXN_TESTER_MODE").equals("true");
 	public static final String MOD_NAME = "PriceCxn";
 	public static final String MOD_VERSION = Version.MOD_VERSION;
-	public static final Logger LOGGER = LoggerFactory.getLogger(PriceCxnMod.class);
 	public static final MutableText MOD_TEXT = MutableText
 			.of(new PlainTextContent.Literal(""))
 			.append(MutableText.of(new PlainTextContent.Literal("["))
@@ -41,44 +34,6 @@ public class PriceCxnMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 
-	}
-
-	public static void doDebug(@NotNull Consumer<MinecraftClient> function){
-		if(!PriceCxnMod.DEBUG_MODE) return;
-		if(MinecraftClient.getInstance() == null) return;
-		if(MinecraftClient.getInstance().player == null) return;
-		MinecraftClient client = MinecraftClient.getInstance();
-
-		function.accept(client);
-	}
-
-	public static void printTester(String message){
-        if (!PriceCxnMod.DEBUG_MODE && !PriceCxnMod.TESTER_MODE) return;
-        if(MinecraftClient.getInstance() == null) return;
-        if(MinecraftClient.getInstance().player == null) return;
-        MinecraftClient client = MinecraftClient.getInstance();
-
-        MutableText text = MutableText.of(new PlainTextContent.Literal(message));
-        client.player.sendMessage(text, true);
-        LOGGER.debug("[PCXN-TESTER] : {}", message);
-    }
-
-	public static void printDebug(String message, boolean overlay, boolean sysOut){
-		doDebug((client) -> {
-			MutableText text = MutableText.of(new PlainTextContent.Literal(message)).setStyle(PriceCxnMod.DEBUG_TEXT);
-			if(client.player != null)
-			    client.player.sendMessage(text, overlay);
-			if(sysOut) LOGGER.debug("[PCXN-DEBUG] : {}", message);
-		});
-	}
-
-	public static void printDebug(String message, boolean overlay){
-		printDebug(message, overlay, true);
-	}
-
-	public static void printDebug(String message){
-		printDebug(message, false, true);
-		printDebug(message, true, false);
 	}
 
 	public static @NotNull Optional<Integer> getIntVersion(@Nullable String version){

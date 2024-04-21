@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
-import static de.alive.pricecxn.PriceCxnMod.printTester;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
 
 public class TomNookListener extends InventoryListener {
     private final List<PriceCxnItemStack> items = new ArrayList<>();

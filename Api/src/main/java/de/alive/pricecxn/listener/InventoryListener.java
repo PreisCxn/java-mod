@@ -3,11 +3,7 @@ package de.alive.pricecxn.listener;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.PriceCxnModClient;
-import de.alive.pricecxn.cytooxien.CxnConnectionManager;
-import de.alive.pricecxn.cytooxien.CxnListener;
-import de.alive.pricecxn.cytooxien.Modes;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
+import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import de.alive.pricecxn.utils.TimeUtil;
@@ -63,7 +59,7 @@ public abstract class InventoryListener {
                 Slot slot = handler.getSlot(i);
                 if (slot.getStack().isEmpty()) continue;
 
-                PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
+                PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, addComment);
 
                 boolean add = true;
 
@@ -101,14 +97,14 @@ public abstract class InventoryListener {
     }
 
     public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                                  @NotNull ScreenHandler handler,
-                                                                  final int slotIndex,
-                                                                  @Nullable Map<String, DataAccess> searchData,
-                                                                  boolean addComment) {
+                                                                      @NotNull ScreenHandler handler,
+                                                                      final int slotIndex,
+                                                                      @Nullable Map<String, DataAccess> searchData,
+                                                                      boolean addComment) {
         Slot slot = handler.getSlot(slotIndex);
         if (slot.getStack().isEmpty()) return Optional.empty();
 
-        PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, addComment);
+        PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, addComment);
         if (item == null) return Optional.of(newItem);
 
         if (item.equals(newItem)) {
@@ -130,8 +126,8 @@ public abstract class InventoryListener {
     }
 
     public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                                  @NotNull ScreenHandler handler,
-                                                                  final int slotIndex) {
+                                                                      @NotNull ScreenHandler handler,
+                                                                      final int slotIndex) {
         return updateItem(item, handler, slotIndex, null, true);
     }
 
@@ -284,7 +280,7 @@ public abstract class InventoryListener {
     }
 
     protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
-        CxnListener listener = PriceCxnModClient.CXN_LISTENER;
+        ServerListener listener = PriceCxnModClient.CXN_LISTENER;
 
         if (instance == null || instance.player == null) {
             return Mono.error(new NullPointerException("Instance or player is null"));

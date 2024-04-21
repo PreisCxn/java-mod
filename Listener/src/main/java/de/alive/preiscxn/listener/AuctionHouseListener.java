@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
-import static de.alive.pricecxn.PriceCxnMod.printTester;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
 
 public class AuctionHouseListener extends InventoryListener {
 

@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
@@ -65,7 +65,7 @@ public abstract class ItemStackMixin {
     @Unique
     private int searchingCount = 20;
     @Unique
-    private @Nullable PriceCxnItemStack cxnItemStack = null;
+    private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
@@ -147,7 +147,7 @@ public abstract class ItemStackMixin {
 
     @Unique
     public boolean shouldCancel(@NotNull List<Text> list){
-        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+        IThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
 
         Modes mode = themeChecker.getMode();
 
@@ -193,11 +193,11 @@ public abstract class ItemStackMixin {
                 || !pcxnPrice.has("pbv_search_key")
                 || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
                 || this.cxnItemStack == null
-                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY))
+                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
             return 1;
 
         String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
-        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
+        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
 
         if (!nbtData.has("PublicBukkitValues")) return 1;
         JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
@@ -264,7 +264,7 @@ public abstract class ItemStackMixin {
         if (this.lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
         ItemStack itemStack = (ItemStack) (Object) this;
-        this.cxnItemStack = new PriceCxnItemStack(itemStack, null, true, false);
+        this.cxnItemStack = new PriceCxnItemStackImpl(itemStack, null, true, false);
 
         this.pcxnPrice = cxnItemStack.findItemInfo("pricecxn.data.item_data");
         this.nookPrice = cxnItemStack.findItemInfo("pricecxn.data.nook_data");

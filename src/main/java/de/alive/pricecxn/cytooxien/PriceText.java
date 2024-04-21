@@ -11,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;

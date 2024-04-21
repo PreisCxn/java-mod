@@ -17,15 +17,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class CxnDataHandler {
 
     private final ServerChecker serverChecker;
-    private final ThemeServerChecker themeChecker;
+    private final IThemeServerChecker themeChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
 
-    public CxnDataHandler(ServerChecker serverChecker, ThemeServerChecker themeChecker) {
+    public CxnDataHandler(ServerChecker serverChecker, IThemeServerChecker themeChecker) {
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
     }
