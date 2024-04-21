@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.DigestInputStream;
@@ -54,12 +53,12 @@ public class ModuleLoader {
     }
 
     private Mono<Void> download() {
-        return CdnDeliveryType.FILE.generateResponse(remotePath)
+        return CdnDeliveryType.FILE.generateResponseAsBytes(remotePath)
                 .doOnNext(bytes -> LOGGER.info("Downloaded module from {}", remotePath))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(content -> {
                     try{
-                        Files.writeString(jarPath, content, Charset.forName("windows-1252"));
+                        Files.write(jarPath, content);
                     }catch(IOException e){
                         throw new RuntimeException("Could not write file", e);
                     }

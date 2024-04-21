@@ -39,8 +39,8 @@ public class Http {
         return apiUrl;
     }
 
-    protected @NotNull Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
-        return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofString(), Http::applyPushPromise));
+    protected @NotNull Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
+        return Mono.fromFuture(client.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray(), Http::applyPushPromise));
     }
 
     public Mono<String> GET(String uri) {
@@ -53,7 +53,7 @@ public class Http {
                 .GET();
 
         return sendAsync(get.build())
-                .map(response -> Tuples.of(response.statusCode(), response.body()))
+                .map(response -> Tuples.of(response.statusCode(), new String(response.body())))
                 .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 399) {
                         sink.next(tuple.getT2());
@@ -78,7 +78,7 @@ public class Http {
                     .POST(HttpRequest.BodyPublishers.ofString(json.toString()));
 
         return sendAsync(post.build())
-                .map(response -> Tuples.of(response.statusCode(), response.body()))
+                .map(response -> Tuples.of(response.statusCode(), new String(response.body())))
                 .handle((tuple, sink) -> {
                     if (tuple.getT1() >= 200 && tuple.getT1() < 300) {
                         sink.next(tuple.getT2());
@@ -93,6 +93,25 @@ public class Http {
 
     private Logger getLogger() {
         return Logger.getLogger(Http.class.getName());
+    }
+
+    public Mono<byte[]> getBytes(String baseUrl, String s) {
+        HttpRequest.Builder get = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + s))
+                .GET();
+
+        return sendAsync(get.build())
+                .map(response -> Tuples.of(response.statusCode(), response.body()))
+                .handle((tuple, sink) -> {
+                    if (tuple.getT1() >= 200 && tuple.getT1() < 399) {
+                        sink.next(tuple.getT2());
+                        sink.complete();
+                    } else {
+                        String errorMessage = "Received wrong success code: " + tuple.getT1() + "(" + baseUrl + s + ")";
+                        getLogger().severe(errorMessage);
+                        sink.error(new IllegalStateException(new String(tuple.getT2())));
+                    }
+                });
     }
 
 }

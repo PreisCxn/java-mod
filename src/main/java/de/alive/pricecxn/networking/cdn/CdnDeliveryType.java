@@ -39,4 +39,8 @@ public class CdnDeliveryType<T> {
                 .map(function);
     }
 
+    public Mono<byte[]> generateResponseAsBytes(String remotePath) {
+        return http.getBytes(BASE_URL, remotePath + (this.type == null ? "" : "?" + this.type));
+    }
+
 }
