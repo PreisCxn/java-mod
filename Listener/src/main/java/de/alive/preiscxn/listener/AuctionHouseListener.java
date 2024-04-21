@@ -1,4 +1,4 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.listener;
 
 import com.google.gson.JsonArray;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
@@ -7,7 +7,6 @@ import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;

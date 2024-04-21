@@ -1,4 +1,4 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.listener;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -19,10 +19,9 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.*;
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.printTester;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -43,7 +42,7 @@ public class TradeListener extends InventoryListener {
      */
     public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         super(inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
-        //ICH LIEBE MEINE FREUNDIN SO SEHR <3 (AlinaTmr aka Alina aka Schatz aka Prinzessin)
+
         this.searchData.put("buyPrice", TranslationDataAccess.TRADE_BUY_SEARCH);
     }
 
@@ -135,7 +134,7 @@ public class TradeListener extends InventoryListener {
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
-        LOGGER.debug(result.toString());
+        //todo LOGGER.debug(result.toString());
 
         return Optional.of(result);
     }

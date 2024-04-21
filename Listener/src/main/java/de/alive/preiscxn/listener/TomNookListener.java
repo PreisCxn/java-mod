@@ -1,4 +1,4 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.listener;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,10 +17,9 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.*;
+import static de.alive.pricecxn.PriceCxnMod.printDebug;
+import static de.alive.pricecxn.PriceCxnMod.printTester;
 
 public class TomNookListener extends InventoryListener {
     private final List<PriceCxnItemStack> items = new ArrayList<>();
@@ -71,8 +70,8 @@ public class TomNookListener extends InventoryListener {
             }
         }
 
-        LOGGER.debug("Nook: " + array.size() + " items");
-        LOGGER.debug(array.toString());
+        //todo LOGGER.debug("Nook: " + array.size() + " items");
+        //todo LOGGER.debug(array.toString());
 
 
         if(!array.isEmpty())
