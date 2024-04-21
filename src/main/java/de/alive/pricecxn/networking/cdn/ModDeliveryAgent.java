@@ -1,7 +1,5 @@
 package de.alive.pricecxn.networking.cdn;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
 import de.alive.pricecxn.networking.Http;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -10,11 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class ModDeliveryAgent {
-    private final ModDeliveryType<JsonArray> LIST_FILES = new ModDeliveryType<>("type=list-files", s -> JsonParser.parseString(s).getAsJsonArray());
-    private final ModDeliveryType<JsonArray> LIST_VERSIONS = new ModDeliveryType<>("type=list-versions", s -> JsonParser.parseString(s).getAsJsonArray());
-    private final ModDeliveryType<String> NEWEST_VERSION = new ModDeliveryType<>("type=newest-version", Function.identity());
+import static de.alive.pricecxn.networking.cdn.CdnDeliveryType.LIST_VERSIONS;
+import static de.alive.pricecxn.networking.cdn.CdnDeliveryType.NEWEST_VERSION;
 
+public class ModDeliveryAgent {
     private static final String BASE_URL = "https://cdn.preiscxn.de/";
     private static final String MOD_PATH = "PriceCxnMod.jar";
     private static ModDeliveryAgent instance;
@@ -35,12 +32,8 @@ public class ModDeliveryAgent {
         return instance;
     }
 
-    public @NotNull String getModPath() {
-        return BASE_URL + MOD_PATH;
-    }
-
     public @NotNull Mono<List<String>> getModVersions() {
-        return LIST_VERSIONS.generateResponse(jsonElements -> {
+        return LIST_VERSIONS.generateResponse(MOD_PATH, jsonElements -> {
             List<String> versions = new ArrayList<>();
             for (int i = 0; i < jsonElements.size(); i++)
                 versions.add(jsonElements.get(i).getAsString());
@@ -49,26 +42,6 @@ public class ModDeliveryAgent {
     }
 
     public @NotNull Mono<String> getNewestVersion() {
-        return NEWEST_VERSION.generateResponse(Function.identity());
+        return NEWEST_VERSION.generateResponse(MOD_PATH, Function.identity());
     }
-
-
-    private class ModDeliveryType<T> {
-
-        private final String type;
-        private final Function<String, T> stringTFunction;
-
-        private ModDeliveryType(String type, Function<String, T> stringTFunction) {
-            this.type = type;
-            this.stringTFunction = stringTFunction;
-        }
-
-        public <P> @NotNull Mono<P> generateResponse(@NotNull Function<T, P> function) {
-            return http.GET(BASE_URL, MOD_PATH + "?" + this.type)
-                    .map(stringTFunction)
-                    .map(function);
-        }
-
-    }
-
 }

@@ -1,17 +1,15 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.cytooxien.dataobservers.AuctionHouseListener;
-import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
-import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
-import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
+import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
+import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.ServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.PriceCxnMod.LOGGER;
@@ -25,7 +23,7 @@ public class CxnListener extends ServerListener {
     private final @NotNull CxnDataHandler dataHandler;
     private final @NotNull CxnConnectionManager connectionManager;
 
-    public CxnListener() {
+    public CxnListener(ModuleLoader cxnListenerModuleLoader) {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
 
         //setting up server checker
@@ -38,10 +36,19 @@ public class CxnListener extends ServerListener {
         AtomicBoolean listenerActive = new AtomicBoolean(false);
         this.connectionManager = new CxnConnectionManager(dataHandler, serverChecker, themeChecker, listenerActive);
 
-        new AuctionHouseListener(this.isOnServer(), listenerActive);
-        new ItemShopListener(this.isOnServer(), listenerActive);
-        new TomNookListener(this.isOnServer(), listenerActive);
-        new TradeListener(this.isOnServer(), listenerActive);
+        cxnListenerModuleLoader
+                .loadInterfaces(InventoryListener.class)
+                .flatMap(classes -> {
+                    for (Class<? extends InventoryListener> clazz : classes) {
+                        try{
+                            clazz.getConstructor(AtomicBoolean[].class)
+                                    .newInstance((Object) new AtomicBoolean[]{this.isOnServer(), listenerActive});
+                        }catch(Exception e){
+                            LOGGER.error("Could not instantiate listener", e);
+                        }
+                    }
+                    return Mono.empty();
+                }).subscribe();
 
         //checking connection and activating mod
         connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.NONE)
