@@ -20,7 +20,7 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
 /**
  * This class manages the connection to the server and handles the state of the connection.
  */
-public class CxnConnectionManager {
+public class CxnConnectionManager implements ICxnConnectionManager {
 
     private final CxnDataHandler dataHandler;
     private final ServerChecker serverChecker;
@@ -47,6 +47,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
+    @Override
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(Refresh refresh) {
         return Mono.fromCallable(() -> checkConnection(refresh))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -57,6 +58,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
+    @Override
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(Refresh refresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
@@ -156,6 +158,7 @@ public class CxnConnectionManager {
      * Checks if the server version is the minimum required version.
      * @return A Mono object containing a Boolean indicating if the server version is the minimum required version.
      */
+    @Override
     public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
@@ -168,6 +171,7 @@ public class CxnConnectionManager {
      * Checks if the user is a special user.
      * @return A Mono object containing a Boolean indicating if the user is a special user.
      */
+    @Override
     public @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
@@ -181,6 +185,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object.
      */
+    @Override
     public @NotNull Mono<Void> activate(Refresh refresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
@@ -204,6 +209,7 @@ public class CxnConnectionManager {
     /**
      * Deactivates the connection manager.
      */
+    @Override
     public void deactivate() {
         if (!this.active.get()) return; //return wenn schon deaktiviert
 
@@ -223,6 +229,7 @@ public class CxnConnectionManager {
      * Checks if the connection manager is active.
      * @return A Boolean indicating if the connection manager is active.
      */
+    @Override
     public boolean isActive() {
         return this.active.get();
     }
@@ -270,10 +277,5 @@ public class CxnConnectionManager {
      */
     public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message) {
         sendConnectionInformation(shouldSend, message, false);
-    }
-
-    public enum Refresh {
-        NONE,
-        THEME
     }
 }

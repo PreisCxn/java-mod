@@ -18,6 +18,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     implementation 'io.projectreactor:reactor-core:3.4.13'
+    implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '1.9'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

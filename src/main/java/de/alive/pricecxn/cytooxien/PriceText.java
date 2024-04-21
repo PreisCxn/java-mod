@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 import static de.alive.pricecxn.utils.StringUtil.convertPrice;
 
 public class PriceText {

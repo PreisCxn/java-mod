@@ -204,7 +204,7 @@ public class TradeListener extends InventoryListener {
                     Slot slot = handler.getSlot(i);
                     if (slot.getStack().isEmpty()) continue;
 
-                    PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, bool);
+                    PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, bool);
 
                     slots.add(newItem);
                 }

@@ -19,7 +19,7 @@ import java.util.Map;
 
 import static de.alive.pricecxn.LogPrinter.LOGGER;
 
-public class CxnDataHandler {
+public class CxnDataHandler implements ICxnDataHandler {
 
     private final ServerChecker serverChecker;
     private final IThemeServerChecker themeChecker;
@@ -30,6 +30,7 @@ public class CxnDataHandler {
         this.themeChecker = themeChecker;
     }
 
+    @Override
     public @NotNull Mono<Void> initData() {
         LOGGER.debug("initData");
 
@@ -46,6 +47,7 @@ public class CxnDataHandler {
                     .doOnSuccess(this::createTranslationHandler).then();
     }
 
+    @Override
     public @NotNull Mono<Void> refreshItemData(String dataKey, boolean isNook) {
         if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
 
@@ -71,53 +73,24 @@ public class CxnDataHandler {
         return data.get(dataKey).refresh(true);
     }
 
+    @Override
     public @NotNull Mono<Void> refreshData(boolean forced) {
         return Flux.fromIterable(data.entrySet())
                 .flatMap(entry -> entry.getValue().refresh(forced))
                 .then();
     }
 
+    @Override
     public DataHandler get(String key) {
         return data.get(key);
     }
 
-    private void createTranslationHandler(@NotNull List<String> langList) {
-        DataAccess[] translationAccess = {
-                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
-                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
-                TranslationDataAccess.INV_NOOK_SEARCH,
-                TranslationDataAccess.INV_TRADE_SEARCH,
-                TranslationDataAccess.TIMESTAMP_SEARCH,
-                TranslationDataAccess.SELLER_SEARCH,
-                TranslationDataAccess.BID_SEARCH,
-                TranslationDataAccess.AH_BUY_SEARCH,
-                TranslationDataAccess.THEME_SERVER_SEARCH,
-                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
-                TranslationDataAccess.NOOK_BUY_SEARCH,
-                TranslationDataAccess.SHOP_BUY_SEARCH,
-                TranslationDataAccess.SHOP_SELL_SEARCH,
-                TranslationDataAccess.TRADE_BUY_SEARCH,
-                TranslationDataAccess.HOUR_SEARCH,
-                TranslationDataAccess.MINUTE_SEARCH,
-                TranslationDataAccess.SECOND_SEARCH,
-                TranslationDataAccess.NOW_SEARCH,
-                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
-                TranslationDataAccess.CITYBUILD_INV_BLOCK
-        };
-
-
-        data.put("cxnprice.translation",
-                            new DataHandler(serverChecker,
-                                            "/settings/translations",
-                                            langList,
-                                            "translation_key",
-                                            DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
-    }
-
+    @Override
     public DataHandler getData(String key) {
         return data.get(key);
     }
 
+    @Override
     public @Nullable List<String> getModUsers() {
         List<String> stringList = new ArrayList<>();
 

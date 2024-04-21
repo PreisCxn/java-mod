@@ -4,7 +4,7 @@ import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.ServerChecker;
+import de.alive.pricecxn.networking.IServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -19,9 +19,9 @@ public class CxnListener extends ServerListener {
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
     private final @NotNull IThemeServerChecker themeChecker;
-    private final @NotNull ServerChecker serverChecker;
-    private final @NotNull CxnDataHandler dataHandler;
-    private final @NotNull CxnConnectionManager connectionManager;
+    private final @NotNull IServerChecker serverChecker;
+    private final @NotNull ICxnDataHandler dataHandler;
+    private final @NotNull ICxnConnectionManager connectionManager;
 
     public CxnListener(ModuleLoader cxnListenerModuleLoader) {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
@@ -51,7 +51,7 @@ public class CxnListener extends ServerListener {
                 }).subscribe();
 
         //checking connection and activating mod
-        connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.NONE)
+        connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.NONE)
                 .doOnSuccess((a) -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
                 .subscribe();
 
@@ -74,7 +74,7 @@ public class CxnListener extends ServerListener {
             return Mono.empty();
         boolean activeBackup = connectionManager.isActive();
 
-        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
+        return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
                 .flatMap(messageInformation -> {
                     CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
@@ -86,7 +86,7 @@ public class CxnListener extends ServerListener {
     @Override
     public @NotNull Mono<Void> onServerJoin() {
 
-        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
+        return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
                 .doOnSuccess(messageInformation -> CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
                 .then();
 
@@ -98,7 +98,7 @@ public class CxnListener extends ServerListener {
         connectionManager.deactivate();
     }
 
-    public @NotNull CxnConnectionManager getConnectionManager() {
+    public @NotNull ICxnConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
@@ -106,7 +106,7 @@ public class CxnListener extends ServerListener {
         return dataHandler.get(key);
     }
 
-    public @NotNull ServerChecker getServerChecker() {
+    public @NotNull IServerChecker getServerChecker() {
         return serverChecker;
     }
 
