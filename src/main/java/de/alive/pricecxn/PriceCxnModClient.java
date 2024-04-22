@@ -21,6 +21,7 @@ import org.lwjgl.glfw.GLFW;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -56,6 +57,15 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public void onInitializeClient() {
         //Initialize Mod
+
+        try {
+            Field mod = PriceCxn.class.getDeclaredField("mod");
+            mod.setAccessible(true);
+            mod.set(null, this);
+            mod.setAccessible(false);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "cxn_listener.keys.open_in_browser",
