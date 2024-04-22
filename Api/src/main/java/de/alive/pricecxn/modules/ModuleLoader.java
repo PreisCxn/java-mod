@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class ModuleLoader {
 
