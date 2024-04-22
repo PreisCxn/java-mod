@@ -13,6 +13,7 @@ repositories {
 project(':Api') {
 	afterEvaluate {
 		tasks.named('remapJar') {
+			doNotTrackState("Reason for not tracking state")
 			enabled = false
 		}
 	}
