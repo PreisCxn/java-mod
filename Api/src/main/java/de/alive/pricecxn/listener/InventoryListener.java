@@ -1,29 +1,31 @@
 package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.cytooxien.*;
+import de.alive.pricecxn.PriceCxn;
+import de.alive.pricecxn.cytooxien.ICxnConnectionManager;
+import de.alive.pricecxn.cytooxien.ICxnListener;
+import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
-import de.alive.pricecxn.utils.TimeUtil;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class InventoryListener {
+public abstract class InventoryListener implements IInventoryListener {
+    static final int REFRESH_INTERVAL = 200;
 
-    private static final int REFRESH_INTERVAL = 200;
     private final @NotNull DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
     private final List<Integer> slotNbt = new ArrayList<>();
@@ -47,95 +49,6 @@ public abstract class InventoryListener {
         this.active = active;
 
         init();
-    }
-
-    public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                                       @NotNull ScreenHandler handler,
-                                                       @NotNull Pair<Integer, Integer> range,
-                                                       @Nullable Map<String, DataAccess> searchData,
-                                                       boolean addComment) {
-        return Mono.fromRunnable(() -> {
-            for (int i = range.getLeft(); i <= range.getRight(); i++) {
-                Slot slot = handler.getSlot(i);
-                if (slot.getStack().isEmpty()) continue;
-
-                PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, addComment);
-
-                boolean add = true;
-
-                synchronized(items){
-                    for (PriceCxnItemStack item : items) {
-                        if (item.equals(newItem)) {
-
-                            if (searchData != null && searchData.containsKey("timestamp")) {
-                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                    item.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                    !TimeUtil.timestampsEqual(
-                                            item.getData().get("timestamp").getAsLong(),
-                                            newItem.getData().get("timestamp").getAsLong(),
-                                            5)) {
-                                    continue;
-                                }
-                            }
-
-                            add = false;
-                            if (!item.deepEquals(newItem)) {
-                                item.updateData(newItem);
-                            }
-                            break;
-                        }
-                    }
-
-                    if (add) {
-                        items.add(newItem);
-                    }
-                }
-
-            }
-        });
-
-    }
-
-    public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                                      @NotNull ScreenHandler handler,
-                                                                      final int slotIndex,
-                                                                      @Nullable Map<String, DataAccess> searchData,
-                                                                      boolean addComment) {
-        Slot slot = handler.getSlot(slotIndex);
-        if (slot.getStack().isEmpty()) return Optional.empty();
-
-        PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, addComment);
-        if (item == null) return Optional.of(newItem);
-
-        if (item.equals(newItem)) {
-            if (searchData != null
-                && searchData.containsKey("timestamp")
-                && !TimeUtil.timestampsEqual(
-                    item.getData().get("timestamp").getAsLong(),
-                    newItem.getData().get("timestamp").getAsLong(),
-                    5)) {
-                return Optional.empty();
-            } else if (!item.deepEquals(newItem)) {
-                item.updateData(newItem);
-                return Optional.of(item);
-            } else
-                return Optional.empty();
-        }
-
-        return Optional.of(newItem);
-    }
-
-    public static @NotNull Optional<PriceCxnItemStack> updateItem(@Nullable PriceCxnItemStack item,
-                                                                      @NotNull ScreenHandler handler,
-                                                                      final int slotIndex) {
-        return updateItem(item, handler, slotIndex, null, true);
-    }
-
-    public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
-                                                       @NotNull ScreenHandler handler,
-                                                       @NotNull Pair<Integer, Integer> range,
-                                                       @Nullable Map<String, DataAccess> searchData) {
-        return updateItemsAsync(items, handler, range, searchData, true);
     }
 
     //setup of Listeners
@@ -254,11 +167,13 @@ public abstract class InventoryListener {
         return false;
     }
 
+    @Override
     public @NotNull Mono<Boolean> hadItemsChangeAsync(@NotNull MinecraftClient client, ScreenHandler handler) {
         return Mono.fromSupplier(() -> hadItemsChange(client, handler))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
+    @Override
     public @NotNull Mono<Void> initSlotsAsync(ScreenHandler handler) {
         return Mono.fromRunnable(() -> initSlots(handler));
     }
@@ -280,7 +195,7 @@ public abstract class InventoryListener {
     }
 
     protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
-        ServerListener listener = PriceCxnModClient.CXN_LISTENER;
+        ICxnListener listener = PriceCxn.getMod().getCxnListener();
 
         if (instance == null || instance.player == null) {
             return Mono.error(new NullPointerException("Instance or player is null"));
@@ -290,7 +205,7 @@ public abstract class InventoryListener {
         JsonObject obj = new JsonObject();
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
-        return listener.getConnectionManager().checkConnectionAsync(CxnConnectionManager.Refresh.THEME).then(Mono.defer(() -> {
+        return listener.getConnectionManager().checkConnectionAsync(ICxnConnectionManager.Refresh.THEME).then(Mono.defer(() -> {
             if (listener.isActive()) {
                 Modes mode = listener.getThemeChecker().getMode();
                 if (mode == Modes.NOTHING) {

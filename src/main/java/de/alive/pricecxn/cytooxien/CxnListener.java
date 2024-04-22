@@ -1,10 +1,12 @@
 package de.alive.pricecxn.cytooxien;
 
+import de.alive.pricecxn.listener.IInventoryListener;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.IServerChecker;
+import de.alive.pricecxn.networking.ServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -14,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.LogPrinter.LOGGER;
 
-public class CxnListener extends ServerListener {
+public class CxnListener extends ServerListener implements ICxnListener {
 
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
@@ -39,7 +41,7 @@ public class CxnListener extends ServerListener {
         cxnListenerModuleLoader
                 .loadInterfaces(InventoryListener.class)
                 .flatMap(classes -> {
-                    for (Class<? extends InventoryListener> clazz : classes) {
+                    for (Class<? extends IInventoryListener> clazz : classes) {
                         try{
                             clazz.getConstructor(AtomicBoolean[].class)
                                     .newInstance((Object) new AtomicBoolean[]{this.isOnServer(), listenerActive});
@@ -98,27 +100,33 @@ public class CxnListener extends ServerListener {
         connectionManager.deactivate();
     }
 
+    @Override
     public @NotNull ICxnConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
+    @Override
     public DataHandler getData(String key) {
         return dataHandler.get(key);
     }
 
+    @Override
     public @NotNull IServerChecker getServerChecker() {
         return serverChecker;
     }
 
+    @Override
     public @NotNull IThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
 
 
+    @Override
     public @Nullable List<String> getModUsers() {
         return dataHandler.getModUsers();
     }
 
+    @Override
     public boolean isActive() {
         return connectionManager.isActive();
     }

@@ -18,4 +18,5 @@ public interface IWebSocketConnector {
 
     void removeOpenListener(SocketOpenListener listener);
 
+    void sendMessage(String message);
 }

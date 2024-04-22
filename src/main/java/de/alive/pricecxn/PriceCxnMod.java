@@ -21,6 +21,7 @@ public class PriceCxnMod implements ModInitializer {
 	public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
 	public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
 	public static final String MOD_NAME = "PriceCxn";
+
 	public static final String MOD_VERSION = Version.MOD_VERSION;
 	public static final MutableText MOD_TEXT = MutableText
 			.of(new PlainTextContent.Literal(""))

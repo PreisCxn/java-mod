@@ -1,6 +1,5 @@
 package de.alive.pricecxn;
 
-import de.alive.pricecxn.listener.ServerListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
@@ -10,16 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class LogPrinter {
     public static final boolean DEBUG_MODE = System.getenv("PCXN_DEBUG_MODE") != null && System.getenv("PCXN_DEBUG_MODE").equals("true");
     public static final boolean TESTER_MODE = System.getenv("PCXN_TESTER_MODE") != null && System.getenv("PCXN_TESTER_MODE").equals("true");
     public static final Style DEBUG_TEXT = Style.EMPTY.withColor(Formatting.RED).withItalic(true);
-
-    public static final ServerListener CXN_LISTENER = new CxnListener(new ModuleLoader("modules/cxn.listener.jar",
-                                                                                       Path.of("./" + MOD_NAME + "_modules/cxn.listener.jar")));
 
     public static final Logger LOGGER = LoggerFactory.getLogger("preiscxn");
 

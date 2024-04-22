@@ -3,8 +3,8 @@ package de.alive.preiscxn.listener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
@@ -131,7 +131,7 @@ public class TradeListener extends InventoryListener {
 
         JsonObject result = items.get(0).getData();
 
-        result.remove(PriceCxnItemStackImpl.AMOUNT_KEY);
+        result.remove(PriceCxnItemStack.AMOUNT_KEY);
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
@@ -204,7 +204,7 @@ public class TradeListener extends InventoryListener {
                     Slot slot = handler.getSlot(i);
                     if (slot.getStack().isEmpty()) continue;
 
-                    PriceCxnItemStack newItem = new PriceCxnItemStackImpl(slot.getStack(), searchData, bool);
+                    PriceCxnItemStack newItem = PriceCxn.getMod().createItemStack(slot.getStack(), searchData, bool);
 
                     slots.add(newItem);
                 }

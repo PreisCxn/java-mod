@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
@@ -21,11 +22,11 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class CxnDataHandler implements ICxnDataHandler {
 
-    private final ServerChecker serverChecker;
+    private final IServerChecker serverChecker;
     private final IThemeServerChecker themeChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
 
-    public CxnDataHandler(ServerChecker serverChecker, IThemeServerChecker themeChecker) {
+    public CxnDataHandler(IServerChecker serverChecker, IThemeServerChecker themeChecker) {
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
     }
@@ -113,5 +114,38 @@ public class CxnDataHandler implements ICxnDataHandler {
             LOGGER.error("Error while getting mod users", e);
             return null;
         }
+    }
+
+    public void createTranslationHandler(@NotNull List<String> langList) {
+        DataAccess[] translationAccess = {
+                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
+                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
+                TranslationDataAccess.INV_NOOK_SEARCH,
+                TranslationDataAccess.INV_TRADE_SEARCH,
+                TranslationDataAccess.TIMESTAMP_SEARCH,
+                TranslationDataAccess.SELLER_SEARCH,
+                TranslationDataAccess.BID_SEARCH,
+                TranslationDataAccess.AH_BUY_SEARCH,
+                TranslationDataAccess.THEME_SERVER_SEARCH,
+                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
+                TranslationDataAccess.NOOK_BUY_SEARCH,
+                TranslationDataAccess.SHOP_BUY_SEARCH,
+                TranslationDataAccess.SHOP_SELL_SEARCH,
+                TranslationDataAccess.TRADE_BUY_SEARCH,
+                TranslationDataAccess.HOUR_SEARCH,
+                TranslationDataAccess.MINUTE_SEARCH,
+                TranslationDataAccess.SECOND_SEARCH,
+                TranslationDataAccess.NOW_SEARCH,
+                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
+                TranslationDataAccess.CITYBUILD_INV_BLOCK
+        };
+
+
+        data.put("cxnprice.translation",
+                new DataHandler(serverChecker,
+                        "/settings/translations",
+                        langList,
+                        "translation_key",
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
     }
 }

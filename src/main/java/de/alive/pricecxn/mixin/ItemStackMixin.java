@@ -8,6 +8,7 @@ import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.networking.DataHandler;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
@@ -70,7 +71,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
 
-        ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
+        IServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
 
         if(shouldCancel(list))
             return;
@@ -188,7 +189,7 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public int getPbvAmountFactor(@NotNull ServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
+    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
         if (pcxnPrice == null
                 || !pcxnPrice.has("pbv_search_key")
                 || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE

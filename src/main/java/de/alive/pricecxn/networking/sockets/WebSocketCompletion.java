@@ -17,9 +17,9 @@ public class WebSocketCompletion {
 
     private final CompletableFuture<String> future = new CompletableFuture<>();
     private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
-    private final @NotNull WebSocketConnector connector;
+    private final @NotNull IWebSocketConnector connector;
 
-    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
+    public WebSocketCompletion(@NotNull IWebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
         this.connector = connector;
 
         SocketMessageListener listener = new SocketMessageListener() {

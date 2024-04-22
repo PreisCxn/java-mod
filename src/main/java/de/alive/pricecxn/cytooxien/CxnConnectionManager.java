@@ -1,10 +1,21 @@
 package de.alive.pricecxn.cytooxien;
 
+import com.google.gson.*;
 import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.networking.DataAccess;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.NetworkingState;
 import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
+import de.alive.pricecxn.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
@@ -13,7 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import static de.alive.pricecxn.LogPrinter.LOGGER;
 
@@ -22,8 +35,8 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
  */
 public class CxnConnectionManager implements ICxnConnectionManager {
 
-    private final CxnDataHandler dataHandler;
-    private final ServerChecker serverChecker;
+    private final ICxnDataHandler dataHandler;
+    private final IServerChecker serverChecker;
     private final IThemeServerChecker themeChecker;
     private final AtomicBoolean active = new AtomicBoolean(false);
     private @Nullable Boolean isRightVersion = null;
@@ -36,7 +49,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      * @param themeChecker Checks the theme status.
      * @param listenerActive Indicates if the listener is active.
      */
-    public CxnConnectionManager(CxnDataHandler dataHandler, ServerChecker serverChecker, IThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
+    public CxnConnectionManager(ICxnDataHandler dataHandler, IServerChecker serverChecker, IThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
         this.dataHandler = dataHandler;
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;

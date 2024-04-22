@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.LogPrinter.printDebug;
 import static de.alive.pricecxn.LogPrinter.printTester;
+import static de.alive.pricecxn.listener.StaticListenerMethods.updateItemsAsync;
 
 public class TomNookListener extends InventoryListener {
     private final List<PriceCxnItemStack> items = new ArrayList<>();

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.pricecxn.LogPrinter.printDebug;
 import static de.alive.pricecxn.LogPrinter.printTester;
+import static de.alive.pricecxn.listener.StaticListenerMethods.updateItem;
 
 public class ItemShopListener extends InventoryListener {
 
