@@ -77,8 +77,8 @@ public class ModuleLoader {
                                     .substring(1);
                             try{
                                 Class<?> clazz = defaultPackage.getT1().loadClass(defaultPackage.getT2().getName() + "." + className);
-                                if (interfaceClass.getName().equals(clazz.getSuperclass().getName())) {
-                                    list.add((Class<? extends I>) clazz);
+                                if (interfaceClass.isAssignableFrom(clazz)) {
+                                    list.add(clazz.asSubclass(interfaceClass));
                                 }
                             }catch(ClassNotFoundException e){
                                 LOGGER.error("Error while loading module", e);
