@@ -2,17 +2,20 @@ package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.IMinecraftClient;
+import de.alive.pricecxn.IScreenHandler;
+import de.alive.pricecxn.ISlot;
 import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.cytooxien.ICxnConnectionManager;
 import de.alive.pricecxn.cytooxien.ICxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
+import de.alive.pricecxn.impl.MinecraftClientImpl;
+import de.alive.pricecxn.impl.ScreenHandlerImpl;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -61,7 +64,7 @@ public abstract class InventoryListener implements IInventoryListener {
             Mono<Void> mono = Mono.empty();
             if (this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
                 this.isOpen = false;
-                mono = mono.then(onInventoryClose(client, client.player.currentScreenHandler)).then();
+                mono = mono.then(onInventoryClose(new MinecraftClientImpl(client), new ScreenHandlerImpl(client.player.currentScreenHandler))).then();
             }
 
             if (client.currentScreen == null) {
@@ -73,24 +76,24 @@ public abstract class InventoryListener implements IInventoryListener {
                 return;
             }
 
-            if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(client, inventoryTitles.getData())) {
+            if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(new MinecraftClientImpl(client), inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
-                ScreenHandler handler = client.player.currentScreenHandler;
+                IScreenHandler handler = new ScreenHandlerImpl(client.player.currentScreenHandler);
                 mono.then(initSlotsAsync(handler)
                                  .doOnSuccess((a) -> {
                                      this.isOpen = true;
                                      lastUpdate = System.currentTimeMillis();
-                                 }).then(onInventoryOpen(client, handler)))
+                                 }).then(onInventoryOpen(new MinecraftClientImpl(client), handler)))
                         .subscribe();
                 return;
             }
 
             mono.then(
-                    hadItemsChangeAsync(client, client.player.currentScreenHandler)
+                    hadItemsChangeAsync(new MinecraftClientImpl(client), new ScreenHandlerImpl(client.player.currentScreenHandler))
                             .flatMap(hasChanged -> {
                                 if (hasChanged) {
                                     lastUpdate = System.currentTimeMillis();
-                                    return onInventoryUpdate(client, client.player.currentScreenHandler);
+                                    return onInventoryUpdate(new MinecraftClientImpl(client), new ScreenHandlerImpl(client.player.currentScreenHandler));
                                 }
                                 return Mono.empty();
                             })
@@ -105,7 +108,7 @@ public abstract class InventoryListener implements IInventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler);
 
     /**
      * This method is called when the inventory is closed
@@ -113,7 +116,7 @@ public abstract class InventoryListener implements IInventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler);
 
     /**
      * This method is called when the inventory is updated
@@ -121,10 +124,10 @@ public abstract class InventoryListener implements IInventoryListener {
      * @param client  The MinecraftClient
      * @param handler The ScreenHandler
      */
-    protected abstract Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler);
+    protected abstract Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler);
 
-    private boolean isInventoryTitle(@NotNull MinecraftClient client, @Nullable List<String> inventoryTitles) {
-        if (client.currentScreen == null) return false;
+    private boolean isInventoryTitle(@NotNull IMinecraftClient client, @Nullable List<String> inventoryTitles) {
+        if (client.isCurrentScreenNull()) return false;
         if (inventoryTitles == null) return false;
 
         for (String title : inventoryTitles) {
@@ -133,7 +136,7 @@ public abstract class InventoryListener implements IInventoryListener {
                 String[] split = title.split("--##--");
                 boolean allContained = true;
                 for (String s : split) {
-                    if (!client.currentScreen.getTitle().getString().contains(s)) {
+                    if (!client.containsInTitle(s)) {
                         allContained = false;
                         break;
                     }
@@ -141,23 +144,23 @@ public abstract class InventoryListener implements IInventoryListener {
                 return allContained;
             }
 
-            if (client.currentScreen.getTitle().getString().equals(title))
+            if (client.equalsTitle(title))
                 return true;
         }
 
         return false;
     }
 
-    private boolean hadItemsChange(@NotNull MinecraftClient client, @Nullable ScreenHandler handler) {
+    private boolean hadItemsChange(@NotNull IMinecraftClient client, @Nullable IScreenHandler handler) {
         if (lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
-        if (client.player == null) return false;
+        if (client.isPlayerNull()) return false;
         if (handler == null) return false;
         if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
-        if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return false;
+        if (!(client.getInventorySize() == inventorySize)) return false;
 
         for (int i = 0; i < this.inventorySize; i++) {
 
-            if (handler.getSlot(i).getStack() != null && !slotNbt.contains(getSlotUniqueHash(handler.getSlot(i)))) {
+            if (!handler.getSlot(i).isStackNull() && !slotNbt.contains(getSlotUniqueHash(handler.getSlot(i)))) {
                 initSlots(handler);
                 return true;
             }
@@ -168,40 +171,40 @@ public abstract class InventoryListener implements IInventoryListener {
     }
 
     @Override
-    public @NotNull Mono<Boolean> hadItemsChangeAsync(@NotNull MinecraftClient client, ScreenHandler handler) {
+    public @NotNull Mono<Boolean> hadItemsChangeAsync(@NotNull IMinecraftClient client, IScreenHandler handler) {
         return Mono.fromSupplier(() -> hadItemsChange(client, handler))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public @NotNull Mono<Void> initSlotsAsync(ScreenHandler handler) {
+    public @NotNull Mono<Void> initSlotsAsync(IScreenHandler handler) {
         return Mono.fromRunnable(() -> initSlots(handler));
     }
 
-    private void initSlots(@Nullable ScreenHandler handler) {
+    private void initSlots(@Nullable IScreenHandler handler) {
         if (handler == null) return;
 
         this.slotNbt.clear();
 
         for (int i = 0; i < this.inventorySize; i++) {
-            if (handler.getSlot(i).getStack() != null) {
+            if (!handler.getSlot(i).isStackNull()) {
                 slotNbt.add(getSlotUniqueHash(handler.getSlot(i)));
             }
         }
     }
 
-    private int getSlotUniqueHash(@NotNull Slot slot) {
-        return slot.getStack().getNbt() == null ? slot.getStack().getName().hashCode() : slot.getStack().getNbt().hashCode();
+    private int getSlotUniqueHash(@NotNull ISlot slot) {
+        return slot.isStackNbtNull() ? slot.stackNameHash() : slot.stackNbtHash();
     }
 
-    protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable MinecraftClient instance, @NotNull JsonElement data) {
+    protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @Nullable IMinecraftClient instance, @NotNull JsonElement data) {
         ICxnListener listener = PriceCxn.getMod().getCxnListener();
 
-        if (instance == null || instance.player == null) {
+        if (instance == null || instance.isPlayerNull()) {
             return Mono.error(new NullPointerException("Instance or player is null"));
         }
 
-        String uuid = instance.player.getUuidAsString();
+        String uuid = instance.getPlayerUuidAsString();
         JsonObject obj = new JsonObject();
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
@@ -215,7 +218,7 @@ public abstract class InventoryListener implements IInventoryListener {
                 obj.addProperty("listener", uri);
                 obj.addProperty("mode", mode.getTranslationKey());
                 obj.addProperty("uuid", uuid);
-                obj.addProperty("username", instance.player.getName().getString());
+                obj.addProperty("username", instance.getPlayerNameString());
                 obj.add("data", data);
                 return Http.getInstance().POST("/datahandler/" + uri, obj).then();
             } else
@@ -224,7 +227,7 @@ public abstract class InventoryListener implements IInventoryListener {
     }
 
     protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
-        return sendData(datahandlerUri, MinecraftClient.getInstance(), data);
+        return sendData(datahandlerUri, new MinecraftClientImpl(MinecraftClient.getInstance()), data);
     }
 
 }

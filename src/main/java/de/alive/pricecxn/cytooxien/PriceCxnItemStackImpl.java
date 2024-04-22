@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
+import de.alive.pricecxn.IItemStack;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;

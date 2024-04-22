@@ -1,18 +1,19 @@
-package de.alive.preiscxn.listener;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.IMinecraftClient;
+import de.alive.pricecxn.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import static de.alive.pricecxn.listener.StaticListenerMethods.updateItemsAsync;
 public class TomNookListener extends InventoryListener {
     private final List<PriceCxnItemStack> items = new ArrayList<>();
 
-    private final Pair<Integer, Integer> itemRange = new Pair<>(13, 13);
+    private final Tuple2<Integer, Integer> itemRange = Tuples.of(13, 13);
 
     private final DataAccess searchData = TranslationDataAccess.NOOK_BUY_SEARCH;
 
@@ -47,7 +48,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook open");
 
         items.clear();
@@ -56,7 +57,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook close");
 
         JsonArray array = new JsonArray();
@@ -81,11 +82,11 @@ public class TomNookListener extends InventoryListener {
         return Mono.empty();
     }
 
-    private @Nullable String getBuyPriceFromInvName(@NotNull MinecraftClient client) {
-        if (client.currentScreen == null || client.currentScreen.getTitle() == null)
+    private @Nullable String getBuyPriceFromInvName(@NotNull IMinecraftClient client) {
+        if (client.isCurrentScreenNull() || client.isCurrentScreenTitleNull())
             return null;
 
-        String screenTitle = client.currentScreen.getTitle().getString();
+        String screenTitle = client.getCurrentScreenTitle();
 
         for(String s : this.searchData.getData()) {
             if(s.contains("--##--")) {
@@ -105,7 +106,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook updated");
         this.invBuyPrice = getBuyPriceFromInvName(client);
         return updateItemsAsync(this.items, handler, this.itemRange, null);

@@ -1,14 +1,14 @@
-package de.alive.preiscxn.listener;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.IMinecraftClient;
+import de.alive.pricecxn.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -55,7 +55,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
@@ -66,7 +66,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop close");
         if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
@@ -86,12 +86,12 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }
 
-    private @NotNull Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
+    private @NotNull Mono<Void> updateItemStacks(@NotNull IScreenHandler handler){
         return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);

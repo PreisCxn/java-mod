@@ -8,6 +8,6 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
-include 'Listener'
 include 'Api'
+include 'Listener'
 

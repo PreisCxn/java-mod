@@ -1,8 +1,10 @@
 package de.alive.pricecxn.modules;
 
+import de.alive.pricecxn.api.Api;
 import de.alive.pricecxn.networking.cdn.CdnDeliveryType;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,10 +23,15 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class ModuleLoader {
 
+    private final Tuple2<ClassLoader, Package> defaultPackage;
     private final String remotePath;
     private final Path jarPath;
 
-    public ModuleLoader(String remotePath, Path jarPath) {
+    public ModuleLoader(Tuple2<ClassLoader, Package> defaultPackage, String remotePath, Path jarPath) {
+        Api api = new Api();
+        System.out.println(api);
+
+        this.defaultPackage = defaultPackage;
         this.remotePath = remotePath;
         this.jarPath = jarPath;
         try{
@@ -36,6 +43,9 @@ public class ModuleLoader {
     }
 
     public <I> Mono<List<Class<? extends I>>> loadInterfaces(Class<I> interfaceClass) {
+        if(this.defaultPackage != null){
+            getInterfacesFromPackage(interfaceClass);
+        }
         return isOutdated()
                 .flatMap(outdated -> {
                     LOGGER.info("Module ({}) is outdated: {}", remotePath, outdated);
@@ -49,6 +59,40 @@ public class ModuleLoader {
                     }
                 });
 
+    }
+
+    private <I> List<Class<? extends I>> getInterfacesFromPackage(Class<I> interfaceClass) {
+        LOGGER.info("Loading interfaces from package {}", defaultPackage);
+        List<Class<? extends I>> list = new ArrayList<>();
+        try{
+            Enumeration<URL> resources = defaultPackage.getT1().getResources(defaultPackage.getT2().getName().replace(".", "/"));
+
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                Path path = Path.of(url.toURI());
+                Files.walk(path)
+                        .filter(Files::isRegularFile)
+                        .filter(p -> p.toString().endsWith(".class"))
+                        .forEach(p -> {
+                            String className = p.toString()
+                                    .replace(path.toString(), "")
+                                    .replace(".class", "")
+                                    .replace("/", ".")
+                                    .substring(1);
+                            try{
+                                Class<?> clazz = defaultPackage.getT1().loadClass(defaultPackage.getT2().getName() + "." + className);
+                                if (interfaceClass.getName().equals(clazz.getSuperclass().getName())) {
+                                    list.add((Class<? extends I>) clazz);
+                                }
+                            }catch(ClassNotFoundException e){
+                                LOGGER.error("Error while loading module", e);
+                            }
+                        });
+            }
+        }catch(Exception e){
+            LOGGER.error("Error while loading module", e);
+        }
+        return list;
     }
 
     private Mono<Void> download() {
@@ -99,7 +143,7 @@ public class ModuleLoader {
 
     private Mono<String> getUrlHash() {
         return CdnDeliveryType.HASH.generateResponse(remotePath)
-                .doOnNext(hash -> LOGGER.info("Got hash from {}", remotePath));
+                .doOnNext(hash -> LOGGER.info("Got hash from remote: /{}", remotePath));
 
     }
 
@@ -126,7 +170,7 @@ public class ModuleLoader {
 
                             Class<?> clazz = classLoader.loadClass(className);
 
-                            if (interfaceClass.isAssignableFrom(clazz)) {
+                            if (interfaceClass.getName().equals(clazz.getSuperclass().getName())) {
                                 list.add((Class<? extends I>) clazz);
                             }
                         }
