@@ -10,15 +10,6 @@ repositories {
 	mavenCentral()
 }
 
-project(':Api') {
-	afterEvaluate {
-		tasks.named('remapJar') {
-			doNotTrackState("Reason for not tracking state")
-			enabled = false
-		}
-	}
-}
-
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
