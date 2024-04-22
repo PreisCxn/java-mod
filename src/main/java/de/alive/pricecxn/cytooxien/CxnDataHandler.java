@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.IServerChecker;
-import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;

@@ -9,7 +9,6 @@ import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.networking.DataHandler;
 import de.alive.pricecxn.networking.IServerChecker;
-import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;

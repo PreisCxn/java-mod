@@ -1,6 +1,6 @@
+import json
 import os
 import requests
-import json
 
 
 def select_file(directory, pattern):

@@ -3,7 +3,6 @@ package de.alive.preiscxn.listener;
 import com.google.gson.JsonArray;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
-import de.alive.pricecxn.listener.IInventoryListener;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;

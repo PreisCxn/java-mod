@@ -6,7 +6,6 @@ import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.pricecxn.listener.ServerListener;
 import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataAccess;
 import net.fabricmc.api.ClientModInitializer;
