@@ -3,7 +3,6 @@ plugins {
 }
 
 group = 'de.alive'
-version = '2.2.6-1.20.4'
 
 repositories {
     mavenCentral()

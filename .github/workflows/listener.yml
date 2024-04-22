@@ -19,9 +19,9 @@ jobs:
           java-version: 17
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew :Listener:build
 
       - name: Run Python script
-        run: python3 ./CdnSender/mod_sender.py
+        run: python3 ./CdnSender/listener_sender.py
         env:
           PRICECXNAUTH: ${{ secrets.PRICECXNAUTH }}
