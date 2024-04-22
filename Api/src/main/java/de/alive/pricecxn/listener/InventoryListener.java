@@ -2,7 +2,6 @@ package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.LogPrinter;
 import de.alive.pricecxn.interfaces.IMinecraftClient;
 import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.interfaces.ISlot;
@@ -11,7 +10,6 @@ import de.alive.pricecxn.cytooxien.ICxnConnectionManager;
 import de.alive.pricecxn.cytooxien.ICxnListener;
 import de.alive.pricecxn.cytooxien.Modes;
 import de.alive.pricecxn.impl.MinecraftClientImpl;
-import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.Http;
 import net.minecraft.client.MinecraftClient;
@@ -29,7 +27,6 @@ public abstract class InventoryListener implements IInventoryListener {
     static final int REFRESH_INTERVAL = 200;
 
     private final @NotNull DataAccess inventoryTitles;
-    private final Mod mod;
     private final int inventorySize; //Anzahl an Slots
     private final List<Integer> slotNbt = new ArrayList<>();
 
@@ -39,18 +36,13 @@ public abstract class InventoryListener implements IInventoryListener {
 
     private long lastUpdate = 0;
 
-    public Mod getMod() {
-        return mod;
-    }
-
     /**
      * This constructor is used to listen to a specific inventory
      *
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public InventoryListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        this.mod = mod;
+    public InventoryListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         this.inventorySize = inventorySize;
         this.inventoryTitles = inventoryTitles;
         this.active = active;
@@ -60,7 +52,7 @@ public abstract class InventoryListener implements IInventoryListener {
 
     //setup of Listeners
     private void init() {
-        getMod().runOnEndClientTick(client -> {
+        PriceCxn.getMod().runOnEndClientTick(client -> {
             if (active != null && Arrays.stream(active).anyMatch(bool -> !bool.get())) return;
             if (client.isPlayerNull()) return;
             if (client.isCurrentScreenNull()) return;

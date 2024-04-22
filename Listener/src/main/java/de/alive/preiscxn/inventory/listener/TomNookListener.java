@@ -40,12 +40,12 @@ public class TomNookListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public TomNookListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(mod, inventoryTitles, inventorySize <= 0 ? 4 * 9 : inventorySize, active);
+    public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(inventoryTitles, inventorySize <= 0 ? 4 * 9 : inventorySize, active);
     }
 
-    public TomNookListener(Mod mod, @Nullable AtomicBoolean... active) {
-        this(mod, TranslationDataAccess.INV_NOOK_SEARCH, 0, active);
+    public TomNookListener(@Nullable AtomicBoolean... active) {
+        this(TranslationDataAccess.INV_NOOK_SEARCH, 0, active);
     }
 
     @Override

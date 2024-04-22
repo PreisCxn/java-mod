@@ -37,8 +37,8 @@ public class AuctionHouseListener extends InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public AuctionHouseListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
-        super(mod, inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+    public AuctionHouseListener(@NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
+        super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
 
         searchData.put("sellerName", TranslationDataAccess.SELLER_SEARCH);
         searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
@@ -48,8 +48,8 @@ public class AuctionHouseListener extends InventoryListener {
 
     }
 
-    public AuctionHouseListener(Mod mod, AtomicBoolean... active) {
-        this(mod, TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
+    public AuctionHouseListener(AtomicBoolean... active) {
+        this(TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override

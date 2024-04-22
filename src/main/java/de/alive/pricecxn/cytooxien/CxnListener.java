@@ -1,7 +1,5 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.PriceCxn;
-import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.IInventoryListener;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
@@ -45,8 +43,8 @@ public class CxnListener extends ServerListener implements ICxnListener {
                 .flatMap(classes -> {
                     for (Class<? extends IInventoryListener> clazz : classes) {
                         try{
-                            clazz.getConstructor(Mod.class, AtomicBoolean[].class)
-                                    .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
+                            clazz.getConstructor(AtomicBoolean[].class)
+                                    .newInstance((Object) new AtomicBoolean[]{this.isOnServer(), listenerActive});
                         }catch(Exception e){
                             LOGGER.error("Could not instantiate listener", e);
                         }
