@@ -2,6 +2,7 @@ package de.alive.pricecxn.mixin;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.*;
@@ -70,7 +71,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
 
-        IServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
+        IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
 
         if(shouldCancel(list))
             return;
@@ -147,7 +148,7 @@ public abstract class ItemStackMixin {
 
     @Unique
     public boolean shouldCancel(@NotNull List<Text> list){
-        IThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+        IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         Modes mode = themeChecker.getMode();
 

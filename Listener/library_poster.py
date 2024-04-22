@@ -34,7 +34,7 @@ else:
     exit(-1)
 # Make the POST request
 
-url = "https://cdn.preiscxn.de/modules/cxn.listener.jar"
+url = "https://cdn.preiscxn.de/modules/cxn.listener.jar?version=2"
 # Open the file in binary read mode
 with open(file_path, 'rb') as f:
     # Start the upload session and get the file ID

@@ -8,6 +8,7 @@ import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.interfaces.ISlot;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
@@ -41,14 +42,14 @@ public class TradeListener extends InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
+    public TradeListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
 
         this.searchData.put("buyPrice", TranslationDataAccess.TRADE_BUY_SEARCH);
     }
 
-    public TradeListener(@Nullable AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_TRADE_SEARCH, 0, active);
+    public TradeListener(Mod mod, @Nullable AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_TRADE_SEARCH, 0, active);
     }
 
     @Override

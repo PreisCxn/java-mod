@@ -6,6 +6,7 @@ import de.alive.pricecxn.interfaces.IMinecraftClient;
 import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
@@ -39,12 +40,12 @@ public class TomNookListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public TomNookListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 4 * 9 : inventorySize, active);
+    public TomNookListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 4 * 9 : inventorySize, active);
     }
 
-    public TomNookListener(@Nullable AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_NOOK_SEARCH, 0, active);
+    public TomNookListener(Mod mod, @Nullable AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_NOOK_SEARCH, 0, active);
     }
 
     @Override

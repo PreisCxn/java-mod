@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
+import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
@@ -306,11 +307,11 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     @Override
     public @Nullable JsonObject findItemInfo(String dataKey) {
-        if(PriceCxnModClient.CXN_LISTENER.getData(dataKey) == null)
+        if(PriceCxn.getMod().getCxnListener().getData(dataKey) == null)
             return null;
 
-        JsonObject obj = PriceCxnModClient.CXN_LISTENER.getData(dataKey).getDataObject();
-        IThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+        JsonObject obj = PriceCxn.getMod().getCxnListener().getData(dataKey).getDataObject();
+        IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         if (obj == null) return null;
 

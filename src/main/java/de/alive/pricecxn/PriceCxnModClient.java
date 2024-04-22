@@ -1,6 +1,5 @@
 package de.alive.pricecxn;
 
-import de.alive.preiscxn.inventory.listener.AuctionHouseListener;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.ICxnListener;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
@@ -32,22 +31,34 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
     private static final Callable<Tuple2<ClassLoader, Package>> DEFAULT_PACKAGE = () -> {
 
         try {
-            new AuctionHouseListener();
-            return Tuples.of(AuctionHouseListener.class.getClassLoader(), AuctionHouseListener.class.getPackage());
+            Class<?> aClass = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener");
+            return Tuples.of(aClass.getClassLoader(), aClass.getPackage());
         }catch (Exception e){
             LogPrinter.LOGGER.error("Failed to get default package", e);
             return null;
         }
     };
-    public static final CxnListener CXN_LISTENER;
+    private final CxnListener CXN_LISTENER;
 
-    static {
+    public PriceCxnModClient(){
+        try {
+            Field mod = Class.forName("de.alive.pricecxn.PriceCxn").getDeclaredField("mod");
+            mod.setAccessible(true);
+            mod.set(null, this);
+            mod.setAccessible(false);
+        } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        LOGGER.info("PriceCxn client created");
+
         try {
             CXN_LISTENER = new CxnListener(new ModuleLoader(
                     DEFAULT_PACKAGE.call(),
@@ -60,16 +71,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public void onInitializeClient() {
-        //Initialize Mod
-
-        try {
-            Field mod = PriceCxn.class.getDeclaredField("mod");
-            mod.setAccessible(true);
-            mod.set(null, this);
-            mod.setAccessible(false);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        LOGGER.info("PriceCxn client initialized");
 
         KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "cxn_listener.keys.open_in_browser",
@@ -99,16 +101,6 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public ICxnListener getCxnListener() {
         return CXN_LISTENER;
-    }
-
-    @Override
-    public boolean isPlayerNull() {
-        return MinecraftClient.getInstance().player == null;
-    }
-
-    @Override
-    public boolean isCurrentScreenHandlerNull() {
-        return MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().player.currentScreenHandler == null;
     }
 
     @Override

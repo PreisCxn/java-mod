@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface ICxnListener {
     @NotNull
@@ -23,4 +25,7 @@ public interface ICxnListener {
     List<String> getModUsers();
 
     boolean isActive();
+
+    @NotNull AtomicBoolean isOnServer();
+
 }

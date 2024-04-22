@@ -1,6 +1,5 @@
 package de.alive.pricecxn.modules;
 
-import de.alive.pricecxn.api.Api;
 import de.alive.pricecxn.networking.cdn.CdnDeliveryType;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -28,9 +27,6 @@ public class ModuleLoader {
     private final Path jarPath;
 
     public ModuleLoader(Tuple2<ClassLoader, Package> defaultPackage, String remotePath, Path jarPath) {
-        Api api = new Api();
-        System.out.println(api);
-
         this.defaultPackage = defaultPackage;
         this.remotePath = remotePath;
         this.jarPath = jarPath;
@@ -44,7 +40,7 @@ public class ModuleLoader {
 
     public <I> Mono<List<Class<? extends I>>> loadInterfaces(Class<I> interfaceClass) {
         if(this.defaultPackage != null){
-            getInterfacesFromPackage(interfaceClass);
+            return Mono.just(getInterfacesFromPackage(interfaceClass));
         }
         return isOutdated()
                 .flatMap(outdated -> {

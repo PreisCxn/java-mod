@@ -16,8 +16,6 @@ public interface Mod {
     PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData);
 
     ICxnListener getCxnListener();
-    boolean isPlayerNull();
-    boolean isCurrentScreenHandlerNull();
     IPlayer getPlayer();
     void runOnEndClientTick(Consumer<IMinecraftClient> consumer);
 

@@ -1,7 +1,7 @@
 package de.alive.pricecxn.mixin;
 
-import de.alive.pricecxn.PriceCxnModClient;
-import de.alive.pricecxn.cytooxien.CxnListener;
+import de.alive.pricecxn.PriceCxn;
+import de.alive.pricecxn.cytooxien.ICxnListener;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
@@ -30,7 +30,7 @@ public abstract class PlayerListEntryMixin {
         Text originalDisplayName = this.displayName;
         if(originalDisplayName == null) return;
 
-        CxnListener listener = PriceCxnModClient.CXN_LISTENER;
+        ICxnListener listener = PriceCxn.getMod().getCxnListener();
 
         if(!listener.isOnServer().get()) return;
         if(!listener.isActive()) return;

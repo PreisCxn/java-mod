@@ -7,6 +7,7 @@ import de.alive.pricecxn.interfaces.IMinecraftClient;
 import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
@@ -42,16 +43,16 @@ public class ItemShopListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
+    public ItemShopListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
 
         searchData.put("buyPrice", TranslationDataAccess.SHOP_BUY_SEARCH);
         searchData.put("sellPrice", TranslationDataAccess.SHOP_SELL_SEARCH);
 
     }
 
-    public ItemShopListener(@Nullable AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
+    public ItemShopListener(Mod mod, @Nullable AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 
     @Override

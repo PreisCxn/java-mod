@@ -34,7 +34,7 @@ public class PriceCxnMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-
+		LOGGER.info("PriceCxn initialized");
 	}
 
 	public static @NotNull Optional<Integer> getIntVersion(@Nullable String version){
