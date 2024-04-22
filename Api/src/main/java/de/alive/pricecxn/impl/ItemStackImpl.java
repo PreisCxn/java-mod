@@ -1,6 +1,6 @@
 package de.alive.pricecxn.impl;
 
-import de.alive.pricecxn.IItemStack;
+import de.alive.pricecxn.interfaces.IItemStack;
 import net.minecraft.item.ItemStack;
 
 public class ItemStackImpl implements IItemStack {

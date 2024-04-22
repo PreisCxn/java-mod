@@ -5,11 +5,16 @@ import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.ICxnListener;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
+import de.alive.pricecxn.impl.MinecraftClientImpl;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IPlayer;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataAccess;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -25,8 +30,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 
 import static de.alive.pricecxn.PriceCxnMod.MOD_NAME;
 
@@ -115,5 +119,14 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             }
             return "";
         };
+    }
+
+    @Override
+    public void runOnEndClientTick(Consumer<IMinecraftClient> consumer) {
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client != null) {
+                consumer.accept(new MinecraftClientImpl(client));
+            }
+        });
     }
 }

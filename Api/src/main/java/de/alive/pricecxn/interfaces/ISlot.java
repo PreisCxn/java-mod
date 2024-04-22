@@ -1,8 +1,7 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.interfaces;
 
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.networking.DataAccess;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;

@@ -2,9 +2,9 @@ package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.IMinecraftClient;
-import de.alive.pricecxn.IScreenHandler;
-import de.alive.pricecxn.ISlot;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
+import de.alive.pricecxn.interfaces.ISlot;
 import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.cytooxien.ICxnConnectionManager;
 import de.alive.pricecxn.cytooxien.ICxnListener;
@@ -56,27 +56,27 @@ public abstract class InventoryListener implements IInventoryListener {
 
     //setup of Listeners
     private void init() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+        PriceCxn.getMod().runOnEndClientTick(client -> {
             if (active != null && Arrays.stream(active).anyMatch(bool -> !bool.get())) return;
-            if (client.player == null) return;
-            if (client.player.currentScreenHandler == null) return;
+            if (client.isPlayerNull()) return;
+            if (client.isCurrentScreenNull()) return;
 
             Mono<Void> mono = Mono.empty();
-            if (this.isOpen && !(client.currentScreen instanceof HandledScreen)) {
+            if (this.isOpen && !(client.isCurrentScreenInstanceOfHandledScreen())) {
                 this.isOpen = false;
-                mono = mono.then(onInventoryClose(new MinecraftClientImpl(client), new ScreenHandlerImpl(client.player.currentScreenHandler))).then();
+                mono = mono.then(onInventoryClose(client, client.getScreenHandler())).then();
             }
 
-            if (client.currentScreen == null) {
+            if (client.isCurrentScreenNull()) {
                 mono.subscribe();
                 return;
             }
-            if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty()) {
+            if (client.isCurrentScreenTitleNull() || client.getCurrentScreenTitle().isEmpty()) {
                 mono.subscribe();
                 return;
             }
 
-            if (!this.isOpen && client.currentScreen instanceof HandledScreen && isInventoryTitle(new MinecraftClientImpl(client), inventoryTitles.getData())) {
+            if (!this.isOpen && client.isCurrentScreenInstanceOfHandledScreen() && isInventoryTitle(client, inventoryTitles.getData())) {
                 if (!(client.player.currentScreenHandler.getSlot(0).inventory.size() == inventorySize)) return;
                 IScreenHandler handler = new ScreenHandlerImpl(client.player.currentScreenHandler);
                 mono.then(initSlotsAsync(handler)

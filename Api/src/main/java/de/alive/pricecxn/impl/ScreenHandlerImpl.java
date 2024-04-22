@@ -1,7 +1,7 @@
 package de.alive.pricecxn.impl;
 
-import de.alive.pricecxn.IScreenHandler;
-import de.alive.pricecxn.ISlot;
+import de.alive.pricecxn.interfaces.IScreenHandler;
+import de.alive.pricecxn.interfaces.ISlot;
 import net.minecraft.screen.ScreenHandler;
 
 public class ScreenHandlerImpl implements IScreenHandler {

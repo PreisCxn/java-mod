@@ -1,4 +1,4 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.interfaces;
 
 import net.minecraft.item.ItemStack;
 

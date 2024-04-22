@@ -1,7 +1,7 @@
 package de.alive.pricecxn.listener;
 
-import de.alive.pricecxn.IMinecraftClient;
-import de.alive.pricecxn.IScreenHandler;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 

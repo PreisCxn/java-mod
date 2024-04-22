@@ -1,4 +1,4 @@
-package de.alive.pricecxn;
+package de.alive.pricecxn.interfaces;
 
 public interface IMinecraftClient {
     boolean isPlayerNull();
@@ -15,4 +15,8 @@ public interface IMinecraftClient {
     String getPlayerUuidAsString();
 
     String getPlayerNameString();
+
+    boolean isCurrentScreenInstanceOfHandledScreen();
+
+    IScreenHandler getScreenHandler();
 }

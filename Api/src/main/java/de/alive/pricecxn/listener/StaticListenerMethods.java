@@ -1,8 +1,8 @@
 package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonNull;
-import de.alive.pricecxn.IScreenHandler;
-import de.alive.pricecxn.ISlot;
+import de.alive.pricecxn.interfaces.IScreenHandler;
+import de.alive.pricecxn.interfaces.ISlot;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.TimeUtil;

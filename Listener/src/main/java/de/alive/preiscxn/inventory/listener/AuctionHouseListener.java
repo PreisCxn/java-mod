@@ -1,8 +1,8 @@
 package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonArray;
-import de.alive.pricecxn.IMinecraftClient;
-import de.alive.pricecxn.IScreenHandler;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.listener.InventoryListener;

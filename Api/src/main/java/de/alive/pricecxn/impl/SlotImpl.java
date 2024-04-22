@@ -1,6 +1,6 @@
 package de.alive.pricecxn.impl;
 
-import de.alive.pricecxn.ISlot;
+import de.alive.pricecxn.interfaces.ISlot;
 import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.networking.DataAccess;

@@ -1,7 +1,9 @@
 package de.alive.pricecxn.impl;
 
-import de.alive.pricecxn.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 
 public class MinecraftClientImpl implements IMinecraftClient {
     private final MinecraftClient minecraftClient;
@@ -53,5 +55,15 @@ public class MinecraftClientImpl implements IMinecraftClient {
     @Override
     public String getPlayerNameString() {
         return minecraftClient.player == null ? "" : minecraftClient.player.getName().getString();
+    }
+
+    @Override
+    public boolean isCurrentScreenInstanceOfHandledScreen() {
+        return minecraftClient.currentScreen instanceof HandledScreen;
+    }
+
+    @Override
+    public IScreenHandler getScreenHandler() {
+        return minecraftClient.player != null ? new ScreenHandlerImpl(minecraftClient.player.currentScreenHandler) : null;
     }
 }
