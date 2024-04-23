@@ -63,7 +63,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         try {
             CXN_LISTENER = new CxnListener(new ModuleLoader(
                     DEFAULT_PACKAGE.call(),
-                    "modules/cxn.listener.jar",
+                    "Listener.jar",
                     Path.of("./" + MOD_NAME + "_modules/cxn.listener.jar")));
         } catch (Exception e) {
             throw new RuntimeException(e);
