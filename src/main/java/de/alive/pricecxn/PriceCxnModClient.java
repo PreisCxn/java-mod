@@ -39,9 +39,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
         try {
             Class<?> aClass = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener");
+            LogPrinter.LOGGER.info("Found listener package: {}", aClass.getPackage());
             return aClass.getPackage();
         }catch (Exception e){
-            LogPrinter.LOGGER.info("Failed to get default package, assume this is no dev environment");
+            LogPrinter.LOGGER.info("Failed to get default package, assuming this is no dev environment");
             return null;
         }
     };

@@ -3,7 +3,6 @@ package de.alive.pricecxn.modules;
 import de.alive.pricecxn.networking.cdn.CdnDeliveryType;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 
 import java.io.IOException;
 import java.net.URL;
@@ -111,7 +110,10 @@ public class ModuleLoader {
             return Mono.just(true);
 
         return Mono
-                .zip(calculateFileHash(jarPath), getUrlHash())
+                .zip(calculateFileHash(jarPath)
+                                .doOnNext(s -> LOGGER.info("Calculated hash for {}: {}...", jarPath, s.substring(0, 10))),
+                        getUrlHash()
+                                .doOnNext(s -> LOGGER.info("Got hash from remote: {}...", s.substring(0, 10))))
                 .map(tuple -> !tuple.getT1().equals(tuple.getT2()))
                 .switchIfEmpty(Mono.just(true));
     }
@@ -139,8 +141,7 @@ public class ModuleLoader {
     }
 
     private Mono<String> getUrlHash() {
-        return CdnDeliveryType.HASH.generateResponse(remotePath)
-                .doOnNext(hash -> LOGGER.info("Got hash from remote: /{}", remotePath));
+        return CdnDeliveryType.HASH.generateResponse(remotePath);
 
     }
 
