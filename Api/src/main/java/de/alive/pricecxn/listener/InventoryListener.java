@@ -2,7 +2,6 @@ package de.alive.pricecxn.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.LogPrinter;
 import de.alive.pricecxn.interfaces.IMinecraftClient;
 import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.interfaces.ISlot;
