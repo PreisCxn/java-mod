@@ -44,6 +44,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
                 .loadInterfaces(InventoryListener.class)
                 .flatMap(classes -> {
                     for (Class<? extends IInventoryListener> clazz : classes) {
+                        LOGGER.info("Found listener: {}", clazz.getName());
                         try{
                             clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                                     .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});

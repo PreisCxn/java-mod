@@ -35,13 +35,13 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
-    private static final Callable<Tuple2<ClassLoader, Package>> DEFAULT_PACKAGE = () -> {
+    private static final Callable<Package> DEFAULT_PACKAGE = () -> {
 
         try {
             Class<?> aClass = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener");
-            return Tuples.of(aClass.getClassLoader(), aClass.getPackage());
+            return aClass.getPackage();
         }catch (Exception e){
-            LogPrinter.LOGGER.error("Failed to get default package", e);
+            LogPrinter.LOGGER.info("Failed to get default package, assume this is no dev environment");
             return null;
         }
     };

@@ -22,11 +22,11 @@ import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class ModuleLoader {
 
-    private final Tuple2<ClassLoader, Package> defaultPackage;
+    private final Package defaultPackage;
     private final String remotePath;
     private final Path jarPath;
 
-    public ModuleLoader(Tuple2<ClassLoader, Package> defaultPackage, String remotePath, Path jarPath) {
+    public ModuleLoader(Package defaultPackage, String remotePath, Path jarPath) {
         this.defaultPackage = defaultPackage;
         this.remotePath = remotePath;
         this.jarPath = jarPath;
@@ -61,7 +61,8 @@ public class ModuleLoader {
         LOGGER.info("Loading interfaces from package {}", defaultPackage);
         List<Class<? extends I>> list = new ArrayList<>();
         try{
-            Enumeration<URL> resources = defaultPackage.getT1().getResources(defaultPackage.getT2().getName().replace(".", "/"));
+
+            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(defaultPackage.getName().replace(".", "/"));
 
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
@@ -76,7 +77,7 @@ public class ModuleLoader {
                                     .replace("/", ".")
                                     .substring(1);
                             try{
-                                Class<?> clazz = defaultPackage.getT1().loadClass(defaultPackage.getT2().getName() + "." + className);
+                                Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(defaultPackage.getName() + "." + className);
                                 if (interfaceClass.isAssignableFrom(clazz)) {
                                     list.add(clazz.asSubclass(interfaceClass));
                                 }
