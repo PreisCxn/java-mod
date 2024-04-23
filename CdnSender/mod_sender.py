@@ -21,9 +21,9 @@ def select_file(directory, pattern):
     return selected_file if selected_file else None
 
 
-selected_file = select_file('../build/libs', 'pricecxn')
+selected_file = select_file('./build/libs', 'pricecxn')
 if selected_file:
-    file_path = os.path.join('../build/libs', selected_file)
+    file_path = os.path.join('./build/libs', selected_file)
 else:
     exit(-1)
 # Make the POST request
