@@ -13,6 +13,15 @@ def get_version():
     return version if version else "1.0.0"
 
 
+def get_version_from_build_gradle(module_name):
+    with open(f"../{module_name}/build.gradle") as f:
+        for line in f:
+            if line.startswith("version"):
+                version = line.split("=")[1].replace("'", "").replace('"', '').strip()
+                break
+    return version if version else "1.0.0"
+
+
 def upload_file(file_path, url):
     headers = {
         "Content-Type": "application/octet-stream",
