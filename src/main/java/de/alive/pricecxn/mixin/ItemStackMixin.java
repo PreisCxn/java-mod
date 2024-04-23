@@ -4,7 +4,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.PriceCxnMod;
-import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
@@ -13,7 +12,7 @@ import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.item.TooltipType;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -46,9 +45,6 @@ public abstract class ItemStackMixin {
     public abstract boolean isEmpty();
 
     @Shadow
-    public abstract void removeCustomName();
-
-    @Shadow
     public abstract Item getItem();
 
     @Shadow
@@ -69,8 +65,8 @@ public abstract class ItemStackMixin {
     private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
-
+    private void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+        List<Text> list = cir.getReturnValue();
         IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
 
         if(shouldCancel(list))

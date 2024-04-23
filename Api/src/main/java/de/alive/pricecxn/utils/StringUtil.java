@@ -4,7 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.item.TooltipType;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -85,8 +86,10 @@ public class StringUtil {
         if(stack == null) return null;
         List<String> result = new ArrayList<>();
 
-        List<Text> tooltip = stack.getTooltip(MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.Default.ADVANCED : TooltipContext.Default.BASIC);
+        List<Text> tooltip = stack.getTooltip(
+                Item.TooltipContext.DEFAULT,
+                MinecraftClient.getInstance().player,
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
 
         for (Text line : tooltip){
             result.add(line.getString());
