@@ -5,7 +5,7 @@ import requests
 
 
 def get_version():
-    with open("../gradle.properties") as f:
+    with open("./gradle.properties") as f:
         for line in f:
             if line.startswith("mod_version"):
                 version = line.split("=")[1].strip()
@@ -14,7 +14,7 @@ def get_version():
 
 
 def get_version_from_build_gradle(module_name):
-    with open(f"../{module_name}/build.gradle") as f:
+    with open(f"./{module_name}/build.gradle") as f:
         for line in f:
             if line.startswith("version"):
                 version = line.split("=")[1].replace("'", "").replace('"', '').strip()
