@@ -2,13 +2,14 @@ package de.alive.pricecxn.mixin;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.ServerChecker;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.utils.StringUtil;
 import de.alive.pricecxn.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
@@ -65,12 +66,12 @@ public abstract class ItemStackMixin {
     @Unique
     private int searchingCount = 20;
     @Unique
-    private @Nullable PriceCxnItemStack cxnItemStack = null;
+    private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> callbackInfoReturnable, @NotNull List<Text> list) {
 
-        ServerChecker serverChecker = PriceCxnModClient.CXN_LISTENER.getServerChecker();
+        IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
 
         if(shouldCancel(list))
             return;
@@ -147,7 +148,7 @@ public abstract class ItemStackMixin {
 
     @Unique
     public boolean shouldCancel(@NotNull List<Text> list){
-        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+        IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         Modes mode = themeChecker.getMode();
 
@@ -188,16 +189,16 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public int getPbvAmountFactor(@NotNull ServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
+    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
         if (pcxnPrice == null
                 || !pcxnPrice.has("pbv_search_key")
                 || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
                 || this.cxnItemStack == null
-                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStack.COMMENT_KEY))
+                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
             return 1;
 
         String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
-        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
+        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
 
         if (!nbtData.has("PublicBukkitValues")) return 1;
         JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
@@ -264,7 +265,7 @@ public abstract class ItemStackMixin {
         if (this.lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
         ItemStack itemStack = (ItemStack) (Object) this;
-        this.cxnItemStack = new PriceCxnItemStack(itemStack, null, true, false);
+        this.cxnItemStack = new PriceCxnItemStackImpl(itemStack, null, true, false);
 
         this.pcxnPrice = cxnItemStack.findItemInfo("pricecxn.data.item_data");
         this.nookPrice = cxnItemStack.findItemInfo("pricecxn.data.nook_data");

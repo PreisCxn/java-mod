@@ -2,6 +2,7 @@ package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.networking.sockets.IWebSocketConnector;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
 import de.alive.pricecxn.utils.TimeUtil;
@@ -19,13 +20,13 @@ public class StorageItemStack {
     private boolean setup = false;
     private final PriceText priceText = PriceText.create(true);
     private Type type;
-    private WebSocketConnector connector;
+    private IWebSocketConnector connector;
 
     public StorageItemStack() {
 
     }
 
-    public void setup(@NotNull JsonObject object, WebSocketConnector connector){
+    public void setup(@NotNull JsonObject object, IWebSocketConnector connector){
         this.type = isOf(object, Type.VENDITORPL) ? Type.VENDITORPL : Type.ITEM_STORAGE;
         this.connector = connector;
         this.setup = true;
@@ -112,7 +113,7 @@ public class StorageItemStack {
             return priceMap.containsKey(amount);
         }
 
-        public @NotNull Mono<Void> requestAmount(int amount, @NotNull WebSocketConnector connector) {
+        public @NotNull Mono<Void> requestAmount(int amount, @NotNull IWebSocketConnector connector) {
             return new WebSocketCompletion(connector, this.query, String.valueOf(amount)).getMono().mapNotNull(s -> {
                 if (s == null) {
                     return null;

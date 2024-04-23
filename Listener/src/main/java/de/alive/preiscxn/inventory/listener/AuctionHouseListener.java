@@ -1,16 +1,17 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonArray;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,13 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
-import static de.alive.pricecxn.PriceCxnMod.printTester;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
+import static de.alive.pricecxn.listener.StaticListenerMethods.updateItemsAsync;
 
 public class AuctionHouseListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
-    private final Pair<Integer, Integer> itemRange = new Pair<>(10, 35);
+    private final Tuple2<Integer, Integer> itemRange = Tuples.of(10, 35);
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
@@ -35,8 +37,8 @@ public class AuctionHouseListener extends InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public AuctionHouseListener(@NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+    public AuctionHouseListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
 
         searchData.put("sellerName", TranslationDataAccess.SELLER_SEARCH);
         searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
@@ -46,12 +48,12 @@ public class AuctionHouseListener extends InventoryListener {
 
     }
 
-    public AuctionHouseListener(AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
+    public AuctionHouseListener(Mod mod, AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("AuctionHouse open");
 
         items.clear();
@@ -59,7 +61,7 @@ public class AuctionHouseListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("AuctionHouse close");
 
         JsonArray array = new JsonArray();
@@ -76,7 +78,7 @@ public class AuctionHouseListener extends InventoryListener {
         if(!array.isEmpty())
             return sendData("/auctionhouse", array)
                     .doOnSuccess(aVoid -> {
-                        if(client.player == null)
+                        if(client.isPlayerNull())
                             return;
                         printTester( "AuctionHouse data sent: " + array.size() + " items");
                     });
@@ -84,7 +86,7 @@ public class AuctionHouseListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("AuctionHouse updated");
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }

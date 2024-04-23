@@ -6,17 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class DataHandler {
 
     public static final int TRANSLATION_REFRESH_INTERVAL = 1000 * 60 * 60; // 1 Stunde
     public static final int MODUSER_REFRESH_INTERVAL = 1000 * 60 * 60 * 6; // 6 Stunden
     public static final int ITEM_REFRESH_INTERVAL = 1000 * 60 * 60 * 3; // 6 Stunden
-    private final @NotNull ServerChecker serverChecker;
+    private final @NotNull IServerChecker serverChecker;
     private final @Nullable List<String> columnNames;
     private final @Nullable String keyColumnName;
     private long lastUpdate = 0;
@@ -35,7 +33,7 @@ public class DataHandler {
      * @param keyColumnName   The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess @Nullable ... dataAccess) {
+    public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess @Nullable ... dataAccess) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
@@ -47,11 +45,11 @@ public class DataHandler {
         }
     }
 
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval) {
+    public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval) {
         this(serverChecker, uri, columnNames, keyColumnName, refreshInterval, (DataAccess) null);
     }
 
-    public DataHandler(@NotNull ServerChecker serverChecker, @NotNull String uri, int refreshInterval) {
+    public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, int refreshInterval) {
         this(serverChecker, uri, null, null, refreshInterval, (DataAccess) null);
     }
 

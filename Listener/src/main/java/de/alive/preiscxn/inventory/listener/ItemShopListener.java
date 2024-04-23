@@ -1,14 +1,15 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.ScreenHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -19,8 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.printDebug;
-import static de.alive.pricecxn.PriceCxnMod.printTester;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
+import static de.alive.pricecxn.listener.StaticListenerMethods.updateItem;
 
 public class ItemShopListener extends InventoryListener {
 
@@ -41,20 +43,20 @@ public class ItemShopListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      * @param active
      */
-    public ItemShopListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
+    public ItemShopListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
 
         searchData.put("buyPrice", TranslationDataAccess.SHOP_BUY_SEARCH);
         searchData.put("sellPrice", TranslationDataAccess.SHOP_SELL_SEARCH);
 
     }
 
-    public ItemShopListener(@Nullable AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
+    public ItemShopListener(Mod mod, @Nullable AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
@@ -65,7 +67,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop close");
         if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
@@ -85,12 +87,12 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }
 
-    private @NotNull Mono<Void> updateItemStacks(@NotNull ScreenHandler handler){
+    private @NotNull Mono<Void> updateItemStacks(@NotNull IScreenHandler handler){
         return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);

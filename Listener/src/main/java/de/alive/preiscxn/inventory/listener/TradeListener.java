@@ -1,28 +1,29 @@
-package de.alive.pricecxn.cytooxien.dataobservers;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.alive.pricecxn.interfaces.IMinecraftClient;
+import de.alive.pricecxn.interfaces.IScreenHandler;
+import de.alive.pricecxn.interfaces.ISlot;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.TranslationDataAccess;
+import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.*;
+import static de.alive.pricecxn.LogPrinter.printDebug;
+import static de.alive.pricecxn.LogPrinter.printTester;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -41,18 +42,18 @@ public class TradeListener extends InventoryListener {
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public TradeListener(@NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
-        //ICH LIEBE MEINE FREUNDIN SO SEHR <3 (AlinaTmr aka Alina aka Schatz aka Prinzessin)
+    public TradeListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
+
         this.searchData.put("buyPrice", TranslationDataAccess.TRADE_BUY_SEARCH);
     }
 
-    public TradeListener(@Nullable AtomicBoolean... active) {
-        this(TranslationDataAccess.INV_TRADE_SEARCH, 0, active);
+    public TradeListener(Mod mod, @Nullable AtomicBoolean... active) {
+        this(mod, TranslationDataAccess.INV_TRADE_SEARCH, 0, active);
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade open");
 
         return Flux.concat(
@@ -67,7 +68,7 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade close");
 
         JsonObject array = new JsonObject();
@@ -91,7 +92,7 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull MinecraftClient client, @NotNull ScreenHandler handler) {
+    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade updated");
         return Flux.concat(
                 Flux.fromIterable(selfInventory)
@@ -135,7 +136,7 @@ public class TradeListener extends InventoryListener {
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
-        LOGGER.debug(result.toString());
+        //todo LOGGER.debug(result.toString());
 
         return Optional.of(result);
     }
@@ -164,7 +165,7 @@ public class TradeListener extends InventoryListener {
         return element.isEmpty();
     }
 
-    private record TradeStackRow(Pair<Integer, Integer> slotRange, List<PriceCxnItemStack> slots) {
+    private record TradeStackRow(Tuple2<Integer, Integer> slotRange, List<PriceCxnItemStack> slots) {
 
         static @NotNull List<TradeStackRow> from(int startValue, int height, int width, int spaceBetween) {
             List<TradeStackRow> result = new ArrayList<>(height * width);
@@ -178,7 +179,7 @@ public class TradeListener extends InventoryListener {
         }
 
         static @NotNull TradeStackRow from(int start, int width) {
-            return new TradeStackRow(new Pair<>(start, start + width - 1), new ArrayList<>());
+            return new TradeStackRow(Tuples.of(start, start + width - 1), new ArrayList<>());
         }
 
         static @NotNull JsonArray getData(@NotNull List<TradeStackRow> rows) {
@@ -197,21 +198,21 @@ public class TradeListener extends InventoryListener {
             return result;
         }
 
-        void update(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
+        void update(@NotNull IScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
             synchronized(slots){
                 slots.clear();
-                for (int i = slotRange.getLeft(); i <= slotRange.getRight(); i++) {
-                    Slot slot = handler.getSlot(i);
-                    if (slot.getStack().isEmpty()) continue;
+                for (int i = slotRange.getT1(); i <= slotRange.getT2(); i++) {
+                    ISlot slot = handler.getSlot(i);
+                    if (slot.isStackEmpty()) continue;
 
-                    PriceCxnItemStack newItem = new PriceCxnItemStack(slot.getStack(), searchData, bool);
+                    PriceCxnItemStack newItem = slot.createItemStack(searchData, bool);
 
                     slots.add(newItem);
                 }
             }
         }
 
-        @NotNull Mono<Void> updateAsync(@NotNull ScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
+        @NotNull Mono<Void> updateAsync(@NotNull IScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
             return Mono.fromRunnable(() -> update(handler, searchData, bool)).then();
         }
 

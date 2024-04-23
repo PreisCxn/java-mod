@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
+import de.alive.pricecxn.PriceCxn;
 import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.utils.StringUtil;
@@ -19,17 +20,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
-public class PriceCxnItemStack {
+public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
-
-    public static final String ITEM_NAME_KEY = "itemName";
-    public static final String AMOUNT_KEY = "amount";
-    public static final String COMMENT_KEY = "comment";
-    public static final String DISPLAY_NAME_KEY = "displayName";
-    public static final String MC_CLIENT_LANG_KEY = "mcClientLang";
 
     private final @NotNull ItemStack item;
 
@@ -45,7 +40,7 @@ public class PriceCxnItemStack {
 
     private List<String> toolTips;
 
-    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
         this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
@@ -103,11 +98,11 @@ public class PriceCxnItemStack {
 
     }
 
-    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
         this(item, searchData, addComment, true);
     }
 
-    public PriceCxnItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
+    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
         this(item, searchData, true);
     }
 
@@ -197,13 +192,14 @@ public class PriceCxnItemStack {
 
     @Override
     public boolean equals(Object o) {
-        return (o == this) || (o instanceof PriceCxnItemStack
-                && ((PriceCxnItemStack) o).getEqualData().equals(this.getEqualData()));
+        return (o == this) || (o instanceof PriceCxnItemStackImpl
+                && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData()));
     }
 
+    @Override
     public boolean deepEquals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof PriceCxnItemStack item)) return false;
+        if (!(o instanceof PriceCxnItemStackImpl item)) return false;
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
@@ -224,10 +220,12 @@ public class PriceCxnItemStack {
         return this.data.toString();
     }
 
+    @Override
     public @NotNull JsonObject getData() {
         return data;
     }
 
+    @Override
     public @NotNull JsonObject getDataWithoutDisplay() {
         JsonObject data = this.data.deepCopy();
         data.get(COMMENT_KEY).getAsJsonObject().remove("display");
@@ -250,6 +248,7 @@ public class PriceCxnItemStack {
 
     }
 
+    @Override
     public boolean isSameItem(@NotNull PriceCxnItemStack item) {
         if (!Objects.equals(this.getItemName(), item.getItemName()))
             return false; //wenn itemName nicht gleich => false
@@ -278,10 +277,12 @@ public class PriceCxnItemStack {
         return thisComment.get(bukkitValue).equals(itemComment.get(bukkitValue)); //wenn beide PublicBukkitValues gleich => true
     }
 
+    @Override
     public String getItemName() {
         return itemName;
     }
 
+    @Override
     public void updateData(@NotNull PriceCxnItemStack item) {
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
             if (entry.getValue().hasEqualData()) {
@@ -294,20 +295,23 @@ public class PriceCxnItemStack {
         }
     }
 
+    @Override
     public int getAmount() {
         return amount;
     }
 
+    @Override
     public @NotNull Map<String, DataAccess> getSearchData() {
         return searchData;
     }
 
+    @Override
     public @Nullable JsonObject findItemInfo(String dataKey) {
-        if(PriceCxnModClient.CXN_LISTENER.getData(dataKey) == null)
+        if(PriceCxn.getMod().getCxnListener().getData(dataKey) == null)
             return null;
 
-        JsonObject obj = PriceCxnModClient.CXN_LISTENER.getData(dataKey).getDataObject();
-        ThemeServerChecker themeChecker = PriceCxnModClient.CXN_LISTENER.getThemeChecker();
+        JsonObject obj = PriceCxn.getMod().getCxnListener().getData(dataKey).getDataObject();
+        IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         if (obj == null) return null;
 
@@ -321,10 +325,10 @@ public class PriceCxnItemStack {
         List<Integer> foundItems = new ArrayList<>();
 
         //item ist special_item?
-        if (data.has(PriceCxnItemStack.COMMENT_KEY) &&
-            data.get(PriceCxnItemStack.COMMENT_KEY).isJsonObject() &&
-            data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
-            JsonObject nbtData = data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject();
+        if (data.has(PriceCxnItemStackImpl.COMMENT_KEY) &&
+            data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject() &&
+            data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
+            JsonObject nbtData = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
             String pbvString = nbtData.get("PublicBukkitValues").getAsJsonObject().toString();
 
             outer:
@@ -361,7 +365,7 @@ public class PriceCxnItemStack {
 
                 if (searches.length > 1) {
                     String[] nbtSearches = searches[1].split("\\.");
-                    String commentSearch = data.get(PriceCxnItemStack.COMMENT_KEY).getAsJsonObject().toString();
+                    String commentSearch = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().toString();
 
                     for (String s : nbtSearches) {
                         if (!commentSearch.contains(s)) continue outer;

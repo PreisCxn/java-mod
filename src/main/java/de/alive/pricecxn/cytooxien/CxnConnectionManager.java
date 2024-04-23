@@ -1,8 +1,8 @@
 package de.alive.pricecxn.cytooxien;
 
 import de.alive.pricecxn.PriceCxnMod;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.NetworkingState;
-import de.alive.pricecxn.networking.ServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -15,15 +15,16 @@ import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
+
 /**
  * This class manages the connection to the server and handles the state of the connection.
  */
-public class CxnConnectionManager {
+public class CxnConnectionManager implements ICxnConnectionManager {
 
-    private final CxnDataHandler dataHandler;
-    private final ServerChecker serverChecker;
-    private final ThemeServerChecker themeChecker;
+    private final ICxnDataHandler dataHandler;
+    private final IServerChecker serverChecker;
+    private final IThemeServerChecker themeChecker;
     private final AtomicBoolean active = new AtomicBoolean(false);
     private @Nullable Boolean isRightVersion = null;
     private @NotNull NetworkingState state = NetworkingState.OFFLINE;
@@ -35,7 +36,7 @@ public class CxnConnectionManager {
      * @param themeChecker Checks the theme status.
      * @param listenerActive Indicates if the listener is active.
      */
-    public CxnConnectionManager(CxnDataHandler dataHandler, ServerChecker serverChecker, ThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
+    public CxnConnectionManager(ICxnDataHandler dataHandler, IServerChecker serverChecker, IThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
         this.dataHandler = dataHandler;
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
@@ -46,6 +47,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
+    @Override
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(Refresh refresh) {
         return Mono.fromCallable(() -> checkConnection(refresh))
                 .subscribeOn(Schedulers.boundedElastic())
@@ -56,6 +58,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
+    @Override
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(Refresh refresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
@@ -155,6 +158,7 @@ public class CxnConnectionManager {
      * Checks if the server version is the minimum required version.
      * @return A Mono object containing a Boolean indicating if the server version is the minimum required version.
      */
+    @Override
     public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
@@ -167,6 +171,7 @@ public class CxnConnectionManager {
      * Checks if the user is a special user.
      * @return A Mono object containing a Boolean indicating if the user is a special user.
      */
+    @Override
     public @NotNull Mono<Boolean> isSpecialUser() {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
@@ -180,6 +185,7 @@ public class CxnConnectionManager {
      * @param refresh Indicates if the theme should be refreshed.
      * @return A Mono object.
      */
+    @Override
     public @NotNull Mono<Void> activate(Refresh refresh) {
         if (this.active.get()) return Mono.empty(); //return wenn schon aktiviert
 
@@ -187,7 +193,7 @@ public class CxnConnectionManager {
                 .then(dataHandler.refreshData(true))
                 .then(Mono.just(themeChecker))
                 .filter(themeServerChecker -> refresh == Refresh.THEME)
-                .flatMap(ThemeServerChecker::refreshAsync)
+                .flatMap(IThemeServerChecker::refreshAsync)
                 .doOnSuccess(ignored -> {
                     activateListeners();
                     this.active.set(true);
@@ -203,6 +209,7 @@ public class CxnConnectionManager {
     /**
      * Deactivates the connection manager.
      */
+    @Override
     public void deactivate() {
         if (!this.active.get()) return; //return wenn schon deaktiviert
 
@@ -222,6 +229,7 @@ public class CxnConnectionManager {
      * Checks if the connection manager is active.
      * @return A Boolean indicating if the connection manager is active.
      */
+    @Override
     public boolean isActive() {
         return this.active.get();
     }
@@ -269,10 +277,5 @@ public class CxnConnectionManager {
      */
     public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message) {
         sendConnectionInformation(shouldSend, message, false);
-    }
-
-    public enum Refresh {
-        NONE,
-        THEME
     }
 }

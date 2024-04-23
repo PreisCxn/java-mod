@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.alive.pricecxn.networking.DataAccess;
 import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.ServerChecker;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -17,19 +17,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
-public class CxnDataHandler {
+public class CxnDataHandler implements ICxnDataHandler {
 
-    private final ServerChecker serverChecker;
-    private final ThemeServerChecker themeChecker;
+    private final IServerChecker serverChecker;
+    private final IThemeServerChecker themeChecker;
     private final Map<String, DataHandler> data = new HashMap<>();
 
-    public CxnDataHandler(ServerChecker serverChecker, ThemeServerChecker themeChecker) {
+    public CxnDataHandler(IServerChecker serverChecker, IThemeServerChecker themeChecker) {
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
     }
 
+    @Override
     public @NotNull Mono<Void> initData() {
         LOGGER.debug("initData");
 
@@ -46,6 +47,7 @@ public class CxnDataHandler {
                     .doOnSuccess(this::createTranslationHandler).then();
     }
 
+    @Override
     public @NotNull Mono<Void> refreshItemData(String dataKey, boolean isNook) {
         if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
 
@@ -71,17 +73,49 @@ public class CxnDataHandler {
         return data.get(dataKey).refresh(true);
     }
 
+    @Override
     public @NotNull Mono<Void> refreshData(boolean forced) {
         return Flux.fromIterable(data.entrySet())
                 .flatMap(entry -> entry.getValue().refresh(forced))
                 .then();
     }
 
+    @Override
     public DataHandler get(String key) {
         return data.get(key);
     }
 
-    private void createTranslationHandler(@NotNull List<String> langList) {
+    @Override
+    public DataHandler getData(String key) {
+        return data.get(key);
+    }
+
+    @Override
+    public @Nullable List<String> getModUsers() {
+        List<String> stringList = new ArrayList<>();
+
+        JsonArray array;
+
+        try {
+            array = data.get("pricecxn.data.mod_users").getDataArray();
+
+            if (array == null) return null;
+
+            array.forEach(element -> {
+                if (!element.isJsonNull())
+                    stringList.add(element.getAsString());
+            });
+
+            if (stringList.isEmpty()) return null;
+
+            return stringList;
+        } catch (Exception e) {
+            LOGGER.error("Error while getting mod users", e);
+            return null;
+        }
+    }
+
+    public void createTranslationHandler(@NotNull List<String> langList) {
         DataAccess[] translationAccess = {
                 TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
                 TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
@@ -107,38 +141,10 @@ public class CxnDataHandler {
 
 
         data.put("cxnprice.translation",
-                            new DataHandler(serverChecker,
-                                            "/settings/translations",
-                                            langList,
-                                            "translation_key",
-                                            DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
-    }
-
-    public DataHandler getData(String key) {
-        return data.get(key);
-    }
-
-    public @Nullable List<String> getModUsers() {
-        List<String> stringList = new ArrayList<>();
-
-        JsonArray array;
-
-        try {
-            array = data.get("pricecxn.data.mod_users").getDataArray();
-
-            if (array == null) return null;
-
-            array.forEach(element -> {
-                if (!element.isJsonNull())
-                    stringList.add(element.getAsString());
-            });
-
-            if (stringList.isEmpty()) return null;
-
-            return stringList;
-        } catch (Exception e) {
-            LOGGER.error("Error while getting mod users", e);
-            return null;
-        }
+                new DataHandler(serverChecker,
+                        "/settings/translations",
+                        langList,
+                        "translation_key",
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
     }
 }

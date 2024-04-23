@@ -17,15 +17,15 @@ import static org.mockito.Mockito.when;
 
 public class HttpTest {
     private static class HttpMocker extends Http {
-        private final HttpResponse<String> mockResponse;
+        private final HttpResponse<byte[]> mockResponse;
 
-        public HttpMocker(HttpResponse<String> mockResponse) {
+        public HttpMocker(HttpResponse<byte[]> mockResponse) {
             super();
             this.mockResponse = mockResponse;
         }
 
         @Override
-        protected Mono<HttpResponse<String>> sendAsync(HttpRequest request) {
+        protected Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
             return Mono.just(mockResponse);
         }
     }
@@ -34,9 +34,9 @@ public class HttpTest {
     public void getShouldReturnExpectedResultWhenStatusCodeIsSuccessful() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("Success");
+        when(mockResponse.body()).thenReturn("Success".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -52,9 +52,9 @@ public class HttpTest {
     public void getShouldReturnExpectedResultWhenStatusCodeIsSuccessfulWithHeaders() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("Success");
+        when(mockResponse.body()).thenReturn("Success".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -70,9 +70,9 @@ public class HttpTest {
     public void getShouldReturnErrorWhenStatusCodeIsNotSuccessful() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
-        when(mockResponse.body()).thenReturn("Error");
+        when(mockResponse.body()).thenReturn("Error".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -88,9 +88,9 @@ public class HttpTest {
     public void postShouldReturnExpectedResultWhenStatusCodeIsSuccessfulAndBodyIsNotEmpty() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("Success");
+        when(mockResponse.body()).thenReturn("Success".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -106,9 +106,9 @@ public class HttpTest {
     public void postShouldReturnExpectedResultWhenStatusCodeIsSuccessfulAndBodyIsEmpty() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("");
+        when(mockResponse.body()).thenReturn("".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -124,9 +124,9 @@ public class HttpTest {
     public void postShouldReturnErrorWhenStatusCodeIsNotSuccessfulAndBodyIsNotEmpty() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
-        when(mockResponse.body()).thenReturn("Error");
+        when(mockResponse.body()).thenReturn("Error".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -142,9 +142,9 @@ public class HttpTest {
     public void postShouldReturnErrorWhenStatusCodeIsNotSuccessfulAndBodyIsEmpty() {
         Function<String, String> stringFunction = Function.identity();
 
-        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(400);
-        when(mockResponse.body()).thenReturn("");
+        when(mockResponse.body()).thenReturn("".getBytes());
 
         Http http = new HttpMocker(mockResponse);
 
@@ -174,16 +174,16 @@ public class HttpTest {
     public void testSendAsync() {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://example.com/")).GET().build();
         Http http = Http.getInstance();
-        Mono<HttpResponse<String>> result = http.sendAsync(request);
+        Mono<HttpResponse<byte[]>> result = http.sendAsync(request);
         StepVerifier.create(result).expectNextCount(1).verifyComplete();
     }
 
     @Test
     public void testGetWithoutBaseUrl() {
         // Mocking HttpResponse
-        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = Mockito.mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("Success");
+        when(mockResponse.body()).thenReturn("Success".getBytes());
 
         // Mocking Http
         Http http = Mockito.spy(Http.getInstance());
@@ -197,9 +197,9 @@ public class HttpTest {
     @Test
     public void testPostWithoutCallbacks() {
         // Mocking HttpResponse
-        HttpResponse<String> mockResponse = Mockito.mock(HttpResponse.class);
+        HttpResponse<byte[]> mockResponse = Mockito.mock(HttpResponse.class);
         when(mockResponse.statusCode()).thenReturn(200);
-        when(mockResponse.body()).thenReturn("Success");
+        when(mockResponse.body()).thenReturn("Success".getBytes());
 
         // Mocking Http
         Http http = Mockito.spy(Http.getInstance());

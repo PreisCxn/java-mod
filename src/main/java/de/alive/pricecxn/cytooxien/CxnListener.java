@@ -1,31 +1,35 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.cytooxien.dataobservers.AuctionHouseListener;
-import de.alive.pricecxn.cytooxien.dataobservers.ItemShopListener;
-import de.alive.pricecxn.cytooxien.dataobservers.TomNookListener;
-import de.alive.pricecxn.cytooxien.dataobservers.TradeListener;
+import de.alive.pricecxn.PriceCxn;
+import de.alive.pricecxn.PriceCxnModClient;
+import de.alive.pricecxn.interfaces.Mod;
+import de.alive.pricecxn.listener.IInventoryListener;
+import de.alive.pricecxn.listener.InventoryListener;
 import de.alive.pricecxn.listener.ServerListener;
+import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataHandler;
+import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.ServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
-public class CxnListener extends ServerListener {
+public class CxnListener extends ServerListener implements ICxnListener {
 
     private static final List<String> DEFAULT_IPS = List.of("cytooxien");
     private static final List<String> DEFAULT_IGNORED_IPS = List.of("beta");
-    private final @NotNull ThemeServerChecker themeChecker;
-    private final @NotNull ServerChecker serverChecker;
-    private final @NotNull CxnDataHandler dataHandler;
-    private final @NotNull CxnConnectionManager connectionManager;
+    private final @NotNull IThemeServerChecker themeChecker;
+    private final @NotNull IServerChecker serverChecker;
+    private final @NotNull ICxnDataHandler dataHandler;
+    private final @NotNull ICxnConnectionManager connectionManager;
 
-    public CxnListener() {
+    public CxnListener(ModuleLoader cxnListenerModuleLoader) {
         super(DEFAULT_IPS, DEFAULT_IGNORED_IPS);
 
         //setting up server checker
@@ -38,13 +42,23 @@ public class CxnListener extends ServerListener {
         AtomicBoolean listenerActive = new AtomicBoolean(false);
         this.connectionManager = new CxnConnectionManager(dataHandler, serverChecker, themeChecker, listenerActive);
 
-        new AuctionHouseListener(this.isOnServer(), listenerActive);
-        new ItemShopListener(this.isOnServer(), listenerActive);
-        new TomNookListener(this.isOnServer(), listenerActive);
-        new TradeListener(this.isOnServer(), listenerActive);
+        cxnListenerModuleLoader
+                .loadInterfaces(InventoryListener.class)
+                .flatMap(classes -> {
+                    for (Class<? extends IInventoryListener> clazz : classes) {
+                        LOGGER.info("Found listener: {}", clazz.getName());
+                        try{
+                            clazz.getConstructor(Mod.class, AtomicBoolean[].class)
+                                    .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
+                        }catch(Exception e){
+                            LOGGER.error("Could not instantiate listener", e);
+                        }
+                    }
+                    return Mono.empty();
+                }).subscribe();
 
         //checking connection and activating mod
-        connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.NONE)
+        connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.NONE)
                 .doOnSuccess((a) -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
                 .subscribe();
 
@@ -67,7 +81,7 @@ public class CxnListener extends ServerListener {
             return Mono.empty();
         boolean activeBackup = connectionManager.isActive();
 
-        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
+        return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
                 .flatMap(messageInformation -> {
                     CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
                     if (activeBackup)
@@ -79,7 +93,7 @@ public class CxnListener extends ServerListener {
     @Override
     public @NotNull Mono<Void> onServerJoin() {
 
-        return connectionManager.checkConnectionAsync(CxnConnectionManager.Refresh.THEME)
+        return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
                 .doOnSuccess(messageInformation -> CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
                 .then();
 
@@ -91,27 +105,33 @@ public class CxnListener extends ServerListener {
         connectionManager.deactivate();
     }
 
-    public @NotNull CxnConnectionManager getConnectionManager() {
+    @Override
+    public @NotNull ICxnConnectionManager getConnectionManager() {
         return connectionManager;
     }
 
+    @Override
     public DataHandler getData(String key) {
         return dataHandler.get(key);
     }
 
-    public @NotNull ServerChecker getServerChecker() {
+    @Override
+    public @NotNull IServerChecker getServerChecker() {
         return serverChecker;
     }
 
-    public @NotNull ThemeServerChecker getThemeChecker() {
+    @Override
+    public @NotNull IThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
 
 
+    @Override
     public @Nullable List<String> getModUsers() {
         return dataHandler.getModUsers();
     }
 
+    @Override
     public boolean isActive() {
         return connectionManager.isActive();
     }

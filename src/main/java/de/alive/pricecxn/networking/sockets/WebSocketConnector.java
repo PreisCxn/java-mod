@@ -15,12 +15,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 @ClientEndpoint
-public class WebSocketConnector {
+public class WebSocketConnector implements IWebSocketConnector {
 
-    public static final String DEFAULT_WEBSOCKET_URI = "wss://socket.preiscxn.de";
     private final List<SocketMessageListener> messageListeners = new CopyOnWriteArrayList<>();
     private final List<SocketCloseListener> closeListeners = new CopyOnWriteArrayList<>();
     private final List<SocketOpenListener> openListeners = new CopyOnWriteArrayList<>();
@@ -119,6 +118,7 @@ public class WebSocketConnector {
         }
     }
 
+    @Override
     public boolean isConnected() {
         if(this.session == null){
             return false;
@@ -126,36 +126,42 @@ public class WebSocketConnector {
         return this.session.isOpen();
     }
 
+    @Override
     public void addMessageListener(SocketMessageListener listener) {
         synchronized(messageListeners){
             messageListeners.add(listener);
         }
     }
 
+    @Override
     public void addCloseListener(SocketCloseListener listener) {
         synchronized(closeListeners){
             closeListeners.add(listener);
         }
     }
 
+    @Override
     public void addOpenListener(SocketOpenListener listener) {
         synchronized(openListeners){
             openListeners.add(listener);
         }
     }
 
+    @Override
     public void removeMessageListener(SocketMessageListener listener) {
         synchronized(messageListeners){
             messageListeners.remove(listener);
         }
     }
 
+    @Override
     public void removeCloseListener(SocketCloseListener listener) {
         synchronized(closeListeners){
             closeListeners.remove(listener);
         }
     }
 
+    @Override
     public void removeOpenListener(SocketOpenListener listener) {
         synchronized(openListeners){
             openListeners.remove(listener);

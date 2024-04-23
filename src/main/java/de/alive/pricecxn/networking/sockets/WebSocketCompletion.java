@@ -8,10 +8,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static de.alive.pricecxn.PriceCxnMod.LOGGER;
+import static de.alive.pricecxn.LogPrinter.LOGGER;
 
 public class WebSocketCompletion {
     public static final String QUERY_STRING = "pcxn?";
@@ -19,9 +17,9 @@ public class WebSocketCompletion {
 
     private final CompletableFuture<String> future = new CompletableFuture<>();
     private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
-    private final @NotNull WebSocketConnector connector;
+    private final @NotNull IWebSocketConnector connector;
 
-    public WebSocketCompletion(@NotNull WebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
+    public WebSocketCompletion(@NotNull IWebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
         this.connector = connector;
 
         SocketMessageListener listener = new SocketMessageListener() {
