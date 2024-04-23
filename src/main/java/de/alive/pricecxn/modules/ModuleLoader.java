@@ -45,7 +45,7 @@ public class ModuleLoader {
                 .flatMap(outdated -> {
                     LOGGER.info("Module ({}) is outdated: {}", remotePath, outdated);
                     if (outdated) {
-                        return download()
+                        return download().then(calculateFileHash(jarPath).doOnNext(s -> LOGGER.info("Calculated hash for downloaded {}: {}...", jarPath, s.substring(0, 10))))
                                 .then(Mono.fromCallable(() -> getInterfaces(interfaceClass)))
                                 .subscribeOn(Schedulers.boundedElastic());
                     } else {
@@ -145,7 +145,6 @@ public class ModuleLoader {
 
     }
 
-    @SuppressWarnings("unchecked")
     public <I> List<Class<? extends I>> getInterfaces(Class<I> interfaceClass) {
         LOGGER.info("Loading interfaces from {}", jarPath);
         List<Class<? extends I>> list = new ArrayList<>();
@@ -153,32 +152,31 @@ public class ModuleLoader {
             URL url = jarPath.toUri().toURL();
             URL[] urls = new URL[]{url};
 
-            try(URLClassLoader classLoader = new URLClassLoader(urls)){
+            // Verwenden Sie den ClassLoader der aktuellen Klasse
+            URLClassLoader classLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
 
-                try(JarFile jarFile = new JarFile(jarPath.toFile())){
+            try (JarFile jarFile = new JarFile(jarPath.toFile())) {
+                Enumeration<JarEntry> entries = jarFile.entries();
 
-                    Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String entryName = entry.getName();
 
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = entries.nextElement();
-                        String entryName = entry.getName();
+                    if (entryName.endsWith(".class")) {
+                        String className = entryName.replace("/", ".").replace(".class", "");
+                        // Verwenden Sie den ClassLoader der aktuellen Klasse, um die Klasse zu laden
+                        Class<?> clazz = Class.forName(className, true, classLoader);
 
-                        if (entryName.endsWith(".class")) {
-                            String className = entryName.replace("/", ".").replace(".class", "");
-
-                            Class<?> clazz = classLoader.loadClass(className);
-
-                            if (interfaceClass.getName().equals(clazz.getSuperclass().getName())) {
-                                list.add((Class<? extends I>) clazz);
-                            }
+                        if (interfaceClass.getName().equals(clazz.getSuperclass().getName())) {
+                            list.add(clazz.asSubclass(interfaceClass));
                         }
                     }
                 }
             }
+
         }catch(Exception e){
             LOGGER.error("Error while loading module", e);
         }
         return list;
     }
-
 }

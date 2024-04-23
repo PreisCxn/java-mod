@@ -1,6 +1,7 @@
 package de.alive.pricecxn.cytooxien;
 
 import de.alive.pricecxn.PriceCxn;
+import de.alive.pricecxn.PriceCxnModClient;
 import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.listener.IInventoryListener;
 import de.alive.pricecxn.listener.InventoryListener;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,6 +48,25 @@ public class CxnListener extends ServerListener implements ICxnListener {
                     for (Class<? extends IInventoryListener> clazz : classes) {
                         LOGGER.info("Found listener: {}", clazz.getName());
                         try{
+                            for (Constructor<?> constructor : clazz.getConstructors()) {
+                                if (constructor.getParameterCount() != 2) {
+                                    continue;
+                                }
+
+                                //check equality with name and not class
+                                if (!constructor.getParameterTypes()[0].getName().equals(Mod.class.getName())
+                                        || !constructor.getParameterTypes()[1].getName().equals(AtomicBoolean[].class.getName())) {
+                                    continue;
+                                }
+
+                                System.out.println(constructor.getParameterTypes()[0].getClassLoader());
+                                System.out.println(PriceCxnModClient.class.getClassLoader());
+
+                                constructor.newInstance(
+                                        constructor.getParameterTypes()[0].cast(PriceCxn.getMod()),
+                                        constructor.getParameterTypes()[1].cast(new AtomicBoolean[]{this.isOnServer(), listenerActive}));
+                                return Mono.empty();
+                            }
                             clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                                     .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
                         }catch(Exception e){
