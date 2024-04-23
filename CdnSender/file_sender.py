@@ -4,6 +4,25 @@ import os
 import requests
 
 
+def select_file(directory, pattern):
+    # Get all files in the directory
+    all_files = os.listdir(directory)
+    print(f"Debug: All files in directory {directory}: {all_files}")  # Debug print
+
+    # Initialize the file to be None
+    selected_file = None
+
+    # Loop through all files
+    for file in all_files:
+        # Check if the file matches the pattern and does not end with -sources.jar
+        if pattern in file and file.endswith(".jar") and not file.endswith("-sources.jar"):
+            selected_file = file
+            break
+
+    print(f"Debug: Selected file: {selected_file}")  # Debug print
+    return selected_file if selected_file else None
+
+
 def get_version():
     with open("./gradle.properties") as f:
         for line in f:
