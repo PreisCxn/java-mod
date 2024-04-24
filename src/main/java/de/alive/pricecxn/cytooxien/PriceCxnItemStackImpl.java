@@ -69,7 +69,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         data.addProperty(DISPLAY_NAME_KEY, displayName);
         data.addProperty(MC_CLIENT_LANG_KEY, MinecraftClient.getInstance().getLanguageManager().getLanguage());
         if (addComment)
-            data.add(COMMENT_KEY, nbtToJson(this.item));
+            data.add(COMMENT_KEY, getCustomData(this.item));
 
         LOGGER.debug(itemName);
 
@@ -105,11 +105,11 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         this(item, searchData, true);
     }
 
-    private @NotNull JsonObject nbtToJson(@NotNull ItemStack item) {
+    private @NotNull JsonObject getCustomData(@NotNull ItemStack item) {
         ComponentMap nbt = item.getComponents();
         if (nbt == null) return new JsonObject();
 
-        return componentMapToJson(nbt);
+        return componentMapToJson(nbt).getAsJsonObject("minecraft:custom_data");
     }
 
     private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
@@ -123,11 +123,55 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             if(component instanceof ComponentMap subComponentMap){
                 json.add(key.toString(), componentMapToJson(subComponentMap));
             } else {
-                json.addProperty(key.toString(), component.toString());
+                Object object = object(component.toString());
+                if (object instanceof JsonElement element)
+                    json.add(key.toString(), element);
+                else
+                    json.addProperty(key.toString(), object.toString());
             }
         }
 
         return json;
+    }
+
+    public Object object(String nbtString) {
+        if (nbtString == null)
+            return "";
+
+        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+        JsonObject valueJson;
+
+        //test if only Delete Pattern is needed
+        try {
+            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+            //test if JsonArray
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonArray();
+            } catch (IllegalStateException ignored) {
+            }
+
+            //test if JsonKey is missing
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonObject();
+            } catch (IllegalStateException e2) {
+                //else add as normal String
+                return nbtString;
+            }
+
+        } catch (JsonParseException e) {
+            //else add as normal String
+            return nbtString;
+        }
+
+        if (valueJson != null) {
+            return valueJson;
+        }
+
+        return nbtString;
     }
 
     private @Nullable String toolTipSearch(@NotNull DataAccess access) {
