@@ -346,6 +346,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
                 String[] searches = searchKey.split("\\.");
 
                 for (String s : searches) {
+                    if(s.equals("special_item")) continue;
                     if (!pbvString.contains(s)) continue outer;
                 }
 
