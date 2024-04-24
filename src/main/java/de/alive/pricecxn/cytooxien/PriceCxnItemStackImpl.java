@@ -251,7 +251,6 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         }
 
         return hash;
-
     }
 
     @Override
@@ -355,8 +354,9 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
             }
 
-        } else {
+        }
 
+        if(foundItems.isEmpty()) {
             outer:
             for (int i = 0; i < array.size(); i++) {
                 JsonObject item = array.get(i).getAsJsonObject();
@@ -383,8 +383,8 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
                 if (foundItems.size() > 1) return null;
 
             }
-
         }
+
 
         if (foundItems.size() == 1) {
             return array.get(foundItems.get(0)).getAsJsonObject();

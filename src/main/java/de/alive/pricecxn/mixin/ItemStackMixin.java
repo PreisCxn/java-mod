@@ -258,7 +258,7 @@ public abstract class ItemStackMixin {
 
     @Unique
     private void findInfo() {
-        if (this.lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
+        //if (this.lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
         ItemStack itemStack = (ItemStack) (Object) this;
         this.cxnItemStack = new PriceCxnItemStackImpl(itemStack, null, true, false);
