@@ -130,4 +130,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public CdnFileHandler getCdnFileHandler() {
         return cdnFileHandler;
     }
+
+    @Override
+    public IMinecraftClient getMinecraftClient() {
+        return new MinecraftClientImpl(MinecraftClient.getInstance());
+    }
+
 }

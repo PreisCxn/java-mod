@@ -20,5 +20,5 @@ public interface Mod {
     IPlayer getPlayer();
     void runOnEndClientTick(Consumer<IMinecraftClient> consumer);
     CdnFileHandler getCdnFileHandler();
-
+    IMinecraftClient getMinecraftClient();
 }

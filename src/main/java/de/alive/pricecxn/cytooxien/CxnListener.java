@@ -49,8 +49,10 @@ public class CxnListener extends ServerListener implements ICxnListener {
                     for (Class<? extends InventoryListener> clazz : classes) {
                         LOGGER.info("Found listener: {}", clazz.getName());
                         try{
-                            clazz.getConstructor(Mod.class, AtomicBoolean[].class)
+                            InventoryListener inventoryListener = clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                                     .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
+
+                            init(inventoryListener);
                         }catch(Exception e){
                             LOGGER.error("Could not instantiate listener", e);
                         }
@@ -137,4 +139,8 @@ public class CxnListener extends ServerListener implements ICxnListener {
         return connectionManager.isActive();
     }
 
+    //setup of Listeners
+    private void init(InventoryListener inventoryListener) {
+        PriceCxn.getMod().runOnEndClientTick(client -> inventoryListener.onTick().subscribe());
+    }
 }

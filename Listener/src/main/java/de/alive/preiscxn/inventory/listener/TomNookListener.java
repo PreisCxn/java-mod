@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.printDebug;
-import static de.alive.api.LogPrinter.printTester;
+import static de.alive.api.LogPrinter.*;
 import static de.alive.api.utils.ItemUpdater.updateItemsAsync;
 
 public class TomNookListener extends InventoryListener {
@@ -49,7 +48,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook open");
 
         items.clear();
@@ -58,7 +57,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook close");
 
         JsonArray array = new JsonArray();
@@ -73,8 +72,8 @@ public class TomNookListener extends InventoryListener {
             }
         }
 
-        //todo LOGGER.debug("Nook: " + array.size() + " items");
-        //todo LOGGER.debug(array.toString());
+        LOGGER.debug("Nook: " + array.size() + " items");
+        LOGGER.debug(array.toString());
 
 
         if(!array.isEmpty())
@@ -107,7 +106,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("TomNook updated");
         this.invBuyPrice = getBuyPriceFromInvName(client);
         return updateItemsAsync(this.items, handler, this.itemRange, null);
