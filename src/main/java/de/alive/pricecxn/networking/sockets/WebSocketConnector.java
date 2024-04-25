@@ -1,5 +1,9 @@
 package de.alive.pricecxn.networking.sockets;
 
+import de.alive.api.networking.sockets.IWebSocketConnector;
+import de.alive.api.networking.sockets.SocketCloseListener;
+import de.alive.api.networking.sockets.SocketMessageListener;
+import de.alive.api.networking.sockets.SocketOpenListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
@@ -15,7 +19,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 @ClientEndpoint
 public class WebSocketConnector implements IWebSocketConnector {

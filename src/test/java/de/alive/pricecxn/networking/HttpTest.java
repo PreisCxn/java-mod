@@ -1,6 +1,7 @@
 package de.alive.pricecxn.networking;
 
 import com.google.gson.JsonObject;
+import de.alive.api.networking.Http;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;

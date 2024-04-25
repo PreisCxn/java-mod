@@ -1,6 +1,6 @@
 package de.alive.pricecxn.modules;
 
-import de.alive.pricecxn.PriceCxn;
+import de.alive.api.PriceCxn;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -18,7 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class ModuleLoader {
 

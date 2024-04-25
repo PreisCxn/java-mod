@@ -1,9 +1,11 @@
 package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.*;
-import de.alive.pricecxn.PriceCxn;
-import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.utils.StringUtil;
+import de.alive.api.PriceCxn;
+import de.alive.api.cytooxien.IThemeServerChecker;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.networking.DataAccess;
+import de.alive.api.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentType;
@@ -19,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");

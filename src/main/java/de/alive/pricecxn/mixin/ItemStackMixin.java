@@ -2,15 +2,18 @@ package de.alive.pricecxn.mixin;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.PriceCxn;
+import de.alive.api.PriceCxn;
+import de.alive.api.cytooxien.IThemeServerChecker;
+import de.alive.api.cytooxien.Modes;
+import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.cytooxien.*;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.IServerChecker;
-import de.alive.pricecxn.utils.StringUtil;
-import de.alive.pricecxn.utils.TimeUtil;
+import de.alive.api.networking.DataHandler;
+import de.alive.api.networking.IServerChecker;
+import de.alive.api.utils.StringUtil;
+import de.alive.api.utils.TimeUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
 import net.minecraft.client.option.KeyBinding;
@@ -37,30 +40,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
     @Shadow
     public abstract boolean isEmpty();
 
-    @Shadow
-    public abstract Item getItem();
-
-    @Shadow
-    private int count;
     @Unique
     private @Nullable JsonObject nookPrice = null;
     @Unique
     private @Nullable JsonObject pcxnPrice = null;
     @Unique
-    private long lastUpdate = 0;
-    @Unique
     private final StorageItemStack storageItemStack = new StorageItemStack();
-    @Unique
-    private @NotNull String searchingString = "";
-    @Unique
-    private int searchingCount = 20;
     @Unique
     private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
@@ -137,7 +129,7 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting(Formatting.ITALIC)));
+                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting( )));
             });
         }
     }
@@ -258,7 +250,8 @@ public abstract class ItemStackMixin {
 
     @Unique
     private void findInfo() {
-        if (this.lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
+        long lastUpdate = 0;
+        if (lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
         ItemStack itemStack = (ItemStack) (Object) this;
         this.cxnItemStack = new PriceCxnItemStackImpl(itemStack, null, true, false);

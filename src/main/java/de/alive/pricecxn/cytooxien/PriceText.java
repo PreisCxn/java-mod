@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
-import static de.alive.pricecxn.utils.StringUtil.convertPrice;
+import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.api.utils.StringUtil.convertPrice;
 
 public class PriceText {
     public static final MutableText COIN_TEXT = MutableText.of(new PlainTextContent.Literal("\uE202"))
