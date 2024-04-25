@@ -1,6 +1,6 @@
 package de.alive.pricecxn.modules;
 
-import de.alive.pricecxn.networking.cdn.CdnDeliveryType;
+import de.alive.pricecxn.PriceCxn;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 import static de.alive.pricecxn.LogPrinter.LOGGER;
 
@@ -66,24 +67,26 @@ public class ModuleLoader {
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 Path path = Path.of(url.toURI());
-                Files.walk(path)
-                        .filter(Files::isRegularFile)
-                        .filter(p -> p.toString().endsWith(".class"))
-                        .forEach(p -> {
-                            String className = p.toString()
+                try(Stream<Path> pathStream = Files.walk(path)) {
+                    pathStream.filter(Files::isRegularFile)
+                            .filter(p -> p.toString().endsWith(".class"))
+                            .map(p -> p.toString()
                                     .replace(path.toString(), "")
                                     .replace(".class", "")
                                     .replace("/", ".")
-                                    .substring(1);
-                            try{
-                                Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(defaultPackage.getName() + "." + className);
-                                if (interfaceClass.isAssignableFrom(clazz)) {
-                                    list.add(clazz.asSubclass(interfaceClass));
+                                    .substring(1))
+                            .forEach(className -> {
+                                try{
+                                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(defaultPackage.getName() + "." + className);
+                                    if (interfaceClass.isAssignableFrom(clazz)) {
+                                        list.add(clazz.asSubclass(interfaceClass));
+                                    }
+                                }catch(ClassNotFoundException e){
+                                    LOGGER.error("Error while loading module", e);
                                 }
-                            }catch(ClassNotFoundException e){
-                                LOGGER.error("Error while loading module", e);
-                            }
-                        });
+                            });
+
+                }
             }
         }catch(Exception e){
             LOGGER.error("Error while loading module", e);
@@ -92,7 +95,7 @@ public class ModuleLoader {
     }
 
     private Mono<Void> download() {
-        return CdnDeliveryType.FILE.generateResponseAsBytes(remotePath)
+        return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, null)
                 .doOnNext(bytes -> LOGGER.info("Downloaded module from {}", remotePath))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(content -> {
@@ -141,7 +144,7 @@ public class ModuleLoader {
     }
 
     private Mono<String> getUrlHash() {
-        return CdnDeliveryType.HASH.generateResponse(remotePath);
+        return PriceCxn.getMod().getCdnFileHandler().getHash(remotePath, null);
 
     }
 

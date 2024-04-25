@@ -3,6 +3,7 @@ package de.alive.pricecxn.interfaces;
 import de.alive.pricecxn.cytooxien.ICxnListener;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.networking.DataAccess;
+import de.alive.pricecxn.networking.cdn.CdnFileHandler;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,5 +19,6 @@ public interface Mod {
     ICxnListener getCxnListener();
     IPlayer getPlayer();
     void runOnEndClientTick(Consumer<IMinecraftClient> consumer);
+    CdnFileHandler getCdnFileHandler();
 
 }
