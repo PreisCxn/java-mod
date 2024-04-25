@@ -1,7 +1,7 @@
-package de.alive.pricecxn.networking;
+package de.alive.api.networking;
 
 import com.google.gson.JsonObject;
-import de.alive.api.networking.Http;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
@@ -26,7 +26,7 @@ public class HttpTest {
         }
 
         @Override
-        protected Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
+        protected @NotNull Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
             return Mono.just(mockResponse);
         }
     }
