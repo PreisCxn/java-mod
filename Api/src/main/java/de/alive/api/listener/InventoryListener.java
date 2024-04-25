@@ -2,17 +2,17 @@ package de.alive.api.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.Modes;
+import de.alive.api.impl.MinecraftClientImpl;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.interfaces.ISlot;
 import de.alive.api.interfaces.Mod;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
-import de.alive.api.PriceCxn;
-import de.alive.api.impl.MinecraftClientImpl;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class InventoryListener implements IInventoryListener {
+public abstract class InventoryListener {
     static final int REFRESH_INTERVAL = 200;
 
     private final @NotNull DataAccess inventoryTitles;
@@ -173,13 +173,11 @@ public abstract class InventoryListener implements IInventoryListener {
         return false;
     }
 
-    @Override
     public @NotNull Mono<Boolean> hadItemsChangeAsync(@NotNull IMinecraftClient client, IScreenHandler handler) {
         return Mono.fromSupplier(() -> hadItemsChange(client, handler))
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
-    @Override
     public @NotNull Mono<Void> initSlotsAsync(IScreenHandler handler) {
         return Mono.fromRunnable(() -> initSlots(handler));
     }
