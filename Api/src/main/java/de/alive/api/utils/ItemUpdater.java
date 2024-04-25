@@ -1,11 +1,10 @@
-package de.alive.api.listener;
+package de.alive.api.utils;
 
 import com.google.gson.JsonNull;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.interfaces.ISlot;
 import de.alive.api.networking.DataAccess;
-import de.alive.api.utils.TimeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class StaticListenerMethods {
+public class ItemUpdater {
     public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
                                                        @NotNull IScreenHandler handler,
                                                        @NotNull Tuple2<Integer, Integer> range,

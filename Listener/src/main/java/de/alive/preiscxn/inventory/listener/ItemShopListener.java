@@ -3,10 +3,10 @@ package de.alive.preiscxn.inventory.listener;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.interfaces.Mod;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.networking.DataAccess;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.api.LogPrinter.printDebug;
 import static de.alive.api.LogPrinter.printTester;
-import static de.alive.api.listener.StaticListenerMethods.updateItem;
+import static de.alive.api.utils.ItemUpdater.updateItem;
 
 public class ItemShopListener extends InventoryListener {
 
