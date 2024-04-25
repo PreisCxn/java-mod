@@ -65,10 +65,7 @@ public class AuctionHouseListener extends InventoryListener {
 
         if(!items.isEmpty()) {
             for (PriceCxnItemStack item : items) {
-                if(items.size() > 40)
-                    array.add(item.getDataWithoutDisplay());
-                else
-                    array.add(item.getData());
+                array.add(item.getDataWithoutDisplay());
             }
         }
 

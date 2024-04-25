@@ -20,21 +20,20 @@ import reactor.core.scheduler.Schedulers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class InventoryListener {
+
     static final int REFRESH_INTERVAL = 200;
 
     private final @NotNull DataAccess inventoryTitles;
     private final int inventorySize; //Anzahl an Slots
     private final List<Integer> slotNbt = new ArrayList<>();
-
-    private boolean isOpen = false;
-
-    private long lastUpdate = 0;
-
     private final @Nullable AtomicBoolean[] active;
     private final IMinecraftClient client;
+    private boolean isOpen = false;
+    private long lastUpdate = 0;
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -50,11 +49,11 @@ public abstract class InventoryListener {
     }
 
     public Mono<Void> onTick() {
-        if (active != null && Arrays.stream(active).anyMatch(bool -> !bool.get())) return Mono.empty();
+        if (active != null && Arrays.stream(active).filter(Objects::nonNull).anyMatch(bool -> !bool.get())) return Mono.empty();
         if (client.isPlayerNull()) return Mono.empty();
-        if (client.isCurrentScreenNull()) return Mono.empty();
-
+        if (client.isCurrentScreenHandlerNull()) return Mono.empty();
         Mono<Void> mono = Mono.empty();
+
         if (this.isOpen && !(client.isCurrentScreenInstanceOfHandledScreen())) {
             this.isOpen = false;
             mono = mono.then(onInventoryClose(client, client.getScreenHandler())).then();
@@ -215,4 +214,5 @@ public abstract class InventoryListener {
      * @param handler The ScreenHandler
      */
     public abstract Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler);
+
 }

@@ -23,6 +23,11 @@ public class MinecraftClientImpl implements IMinecraftClient {
     }
 
     @Override
+    public boolean isCurrentScreenHandlerNull() {
+        return minecraftClient.player == null || minecraftClient.player.currentScreenHandler == null;
+    }
+
+    @Override
     public boolean isCurrentScreenTitleNull() {
         return minecraftClient.currentScreen == null || minecraftClient.currentScreen.getTitle() == null;
     }
