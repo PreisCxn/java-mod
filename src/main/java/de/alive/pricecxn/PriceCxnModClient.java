@@ -12,6 +12,8 @@ import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.modules.ModuleLoader;
 import de.alive.pricecxn.networking.DataAccess;
+import de.alive.pricecxn.networking.cdn.CdnFileHandler;
+import de.alive.pricecxn.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -22,8 +24,6 @@ import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -47,8 +47,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         }
     };
     private final CxnListener CXN_LISTENER;
+    private final CdnFileHandler cdnFileHandler;
 
     public PriceCxnModClient(){
+        this.cdnFileHandler = new CdnFileHandlerImpl();
         try {
             Field mod = Class.forName("de.alive.pricecxn.PriceCxn").getDeclaredField("mod");
             mod.setAccessible(true);
@@ -121,5 +123,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                 consumer.accept(new MinecraftClientImpl(client));
             }
         });
+    }
+
+    @Override
+    public CdnFileHandler getCdnFileHandler() {
+        return cdnFileHandler;
     }
 }
