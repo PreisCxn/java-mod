@@ -1,6 +1,6 @@
 package de.alive.preiscxn.mixin;
 
-import de.alive.preiscxn.keybinds.KeybindExecutor;
+import de.alive.api.PriceCxn;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public abstract class HandledScreenMixin {
     )
     public void on(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if (this.focusedSlot != null && this.focusedSlot.hasStack()) {
-            KeybindExecutor.KEY_BINDING_KEYBIND_EXECUTOR_MAP.forEach(
+            PriceCxn.getMod().forEachKeybindExecutor(
                     (keyBinding, keybindExecutor) -> {
                         if (keyBinding.matchesKey(keyCode, scanCode)) {
                             keybindExecutor.onKeybindPressed(this.focusedSlot.getStack());

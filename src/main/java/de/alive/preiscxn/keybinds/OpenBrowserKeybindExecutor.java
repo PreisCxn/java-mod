@@ -1,6 +1,7 @@
 package de.alive.preiscxn.keybinds;
 
 import com.google.gson.JsonObject;
+import de.alive.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Util;

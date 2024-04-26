@@ -14,7 +14,6 @@ import de.alive.preiscxn.PriceCxnMod;
 import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.cytooxien.PriceText;
 import de.alive.preiscxn.cytooxien.StorageItemStack;
-import de.alive.preiscxn.keybinds.KeybindExecutor;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
@@ -108,7 +107,7 @@ public abstract class ItemStackMixin {
         }
         if(pcxnPrice != null){
 
-            KeyBinding keyBinding = KeybindExecutor.CLASS_KEY_BINDING_MAP.get(OpenBrowserKeybindExecutor.class);
+            KeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
             if(pcxnPrice.has("item_info_url") && !keyBinding.isUnbound()){
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
                                       keyBinding
