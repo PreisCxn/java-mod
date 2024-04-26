@@ -21,10 +21,6 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
         this.http = http;
     }
 
-    public CdnFileHandlerImpl() {
-        this(Http.getInstance());
-    }
-
     private String getPath(@NotNull String file, @Nullable String version) {
         return file + (version == null ? "" : "?version=" + version);
     }

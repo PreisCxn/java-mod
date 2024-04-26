@@ -1,6 +1,7 @@
 package de.alive.api.networking;
 
 import com.google.gson.*;
+import de.alive.api.PriceCxn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -101,7 +102,7 @@ public class DataHandler {
      * @return A CompletableFuture which returns the data as a Map with the key as the key and the values as a List
      */
     private @NotNull Mono<Map<String, List<String>>> getServerDataAsync(String url, @Nullable List<String> columnNames, @Nullable String keyColumnName) {
-        return Http.getInstance().GET(url)
+        return PriceCxn.getMod().getHttp().GET(url)
                 .mapNotNull(jsonString -> {
                     if (JsonParser.parseString(jsonString).isJsonArray()) {
                         dataArray = JsonParser.parseString(jsonString).getAsJsonArray();

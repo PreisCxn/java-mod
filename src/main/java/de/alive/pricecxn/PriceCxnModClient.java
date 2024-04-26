@@ -7,6 +7,7 @@ import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.interfaces.Mod;
 import de.alive.api.networking.DataAccess;
+import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import de.alive.pricecxn.cytooxien.CxnListener;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
@@ -14,6 +15,7 @@ import de.alive.pricecxn.impl.MinecraftClientImpl;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.modules.ModuleLoader;
+import de.alive.pricecxn.networking.HttpImpl;
 import de.alive.pricecxn.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -49,9 +51,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     };
     private final CxnListener CXN_LISTENER;
     private final CdnFileHandler cdnFileHandler;
+    private final Http http;
 
     public PriceCxnModClient(){
-        this.cdnFileHandler = new CdnFileHandlerImpl();
+        this.http = new HttpImpl();
+        this.cdnFileHandler = new CdnFileHandlerImpl(http);
         try {
             Field mod = Class.forName("de.alive.api.PriceCxn").getDeclaredField("mod");
             mod.setAccessible(true);
@@ -134,6 +138,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public IMinecraftClient getMinecraftClient() {
         return new MinecraftClientImpl(MinecraftClient.getInstance());
+    }
+
+    @Override
+    public Http getHttp() {
+        return http;
     }
 
 }

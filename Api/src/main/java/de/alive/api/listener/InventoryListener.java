@@ -11,7 +11,6 @@ import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.interfaces.ISlot;
 import de.alive.api.interfaces.Mod;
 import de.alive.api.networking.DataAccess;
-import de.alive.api.networking.Http;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -181,7 +180,7 @@ public abstract class InventoryListener {
                 obj.addProperty("uuid", uuid);
                 obj.addProperty("username", instance.getPlayerNameString());
                 obj.add("data", data);
-                return Http.getInstance().POST("/datahandler/" + uri, obj).then();
+                return PriceCxn.getMod().getHttp().POST("/datahandler/" + uri, obj).then();
             } else
                 return Mono.error(new NullPointerException("Not connected"));
         }));

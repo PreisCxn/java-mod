@@ -1,7 +1,7 @@
 package de.alive.pricecxn.networking.cdn;
 
-import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
+import de.alive.pricecxn.networking.HttpImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 class CdnFileHandlerImplTest {
     @Mock
-    private Http http;
+    private HttpImpl http;
 
     private CdnFileHandler cdnFileHandler;
     private AutoCloseable closeable;
