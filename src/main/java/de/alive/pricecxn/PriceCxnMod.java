@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class PriceCxnMod implements ModInitializer {
 	// This logger is used to write text to the console and the log file.

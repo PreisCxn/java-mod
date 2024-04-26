@@ -1,18 +1,21 @@
 package de.alive.pricecxn;
 
+import de.alive.api.LogPrinter;
+import de.alive.api.Mod;
+import de.alive.api.cytooxien.ICxnListener;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.api.interfaces.IPlayer;
+import de.alive.api.networking.DataAccess;
+import de.alive.api.networking.Http;
+import de.alive.api.networking.cdn.CdnFileHandler;
 import de.alive.pricecxn.cytooxien.CxnListener;
-import de.alive.pricecxn.cytooxien.ICxnListener;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
 import de.alive.pricecxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.pricecxn.impl.MinecraftClientImpl;
-import de.alive.pricecxn.interfaces.IMinecraftClient;
-import de.alive.pricecxn.interfaces.IPlayer;
-import de.alive.pricecxn.interfaces.Mod;
 import de.alive.pricecxn.keybinds.KeybindExecutor;
 import de.alive.pricecxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.pricecxn.modules.ModuleLoader;
-import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.networking.cdn.CdnFileHandler;
+import de.alive.pricecxn.networking.HttpImpl;
 import de.alive.pricecxn.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -31,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 import static de.alive.pricecxn.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
@@ -48,11 +51,13 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     };
     private final CxnListener CXN_LISTENER;
     private final CdnFileHandler cdnFileHandler;
+    private final Http http;
 
     public PriceCxnModClient(){
-        this.cdnFileHandler = new CdnFileHandlerImpl();
+        this.http = new HttpImpl();
+        this.cdnFileHandler = new CdnFileHandlerImpl(http);
         try {
-            Field mod = Class.forName("de.alive.pricecxn.PriceCxn").getDeclaredField("mod");
+            Field mod = Class.forName("de.alive.api.PriceCxn").getDeclaredField("mod");
             mod.setAccessible(true);
             mod.set(null, this);
             mod.setAccessible(false);
@@ -129,4 +134,15 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public CdnFileHandler getCdnFileHandler() {
         return cdnFileHandler;
     }
+
+    @Override
+    public IMinecraftClient getMinecraftClient() {
+        return new MinecraftClientImpl(MinecraftClient.getInstance());
+    }
+
+    @Override
+    public Http getHttp() {
+        return http;
+    }
+
 }

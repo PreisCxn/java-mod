@@ -3,13 +3,13 @@ package de.alive.preiscxn.inventory.listener;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.interfaces.IMinecraftClient;
-import de.alive.pricecxn.interfaces.IScreenHandler;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.TranslationDataAccess;
-import de.alive.pricecxn.interfaces.Mod;
-import de.alive.pricecxn.listener.InventoryListener;
-import de.alive.pricecxn.networking.DataAccess;
+import de.alive.api.Mod;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.api.interfaces.IScreenHandler;
+import de.alive.api.listener.InventoryListener;
+import de.alive.api.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.LogPrinter.printDebug;
-import static de.alive.pricecxn.LogPrinter.printTester;
-import static de.alive.pricecxn.listener.StaticListenerMethods.updateItem;
+import static de.alive.api.LogPrinter.printDebug;
+import static de.alive.api.LogPrinter.printTester;
+import static de.alive.api.utils.ItemUpdater.updateItem;
 
 public class ItemShopListener extends InventoryListener {
 
@@ -56,7 +56,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop open");
 
         itemStack = null;
@@ -67,7 +67,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop close");
         if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
 
@@ -87,7 +87,7 @@ public class ItemShopListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }

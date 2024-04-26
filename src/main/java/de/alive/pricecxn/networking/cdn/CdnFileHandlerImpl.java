@@ -3,7 +3,8 @@ package de.alive.pricecxn.networking.cdn;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import de.alive.pricecxn.networking.Http;
+import de.alive.api.networking.Http;
+import de.alive.api.networking.cdn.CdnFileHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -18,10 +19,6 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
     public CdnFileHandlerImpl(Http http) {
         this.http = http;
-    }
-
-    public CdnFileHandlerImpl() {
-        this(Http.getInstance());
     }
 
     private String getPath(@NotNull String file, @Nullable String version) {

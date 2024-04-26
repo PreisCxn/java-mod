@@ -2,10 +2,10 @@ package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.networking.sockets.IWebSocketConnector;
+import de.alive.api.networking.sockets.IWebSocketConnector;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import de.alive.pricecxn.networking.sockets.WebSocketConnector;
-import de.alive.pricecxn.utils.TimeUtil;
+import de.alive.api.utils.TimeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;

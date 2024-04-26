@@ -1,24 +1,25 @@
 package de.alive.pricecxn.cytooxien;
 
-import de.alive.pricecxn.PriceCxn;
-import de.alive.pricecxn.PriceCxnModClient;
-import de.alive.pricecxn.interfaces.Mod;
-import de.alive.pricecxn.listener.IInventoryListener;
-import de.alive.pricecxn.listener.InventoryListener;
-import de.alive.pricecxn.listener.ServerListener;
+import de.alive.api.Mod;
+import de.alive.api.PriceCxn;
+import de.alive.api.cytooxien.ICxnConnectionManager;
+import de.alive.api.cytooxien.ICxnDataHandler;
+import de.alive.api.cytooxien.ICxnListener;
+import de.alive.api.cytooxien.IThemeServerChecker;
+import de.alive.api.listener.InventoryListener;
+import de.alive.api.listener.ServerListener;
+import de.alive.api.networking.DataHandler;
+import de.alive.api.networking.IServerChecker;
 import de.alive.pricecxn.modules.ModuleLoader;
-import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.IServerChecker;
 import de.alive.pricecxn.networking.ServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class CxnListener extends ServerListener implements ICxnListener {
 
@@ -45,11 +46,13 @@ public class CxnListener extends ServerListener implements ICxnListener {
         cxnListenerModuleLoader
                 .loadInterfaces(InventoryListener.class)
                 .flatMap(classes -> {
-                    for (Class<? extends IInventoryListener> clazz : classes) {
+                    for (Class<? extends InventoryListener> clazz : classes) {
                         LOGGER.info("Found listener: {}", clazz.getName());
                         try{
-                            clazz.getConstructor(Mod.class, AtomicBoolean[].class)
+                            InventoryListener inventoryListener = clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                                     .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
+
+                            init(inventoryListener);
                         }catch(Exception e){
                             LOGGER.error("Could not instantiate listener", e);
                         }
@@ -136,4 +139,8 @@ public class CxnListener extends ServerListener implements ICxnListener {
         return connectionManager.isActive();
     }
 
+    //setup of Listeners
+    private void init(InventoryListener inventoryListener) {
+        PriceCxn.getMod().runOnEndClientTick(client -> inventoryListener.onTick().subscribe());
+    }
 }

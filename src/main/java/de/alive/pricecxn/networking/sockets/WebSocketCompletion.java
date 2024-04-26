@@ -2,6 +2,8 @@ package de.alive.pricecxn.networking.sockets;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.alive.api.networking.sockets.IWebSocketConnector;
+import de.alive.api.networking.sockets.SocketMessageListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -9,7 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class WebSocketCompletion {
     public static final String QUERY_STRING = "pcxn?";

@@ -1,6 +1,7 @@
 package de.alive.pricecxn.networking;
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class HttpTest {
-    private static class HttpMocker extends Http {
+    private static class HttpMocker extends HttpImpl {
         private final HttpResponse<byte[]> mockResponse;
 
         public HttpMocker(HttpResponse<byte[]> mockResponse) {
@@ -25,7 +26,7 @@ public class HttpTest {
         }
 
         @Override
-        protected Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
+        protected @NotNull Mono<HttpResponse<byte[]>> sendAsync(HttpRequest request) {
             return Mono.just(mockResponse);
         }
     }
@@ -38,7 +39,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("Success".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
@@ -56,7 +57,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("Success".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
@@ -74,7 +75,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("Error".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
@@ -92,7 +93,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("Success".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject())
                 .map(stringFunction);
@@ -110,7 +111,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(200);
         when(mockResponse.body()).thenReturn("".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject())
                 .map(stringFunction);
@@ -128,7 +129,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("Error".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject())
                 .map(stringFunction);
@@ -146,7 +147,7 @@ public class HttpTest {
         when(mockResponse.statusCode()).thenReturn(400);
         when(mockResponse.body()).thenReturn("".getBytes());
 
-        Http http = new HttpMocker(mockResponse);
+        HttpImpl http = new HttpMocker(mockResponse);
 
         Mono<String> result = http.POST("/test", new JsonObject())
                 .map(stringFunction);
@@ -157,15 +158,9 @@ public class HttpTest {
     }
 
     @Test
-    public void testGetInstance() {
-        Http instance = Http.getInstance();
-        assertEquals(Http.DEFAULT_API_URL, instance.getApiUrl());
-    }
-
-    @Test
     public void testHttpConstructor() {
         String apiUrl = "https://test.api.url";
-        Http http = new Http(apiUrl);
+        HttpImpl http = new HttpImpl(apiUrl);
         assertEquals(apiUrl, http.getApiUrl());
     }
 
@@ -173,7 +168,7 @@ public class HttpTest {
     @Test
     public void testSendAsync() {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://example.com/")).GET().build();
-        Http http = Http.getInstance();
+        HttpImpl http = new HttpImpl();
         Mono<HttpResponse<byte[]>> result = http.sendAsync(request);
         StepVerifier.create(result).expectNextCount(1).verifyComplete();
     }
@@ -186,7 +181,7 @@ public class HttpTest {
         when(mockResponse.body()).thenReturn("Success".getBytes());
 
         // Mocking Http
-        Http http = Mockito.spy(Http.getInstance());
+        HttpImpl http = Mockito.spy(new HttpImpl());
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test GET
@@ -202,7 +197,7 @@ public class HttpTest {
         when(mockResponse.body()).thenReturn("Success".getBytes());
 
         // Mocking Http
-        Http http = Mockito.spy(Http.getInstance());
+        HttpImpl http = Mockito.spy(new HttpImpl());
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test POST

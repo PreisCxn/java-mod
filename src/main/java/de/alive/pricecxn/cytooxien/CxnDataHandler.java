@@ -2,11 +2,15 @@ package de.alive.pricecxn.cytooxien;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.networking.DataAccess;
-import de.alive.pricecxn.networking.DataHandler;
-import de.alive.pricecxn.networking.IServerChecker;
+import de.alive.api.cytooxien.ICxnDataHandler;
+import de.alive.api.cytooxien.IThemeServerChecker;
+import de.alive.api.cytooxien.Modes;
+import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.networking.DataAccess;
+import de.alive.api.networking.DataHandler;
+import de.alive.api.networking.IServerChecker;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
-import de.alive.pricecxn.utils.StringUtil;
+import de.alive.api.utils.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
@@ -17,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.alive.pricecxn.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.LOGGER;
 
 public class CxnDataHandler implements ICxnDataHandler {
 

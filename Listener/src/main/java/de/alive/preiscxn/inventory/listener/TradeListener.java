@@ -3,14 +3,14 @@ package de.alive.preiscxn.inventory.listener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.alive.pricecxn.interfaces.IMinecraftClient;
-import de.alive.pricecxn.interfaces.IScreenHandler;
-import de.alive.pricecxn.interfaces.ISlot;
-import de.alive.pricecxn.cytooxien.PriceCxnItemStack;
-import de.alive.pricecxn.cytooxien.TranslationDataAccess;
-import de.alive.pricecxn.interfaces.Mod;
-import de.alive.pricecxn.listener.InventoryListener;
-import de.alive.pricecxn.networking.DataAccess;
+import de.alive.api.Mod;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.api.interfaces.IScreenHandler;
+import de.alive.api.interfaces.ISlot;
+import de.alive.api.listener.InventoryListener;
+import de.alive.api.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
@@ -22,8 +22,7 @@ import reactor.util.function.Tuples;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.pricecxn.LogPrinter.printDebug;
-import static de.alive.pricecxn.LogPrinter.printTester;
+import static de.alive.api.LogPrinter.*;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -53,7 +52,7 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade open");
 
         return Flux.concat(
@@ -68,7 +67,7 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade close");
 
         JsonObject array = new JsonObject();
@@ -92,7 +91,7 @@ public class TradeListener extends InventoryListener {
     }
 
     @Override
-    protected @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+    public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("Trade updated");
         return Flux.concat(
                 Flux.fromIterable(selfInventory)
@@ -123,20 +122,20 @@ public class TradeListener extends InventoryListener {
             price = getBuyPrice(traderControls).map(JsonElement::getAsString);
         } else return Optional.empty();
 
-        int amount = items.get(0).getAmount();
+        int amount = items.getFirst().getAmount();
 
         for (int i = 1; i < items.size(); i++) {
-            if (!items.get(i).isSameItem(items.get(0))) return Optional.empty();
+            if (!items.get(i).isSameItem(items.getFirst())) return Optional.empty();
             amount += items.get(i).getAmount();
         }
 
-        JsonObject result = items.get(0).getData();
+        JsonObject result = items.getFirst().getData();
 
         result.remove(PriceCxnItemStack.AMOUNT_KEY);
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
-        //todo LOGGER.debug(result.toString());
+        LOGGER.debug(result.toString());
 
         return Optional.of(result);
     }
