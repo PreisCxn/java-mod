@@ -4,9 +4,9 @@ import de.alive.api.cytooxien.ActionNotification;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnDataHandler;
 import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.pricecxn.PriceCxnMod;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.networking.NetworkingState;
+import de.alive.pricecxn.PriceCxnMod;
 import de.alive.pricecxn.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -165,12 +165,10 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     @Override
     public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
-                .map(serverMinVersion -> PriceCxnMod.getIntVersion(PriceCxnMod.MOD_VERSION)
-                        .filter(value -> PriceCxnMod.getIntVersion(serverMinVersion)
-                                .filter(integer -> value >= integer)
-                                .isPresent())
-                        .isPresent());
-    }
+                .map(serverMinVersion -> {
+                    String clientVersion = PriceCxnMod.MOD_VERSION;
+                    return isClientVersionSameOrNewer(serverMinVersion, clientVersion);
+                });    }
     /**
      * Checks if the user is a special user.
      * @return A Mono object containing a Boolean indicating if the user is a special user.
@@ -281,5 +279,23 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      */
     public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message) {
         sendConnectionInformation(shouldSend, message, false);
+    }
+
+    private static boolean isClientVersionSameOrNewer(String serverVersion, String clientVersion) {
+        String[] serverVersionParts = serverVersion.split("\\D+");
+        String[] clientVersionParts = clientVersion.split("\\D+");
+
+        int length = Math.min(serverVersionParts.length, clientVersionParts.length);
+        for (int i = 0; i < length; i++) {
+            int serverPart = Integer.parseInt(serverVersionParts[i]);
+            int clientPart = Integer.parseInt(clientVersionParts[i]);
+            if (clientPart > serverPart) {
+                return true;
+            } else if (clientPart < serverPart) {
+                return false;
+            }
+        }
+
+        return clientVersionParts.length >= serverVersionParts.length;
     }
 }
