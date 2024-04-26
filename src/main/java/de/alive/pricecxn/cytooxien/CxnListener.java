@@ -1,11 +1,11 @@
 package de.alive.pricecxn.cytooxien;
 
+import de.alive.api.Mod;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnDataHandler;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.interfaces.Mod;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.listener.ServerListener;
 import de.alive.api.networking.DataHandler;

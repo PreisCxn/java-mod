@@ -2,6 +2,7 @@ package de.alive.api.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.alive.api.Mod;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
@@ -9,7 +10,6 @@ import de.alive.api.cytooxien.Modes;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.interfaces.ISlot;
-import de.alive.api.interfaces.Mod;
 import de.alive.api.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

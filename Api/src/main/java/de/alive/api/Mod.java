@@ -1,7 +1,9 @@
-package de.alive.api.interfaces;
+package de.alive.api;
 
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.api.interfaces.IPlayer;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;

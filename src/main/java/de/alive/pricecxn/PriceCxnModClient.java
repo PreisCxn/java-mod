@@ -1,11 +1,11 @@
 package de.alive.pricecxn;
 
 import de.alive.api.LogPrinter;
+import de.alive.api.Mod;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
-import de.alive.api.interfaces.Mod;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
