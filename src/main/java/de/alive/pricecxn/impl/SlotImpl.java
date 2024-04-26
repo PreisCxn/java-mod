@@ -1,9 +1,9 @@
-package de.alive.api.impl;
+package de.alive.pricecxn.impl;
 
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.ISlot;
 import de.alive.api.networking.DataAccess;
-import de.alive.api.PriceCxn;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,4 +1,4 @@
-package de.alive.api.impl;
+package de.alive.pricecxn.impl;
 
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
