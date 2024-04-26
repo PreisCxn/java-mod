@@ -2,6 +2,7 @@ package de.alive.pricecxn;
 
 import de.alive.api.LogPrinter;
 import de.alive.api.Mod;
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
@@ -41,9 +42,9 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     private static final Callable<Package> DEFAULT_PACKAGE = () -> {
 
         try {
-            Class<?> aClass = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener");
-            LogPrinter.LOGGER.info("Found listener package: {}", aClass.getPackage());
-            return aClass.getPackage();
+            Package definedPackage = Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn.inventory.listener");
+            LogPrinter.LOGGER.info("Found listener package: {}", definedPackage);
+            return definedPackage;
         }catch (Exception e){
             LogPrinter.LOGGER.info("Failed to get default package, assuming this is no dev environment");
             return null;
@@ -57,11 +58,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
         try {
-            Field mod = Class.forName("de.alive.api.PriceCxn").getDeclaredField("mod");
+            Field mod = PriceCxn.class.getDeclaredField("mod");
             mod.setAccessible(true);
             mod.set(null, this);
             mod.setAccessible(false);
-        } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
@@ -71,7 +72,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             CXN_LISTENER = new CxnListener(new ModuleLoader(
                     DEFAULT_PACKAGE.call(),
                     "Listener.jar",
-                    Path.of("./" + MOD_NAME + "_modules/cxn.listener.jar")));
+                    Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
