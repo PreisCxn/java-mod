@@ -29,6 +29,7 @@ dependencies {
 	implementation 'org.java-websocket:Java-WebSocket:1.5.5'
 	implementation 'io.projectreactor:reactor-core:3.4.13'
 	implementation project(path: ":Api", configuration: "namedElements")
+	implementation project(path: ":InventoryScanner")
 	implementation project(path: ":Listener")
 
 	include project(path: ":Api", configuration: "namedElements")
@@ -100,11 +101,11 @@ publishing {
 
 tasks.register('generateVersion', Copy) {
 	doFirst {
-		delete 'src/main/java/de/alive/pricecxn/Version.java'
+		delete 'src/main/java/de/alive/preiscxn/Version.java'
 		println "mod_version is: ${project.mod_version}"
 	}
 	from 'src/templates/version_template.java'
-	into 'src/main/java/de/alive/pricecxn/'
+	into 'src/main/java/de/alive/preiscxn/'
 	include 'version_template.java'
 	rename 'version_template.java', 'Version.java'
 	expand(version: project.mod_version)

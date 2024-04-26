@@ -19,10 +19,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"de.alive.pricecxn.PriceCxnMod"
+			"de.alive.preiscxn.PriceCxnMod"
 		],
 		"client": [
-			"de.alive.pricecxn.PriceCxnModClient"
+			"de.alive.preiscxn.PriceCxnModClient"
 		]
 	},
 	"mixins": [

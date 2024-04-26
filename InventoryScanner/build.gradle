@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'de.alive'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ":Api", configuration: "namedElements")
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
