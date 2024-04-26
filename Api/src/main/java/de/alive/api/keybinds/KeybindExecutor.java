@@ -1,8 +1,8 @@
 package de.alive.api.keybinds;
 
-import net.minecraft.item.ItemStack;
+import de.alive.api.interfaces.IItemStack;
 
 public interface KeybindExecutor {
-    void onKeybindPressed(ItemStack itemStack);
+    void onKeybindPressed(IItemStack itemStack);
 
 }

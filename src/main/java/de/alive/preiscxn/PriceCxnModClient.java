@@ -14,6 +14,7 @@ import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.cytooxien.CxnListener;
 import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
+import de.alive.preiscxn.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.MinecraftClientImpl;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.preiscxn.modules.ModuleLoader;
@@ -175,7 +176,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keyBinding.wasPressed() && client.player != null) {
                 keybindExecutor.onKeybindPressed(
-                        client.player.getInventory().getMainHandStack()
+                         new ItemStackImpl(client.player.getInventory().getMainHandStack())
                 );
             }
         });
