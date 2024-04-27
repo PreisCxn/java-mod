@@ -14,9 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -83,12 +83,12 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
 
             DataAccess access = entry.getValue();
-            JsonElement result = access.getDefaultResult();
+            JsonElement result = access.getData().getDefaultResult();
             String searchResult = this.toolTipSearch(access);
 
             if (searchResult != null) {
-                if (entry.getValue().hasProcessData()) {
-                    result = access.getProcessData().apply(new JsonPrimitive(searchResult));
+                if (entry.getValue().getData().hasProcessData()) {
+                    result = access.getData().getProcessData().apply(new JsonPrimitive(searchResult));
                 } else {
                     result = new JsonPrimitive(searchResult);
                 }
@@ -178,7 +178,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     private @Nullable String toolTipSearch(@NotNull DataAccess access) {
         String result;
-        for (String prefix : access.getData()) {
+        for (String prefix : access.getData().getData()) {
             result = StringUtil.getFirstSuffixStartingWith(this.toolTips, prefix);
             if (result != null) return result;
         }
@@ -190,7 +190,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         JsonObject hash = this.data.deepCopy();
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
-            if (entry.getValue().hasEqualData()) {
+            if (entry.getValue().getData().hasEqualData()) {
                 hash.remove(entry.getKey());
             }
         }
@@ -210,12 +210,12 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         if (!(o instanceof PriceCxnItemStackImpl item)) return false;
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
-            if (entry.getValue().hasEqualData()) {
+            if (entry.getValue().getData().hasEqualData()) {
 
                 JsonElement el1 = item.getData().get(entry.getKey());
                 JsonElement el2 = this.getData().get(entry.getKey());
 
-                if (!entry.getValue().getEqualData().apply(new Pair<>(el1, el2)))
+                if (!entry.getValue().getData().getEqualData().apply(Tuples.of(el1, el2)))
                     return false;
             }
         }
@@ -247,7 +247,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             hash.get(COMMENT_KEY).getAsJsonObject().remove("display");
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
-            if (entry.getValue().hasEqualData()) {
+            if (entry.getValue().getData().hasEqualData()) {
                 hash.remove(entry.getKey());
             }
         }
@@ -292,9 +292,9 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Override
     public void updateData(@NotNull PriceCxnItemStack item) {
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
-            if (entry.getValue().hasEqualData()) {
+            if (entry.getValue().getData().hasEqualData()) {
                 if (!item.getSearchData().containsKey(entry.getKey())) continue;
-                if (!item.getSearchData().get(entry.getKey()).hasEqualData()) continue;
+                if (!item.getSearchData().get(entry.getKey()).getData().hasEqualData()) continue;
 
                 this.data.remove(entry.getKey());
                 this.data.add(entry.getKey(), item.getData().get(entry.getKey()));

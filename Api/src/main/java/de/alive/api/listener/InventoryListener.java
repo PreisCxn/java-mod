@@ -65,7 +65,7 @@ public abstract class InventoryListener {
             return mono;
         }
 
-        if (!this.isOpen && client.isCurrentScreenInstanceOfHandledScreen() && isInventoryTitle(client, inventoryTitles.getData())) {
+        if (!this.isOpen && client.isCurrentScreenInstanceOfHandledScreen() && isInventoryTitle(client, inventoryTitles.getData().getData())) {
             if (!(client.getInventory().getSize() == inventorySize)) return mono;
             IScreenHandler handler = client.getScreenHandler();
             return mono.then(initSlotsAsync(handler)
@@ -117,7 +117,7 @@ public abstract class InventoryListener {
         if (lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
         if (client.isPlayerNull()) return false;
         if (handler == null) return false;
-        if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
+        if (!isInventoryTitle(client, inventoryTitles.getData().getData())) return false;
         if (!(client.getInventory().getSize() == inventorySize)) return false;
 
         for (int i = 0; i < this.inventorySize; i++) {

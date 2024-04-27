@@ -42,7 +42,7 @@ public class DataHandler {
         this.keyColumnName = keyColumnName;
         if (dataAccess != null) {
             for (DataAccess access : dataAccess)
-                if (access != null) access.setDataHandler(this);
+                if (access != null) access.getData().setDataHandler(this);
         }
     }
 
@@ -165,7 +165,7 @@ public class DataHandler {
     }
 
     public void setDataAccess(@NotNull DataAccess dataAccess) {
-        dataAccess.setDataHandler(this);
+        dataAccess.getData().setDataHandler(this);
     }
 
     public void setUri(String uri) {

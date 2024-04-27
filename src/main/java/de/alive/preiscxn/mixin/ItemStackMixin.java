@@ -151,8 +151,8 @@ public abstract class ItemStackMixin {
             return true;
 
         List<String> invBlocks = switch(mode){
-            case SKYBLOCK -> TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData();
-            case CITYBUILD -> TranslationDataAccess.CITYBUILD_INV_BLOCK.getData();
+            case SKYBLOCK -> TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData().getData();
+            case CITYBUILD -> TranslationDataAccess.CITYBUILD_INV_BLOCK.getData().getData();
             default -> null;
         };
 
@@ -167,7 +167,7 @@ public abstract class ItemStackMixin {
         }
 
         for (Text text : list) {
-            for (String datum : TranslationDataAccess.VISIT_ISLAND.getData()) {
+            for (String datum : TranslationDataAccess.VISIT_ISLAND.getData().getData()) {
                 if (text.getString().contains(datum)) {
                     return true;
                 }
@@ -229,11 +229,11 @@ public abstract class ItemStackMixin {
         if(inventoryTitle == null)
             return 1;
 
-        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().contains(inventoryTitle))
+        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().getData().contains(inventoryTitle))
             return 1;
 
         for (Text text : list) {
-            for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData()) {
+            for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData().getData()) {
                 if (text.getString().contains(datum)) {
                     String amount = StringUtil.removeChars(text.getString());
                     try {

@@ -88,7 +88,7 @@ public class TomNookListener extends InventoryListener {
 
         String screenTitle = client.getInventory().getTitle();
 
-        for(String s : this.searchData.getData()) {
+        for(String s : this.searchData.getData().getData()) {
             if(s.contains("--##--")) {
                 String[] split = s.split("--##--");
 

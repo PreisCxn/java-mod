@@ -79,7 +79,7 @@ public abstract class TabListener {
                     }
                 })
                 .filter(Objects::nonNull)
-                .flatMap(value -> Flux.fromIterable(this.searches.getData())
+                .flatMap(value -> Flux.fromIterable(this.searches.getData().getData())
                         .filter(search -> value.toString().contains(search))
                         .filter(search -> !(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())))
                         .flatMap(search -> this.handleData(value.toString()).then(Mono.just(search)))
@@ -107,7 +107,7 @@ public abstract class TabListener {
     }
 
     public List<String> getSearches() {
-        return searches.getData();
+        return searches.getData().getData();
     }
 
     public void setDataAccess(DataAccess searches) {
