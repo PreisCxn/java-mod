@@ -83,10 +83,10 @@ public class TomNookListener extends InventoryListener {
     }
 
     private @Nullable String getBuyPriceFromInvName(@NotNull IMinecraftClient client) {
-        if (client.isCurrentScreenNull() || client.isCurrentScreenTitleNull())
+        if (client.isCurrentScreenNull() || client.getInventory().getTitle() == null)
             return null;
 
-        String screenTitle = client.getCurrentScreenTitle();
+        String screenTitle = client.getInventory().getTitle();
 
         for(String s : this.searchData.getData()) {
             if(s.contains("--##--")) {

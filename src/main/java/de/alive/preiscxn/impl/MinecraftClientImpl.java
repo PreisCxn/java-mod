@@ -1,5 +1,6 @@
 package de.alive.preiscxn.impl;
 
+import de.alive.api.interfaces.IInventory;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import net.minecraft.client.MinecraftClient;
@@ -28,31 +29,6 @@ public class MinecraftClientImpl implements IMinecraftClient {
     }
 
     @Override
-    public boolean isCurrentScreenTitleNull() {
-        return minecraftClient.currentScreen == null || minecraftClient.currentScreen.getTitle() == null;
-    }
-
-    @Override
-    public String getCurrentScreenTitle() {
-        return minecraftClient.currentScreen == null ? "" : minecraftClient.currentScreen.getTitle().getString();
-    }
-
-    @Override
-    public boolean containsInTitle(String s) {
-        return minecraftClient.currentScreen == null || minecraftClient.currentScreen.getTitle().getString().contains(s);
-    }
-
-    @Override
-    public boolean equalsTitle(String s) {
-        return minecraftClient.currentScreen == null || minecraftClient.currentScreen.getTitle().getString().equals(s);
-    }
-
-    @Override
-    public int getInventorySize() {
-        return minecraftClient.player == null ? 0 : minecraftClient.player.currentScreenHandler.getSlot(0).inventory.size();
-    }
-
-    @Override
     public String getPlayerUuidAsString() {
         return minecraftClient.player == null ? "" : minecraftClient.player.getUuidAsString();
     }
@@ -70,5 +46,9 @@ public class MinecraftClientImpl implements IMinecraftClient {
     @Override
     public IScreenHandler getScreenHandler() {
         return minecraftClient.player != null ? new ScreenHandlerImpl(minecraftClient.player.currentScreenHandler) : null;
+    }
+
+    public IInventory getInventory(){
+        return minecraftClient.player != null ? new InventoryImpl(minecraftClient, minecraftClient.player.getInventory()) : null;
     }
 }

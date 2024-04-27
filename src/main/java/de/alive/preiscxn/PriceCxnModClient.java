@@ -176,7 +176,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keyBinding.wasPressed() && client.player != null) {
                 keybindExecutor.onKeybindPressed(
-                         new ItemStackImpl(client.player.getInventory().getMainHandStack())
+                        new MinecraftClientImpl(client),
+                        new ItemStackImpl(client.player.getInventory().getMainHandStack())
                 );
             }
         });

@@ -4,14 +4,6 @@ public interface IMinecraftClient {
     boolean isPlayerNull();
     boolean isCurrentScreenNull();
     boolean isCurrentScreenHandlerNull();
-    boolean isCurrentScreenTitleNull();
-    String getCurrentScreenTitle();
-
-    boolean containsInTitle(String s);
-
-    boolean equalsTitle(String s);
-
-    int getInventorySize();
 
     String getPlayerUuidAsString();
 
@@ -20,4 +12,6 @@ public interface IMinecraftClient {
     boolean isCurrentScreenInstanceOfHandledScreen();
 
     IScreenHandler getScreenHandler();
+
+    IInventory getInventory();
 }
