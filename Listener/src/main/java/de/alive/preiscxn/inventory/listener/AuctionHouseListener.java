@@ -8,6 +8,7 @@ import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.inventory.InventoryDataAccess;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -40,16 +41,16 @@ public class AuctionHouseListener extends InventoryListener {
     public AuctionHouseListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
         super(mod, inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
 
-        searchData.put("sellerName", TranslationDataAccess.SELLER_SEARCH);
+        searchData.put("sellerName", InventoryDataAccess.SELLER_SEARCH);
         searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
-        searchData.put("bidPrice", TranslationDataAccess.BID_SEARCH);
-        searchData.put("buyPrice", TranslationDataAccess.AH_BUY_SEARCH);
-        searchData.put("isBid", TranslationDataAccess.HIGHEST_BIDDER_SEARCH); //todo add isBid
+        searchData.put("bidPrice", InventoryDataAccess.BID_SEARCH);
+        searchData.put("buyPrice", InventoryDataAccess.AH_BUY_SEARCH);
+        searchData.put("isBid", InventoryDataAccess.HIGHEST_BIDDER_SEARCH); //todo add isBid
 
     }
 
     public AuctionHouseListener(Mod mod, AtomicBoolean... active) {
-        this(mod, TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
+        this(mod, InventoryDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override

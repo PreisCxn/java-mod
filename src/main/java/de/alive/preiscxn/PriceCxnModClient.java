@@ -1,6 +1,5 @@
 package de.alive.preiscxn;
 
-import de.alive.api.LogPrinter;
 import de.alive.api.Mod;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnListener;
@@ -8,6 +7,7 @@ import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.api.module.ModuleLoader;
 import de.alive.api.module.PriceCxnModule;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
@@ -17,7 +17,9 @@ import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.MinecraftClientImpl;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.preiscxn.modules.ModuleLoader;
+import de.alive.preiscxn.modules.MainModule;
+import de.alive.preiscxn.modules.ModuleLoaderImpl;
+import de.alive.preiscxn.modules.RemoteModule;
 import de.alive.preiscxn.networking.HttpImpl;
 import de.alive.preiscxn.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
@@ -36,7 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -46,18 +48,9 @@ import static de.alive.preiscxn.PriceCxnMod.MOD_NAME;
 public class PriceCxnModClient implements ClientModInitializer, Mod {
     private final Map<Class<? extends KeybindExecutor>, KeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<KeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
+    private final ModuleLoader projectLoader;
 
-    private static final Callable<Package> DEFAULT_PACKAGE = () -> {
-        try {
-            Package definedPackage = Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn.inventory.listener");
-            LogPrinter.LOGGER.info("Found listener package: {}", definedPackage);
-            return definedPackage;
-        }catch (Exception e){
-            LogPrinter.LOGGER.info("Failed to get default package, assuming this is no dev environment");
-            return null;
-        }
-    };
-    private final CxnListener CXN_LISTENER;
+    private final CxnListener cxnListener;
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
 
@@ -75,28 +68,37 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
         LOGGER.info("PriceCxn client created");
 
+        this.projectLoader =
+                new ModuleLoaderImpl(
+                        Thread.currentThread().getContextClassLoader(),
+                        Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn"));
+
+        this.projectLoader.addModule(new MainModule());
+
         try {
-            CXN_LISTENER = new CxnListener(new ModuleLoader(
-                    DEFAULT_PACKAGE.call(),
-                    "Listener.jar",
-                    Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar")));
+            cxnListener = new CxnListener();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        new ModuleLoader(
-                Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn"))
-                .loadInterfaces(PriceCxnModule.class)
-                .doOnNext(classes -> classes.forEach(aClass -> {
-                    try {
-                        aClass.getConstructor().newInstance().loadModule();
+        RemoteModule.create("Listener.jar",
+                        Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"))
+                .doOnNext(module1 -> {
+                    this.projectLoader.addModule(module1);
+
+                    this.cxnListener.loadModules(this.projectLoader);
+
+                    Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
+                    classes1.forEach(aClass -> {
+                        try {
+                            aClass.getConstructor().newInstance().loadModule();
                         LOGGER.info("Loaded module: {}", aClass);
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        LOGGER.error("Failed to load module: {}", aClass, e);
-                    }
-                }))
-                .subscribe();
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
+                            LOGGER.error("Failed to load module: {}", aClass, e);
+                        }
+                    });
+                }).subscribe();
     }
 
     @Override
@@ -130,7 +132,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public ICxnListener getCxnListener() {
-        return CXN_LISTENER;
+        return cxnListener;
     }
 
     @Override
@@ -191,6 +193,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public void forEachKeybindExecutor(BiConsumer<? super KeyBinding, ? super KeybindExecutor> keyBinding) {
         keyBindingKeybindExecutorMap.forEach(keyBinding);
+    }
+
+    @Override
+    public ModuleLoader getProjectLoader() {
+        return this.projectLoader;
     }
 
 }

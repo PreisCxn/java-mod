@@ -2,10 +2,10 @@ package de.alive.preiscxn.cytooxien;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnDataHandler;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.Modes;
-import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.DataHandler;
 import de.alive.api.networking.IServerChecker;
@@ -16,10 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
@@ -48,7 +45,8 @@ public class CxnDataHandler implements ICxnDataHandler {
             return new WebSocketCompletion(serverChecker.getWebsocket(), "translationLanguages")
                     .getMono()
                     .map(StringUtil::stringToList)
-                    .doOnSuccess(this::createTranslationHandler).then();
+                    .doOnNext(this::createTranslationHandler)
+                    .then();
     }
 
     @Override
@@ -120,35 +118,32 @@ public class CxnDataHandler implements ICxnDataHandler {
     }
 
     public void createTranslationHandler(@NotNull List<String> langList) {
-        DataAccess[] translationAccess = {
-                TranslationDataAccess.INV_AUCTION_HOUSE_SEARCH,
-                TranslationDataAccess.INV_ITEM_SHOP_SEARCH,
-                TranslationDataAccess.INV_NOOK_SEARCH,
-                TranslationDataAccess.INV_TRADE_SEARCH,
-                TranslationDataAccess.TIMESTAMP_SEARCH,
-                TranslationDataAccess.SELLER_SEARCH,
-                TranslationDataAccess.BID_SEARCH,
-                TranslationDataAccess.AH_BUY_SEARCH,
-                TranslationDataAccess.THEME_SERVER_SEARCH,
-                TranslationDataAccess.HIGHEST_BIDDER_SEARCH,
-                TranslationDataAccess.NOOK_BUY_SEARCH,
-                TranslationDataAccess.SHOP_BUY_SEARCH,
-                TranslationDataAccess.SHOP_SELL_SEARCH,
-                TranslationDataAccess.TRADE_BUY_SEARCH,
-                TranslationDataAccess.HOUR_SEARCH,
-                TranslationDataAccess.MINUTE_SEARCH,
-                TranslationDataAccess.SECOND_SEARCH,
-                TranslationDataAccess.NOW_SEARCH,
-                TranslationDataAccess.SKYBLOCK_INV_BLOCK,
-                TranslationDataAccess.CITYBUILD_INV_BLOCK
-        };
+        Set<Class<? extends DataAccess>> classes = PriceCxn.getMod()
+                .getProjectLoader()
+                .loadInterfaces(DataAccess.class);
 
+        List<DataAccess> dataList = new ArrayList<>();
+        for (Class<? extends DataAccess> aClass : classes) {
+
+            if (aClass.isEnum()) {
+                try {
+                    DataAccess[] values = (DataAccess[]) aClass.getMethod("values").invoke(null);
+                    dataList.addAll(Arrays.asList(values));
+                } catch (Exception e) {
+                    LOGGER.error("Error while loading enum values", e);
+                    return;
+                }
+            }
+        }
+        LOGGER.info("Loaded {} DataAccess", dataList.size());
 
         data.put("cxnprice.translation",
                 new DataHandler(serverChecker,
                         "/settings/translations",
                         langList,
                         "translation_key",
-                        DataHandler.TRANSLATION_REFRESH_INTERVAL, translationAccess));
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL,
+                        dataList.toArray(new DataAccess[0])
+                ));
     }
 }

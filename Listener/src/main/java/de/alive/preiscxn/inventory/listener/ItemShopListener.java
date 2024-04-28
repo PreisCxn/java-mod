@@ -5,11 +5,11 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.api.Mod;
 import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.inventory.InventoryDataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -46,13 +46,13 @@ public class ItemShopListener extends InventoryListener {
     public ItemShopListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
         super(mod, inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
 
-        searchData.put("buyPrice", TranslationDataAccess.SHOP_BUY_SEARCH);
-        searchData.put("sellPrice", TranslationDataAccess.SHOP_SELL_SEARCH);
+        searchData.put("buyPrice", InventoryDataAccess.SHOP_BUY_SEARCH);
+        searchData.put("sellPrice", InventoryDataAccess.SHOP_SELL_SEARCH);
 
     }
 
     public ItemShopListener(Mod mod, @Nullable AtomicBoolean... active) {
-        this(mod, TranslationDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
+        this(mod, InventoryDataAccess.INV_ITEM_SHOP_SEARCH, 0, active);
     }
 
     @Override

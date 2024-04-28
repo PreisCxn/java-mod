@@ -5,6 +5,7 @@ import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.api.module.ModuleLoader;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
@@ -31,4 +32,5 @@ public interface Mod {
     void registerKeybinding(@NotNull KeyBinding keyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory);
     KeyBinding getKeyBinding(Class<? extends KeybindExecutor> keybindExecutorClass);
     void forEachKeybindExecutor(BiConsumer<? super KeyBinding, ? super KeybindExecutor> keyBinding);
+    ModuleLoader getProjectLoader();
 }

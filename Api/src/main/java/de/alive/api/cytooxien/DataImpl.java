@@ -22,7 +22,7 @@ public class DataImpl implements Data {
 
     private final @NotNull JsonElement defaultResult;
 
-    DataImpl(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
+    public DataImpl(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
@@ -30,11 +30,11 @@ public class DataImpl implements Data {
         this.defaultResult = defaultResult != null ? defaultResult : JsonNull.INSTANCE;
     }
 
-    DataImpl(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
+    public DataImpl(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
         this(id, backupData, processData, equalData, null);
     }
 
-    DataImpl(String id, List<String> backupData) {
+    public DataImpl(String id, List<String> backupData) {
         this(id, backupData, null, null, null);
     }
 

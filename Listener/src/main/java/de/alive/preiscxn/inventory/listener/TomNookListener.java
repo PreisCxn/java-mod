@@ -10,6 +10,7 @@ import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.utils.StringUtil;
+import de.alive.preiscxn.inventory.InventoryDataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -44,7 +45,7 @@ public class TomNookListener extends InventoryListener {
     }
 
     public TomNookListener(Mod mod, @Nullable AtomicBoolean... active) {
-        this(mod, TranslationDataAccess.INV_NOOK_SEARCH, 0, active);
+        this(mod, InventoryDataAccess.INV_NOOK_SEARCH, 0, active);
     }
 
     @Override
