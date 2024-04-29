@@ -1,8 +1,8 @@
 package de.alive.api.utils;
 
+import de.alive.api.LogPrinter;
 import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.DataAccess;
-import de.alive.api.LogPrinter;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -77,7 +77,7 @@ public class TimeUtil {
     }
 
     public static @NotNull Optional<Long> getStartTimeStamp(@NotNull String timerString) {
-        if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
+        if (StringUtil.containsString(timerString, NOW_SEARCH.getData().getData()))
             return Optional.empty();
 
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
@@ -113,7 +113,7 @@ public class TimeUtil {
      * @return Die Minuten als Integer.
      */
     public static @NotNull Optional<Integer> getMinutes(@NotNull String timerString) {
-        if (StringUtil.containsString(timerString, NOW_SEARCH.getData()))
+        if (StringUtil.containsString(timerString, NOW_SEARCH.getData().getData()))
             return Optional.empty();
 
         String[] parts = timerString.split(" ");
@@ -125,7 +125,7 @@ public class TimeUtil {
                 return Optional.empty();
             }
         } else {
-            if(!StringUtil.containsString(parts[1], MINUTE_SEARCH.getData())) return Optional.of(0);
+            if(!StringUtil.containsString(parts[1], MINUTE_SEARCH.getData().getData())) return Optional.of(0);
 
             try{
                 int minutes = Integer.parseInt(parts[0]);
@@ -146,7 +146,7 @@ public class TimeUtil {
 
         timerString = timerString.toLowerCase();
 
-        List<String> searchList = StringUtil.listToLowerCase(search.getData());
+        List<String> searchList = StringUtil.listToLowerCase(search.getData().getData());
 
         List<String> partsList = Arrays.asList(timerString.split(" "));
 

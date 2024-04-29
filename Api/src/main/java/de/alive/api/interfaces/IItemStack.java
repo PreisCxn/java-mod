@@ -1,7 +1,17 @@
 package de.alive.api.interfaces;
 
-import net.minecraft.item.ItemStack;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.networking.DataAccess;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IItemStack {
-    ItemStack getStack();
+    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
+    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment);
+    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData);
+
+    List<String> getLore();
+
 }

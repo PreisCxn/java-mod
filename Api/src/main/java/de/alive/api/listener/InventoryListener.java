@@ -61,12 +61,12 @@ public abstract class InventoryListener {
         if (client.isCurrentScreenNull()) {
             return mono;
         }
-        if (client.isCurrentScreenTitleNull() || client.getCurrentScreenTitle().isEmpty()) {
+        if (client.getInventory().getTitle() == null || client.getInventory().getTitle().isEmpty()) {
             return mono;
         }
 
-        if (!this.isOpen && client.isCurrentScreenInstanceOfHandledScreen() && isInventoryTitle(client, inventoryTitles.getData())) {
-            if (!(client.getInventorySize() == inventorySize)) return mono;
+        if (!this.isOpen && client.isCurrentScreenInstanceOfHandledScreen() && isInventoryTitle(client, inventoryTitles.getData().getData())) {
+            if (!(client.getInventory().getSize() == inventorySize)) return mono;
             IScreenHandler handler = client.getScreenHandler();
             return mono.then(initSlotsAsync(handler)
                                      .doOnSuccess((a) -> {
@@ -98,7 +98,7 @@ public abstract class InventoryListener {
                 String[] split = title.split("--##--");
                 boolean allContained = true;
                 for (String s : split) {
-                    if (!client.containsInTitle(s)) {
+                    if (!client.getInventory().getTitle().contains(s)) {
                         allContained = false;
                         break;
                     }
@@ -106,7 +106,7 @@ public abstract class InventoryListener {
                 return allContained;
             }
 
-            if (client.equalsTitle(title))
+            if (client.getInventory().getTitle().equals(title))
                 return true;
         }
 
@@ -117,8 +117,8 @@ public abstract class InventoryListener {
         if (lastUpdate + REFRESH_INTERVAL > System.currentTimeMillis()) return false;
         if (client.isPlayerNull()) return false;
         if (handler == null) return false;
-        if (!isInventoryTitle(client, inventoryTitles.getData())) return false;
-        if (!(client.getInventorySize() == inventorySize)) return false;
+        if (!isInventoryTitle(client, inventoryTitles.getData().getData())) return false;
+        if (!(client.getInventory().getSize() == inventorySize)) return false;
 
         for (int i = 0; i < this.inventorySize; i++) {
 

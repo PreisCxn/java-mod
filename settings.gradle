@@ -10,4 +10,5 @@ pluginManagement {
 }
 include 'Api'
 include 'Listener'
+include 'InventoryScanner'
 

@@ -1,4 +1,4 @@
-package de.alive.pricecxn.mixin.client;
+package de.alive.preiscxn.mixin.client;
 
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
