@@ -40,7 +40,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     private <I> List<Class<? extends I>> getInterfaces(ClassLoader classLoader, Class<I> interfaceClass) {
-        LOGGER.info("Loading interfaces from package {}", defaultPackage);
+        LOGGER.info("Loading interfaces for interface {}", interfaceClass.getName());
         List<Class<? extends I>> list = new ArrayList<>();
         try{
             Enumeration<URL> resources = Thread.currentThread()

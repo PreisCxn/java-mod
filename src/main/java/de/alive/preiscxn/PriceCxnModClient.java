@@ -81,8 +81,20 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException(e);
         }
 
+        Package defaultListenerPackage;
+
+        try {
+            defaultListenerPackage = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener")
+                    .getPackage();
+            LOGGER.info("Found default listener package: {}", defaultListenerPackage.getName());
+        } catch (ClassNotFoundException e) {
+            defaultListenerPackage = null;
+            LOGGER.info("No default listener package found");
+        }
+
         RemoteModule.create("Listener.jar",
-                        Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"))
+                        Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
+                        defaultListenerPackage)
                 .doOnNext(module1 -> {
                     this.projectLoader.addModule(module1);
 

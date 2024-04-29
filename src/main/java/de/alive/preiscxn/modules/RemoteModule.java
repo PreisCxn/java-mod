@@ -19,15 +19,21 @@ import static de.alive.api.LogPrinter.LOGGER;
 public class RemoteModule implements Module {
     private final String remotePath;
     private final Path jarPath;
+    private final Package defaultPackage;
     private ClassLoader parentClassLoader = null;
+    private ClassLoader moduleClassLoader = null;
 
-    private RemoteModule(String remotePath, Path jarPath) {
+    private RemoteModule(String remotePath, Path jarPath, Package defaultPackage) {
         this.remotePath = remotePath;
         this.jarPath = jarPath;
+        this.defaultPackage = defaultPackage;
     }
 
-    public static Mono<Module> create(String remotePath, Path jarPath) {
-        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath);
+    public static Mono<Module> create(String remotePath, Path jarPath, Package defaultPackage) {
+        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, defaultPackage);
+
+        if(defaultPackage != null)
+            return Mono.just(remoteModule);
 
         return remoteModule
                 .isOutdated()
@@ -46,6 +52,19 @@ public class RemoteModule implements Module {
 
     @Override
     public ClassLoader getModuleClassLoader() {
+        if(moduleClassLoader == null)
+            moduleClassLoader = createClassLoader();
+
+        return moduleClassLoader;
+    }
+
+    private ClassLoader createClassLoader() {
+        if(this.parentClassLoader == null)
+            throw new IllegalStateException("Parent classloader must not be null (call load first)");
+
+        if(defaultPackage != null)
+            return this.parentClassLoader;
+
         LOGGER.info("Loading interfaces from {}", jarPath);
         try {
             URL url = jarPath.toUri().toURL();
