@@ -6,6 +6,7 @@ import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
+import de.alive.api.keybinds.CustomKeyBinding;
 import de.alive.api.keybinds.KeybindExecutor;
 import de.alive.api.module.Module;
 import de.alive.api.module.ModuleLoader;
@@ -29,7 +30,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,6 +82,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         }
 
         this.projectLoader.addModule(new ClasspathModule("de.alive.api"));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory"));
 
         registerRemoteModule(
                 "de.alive.inventory.listener.AuctionHouseListener",
@@ -123,12 +124,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public void onInitializeClient() {
         LOGGER.info("PriceCxn client initialized");
 
-        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        CustomKeyBinding keyBinding = new CustomKeyBinding(
                 "cxn_listener.keys.open_in_browser",
-                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 "cxn_listener.mod_text"
-        ));
+        );
 
         registerKeybinding(keyBinding, new OpenBrowserKeybindExecutor(), true);
     }
@@ -188,7 +188,9 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public void registerKeybinding(@NotNull KeyBinding keyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+    public void registerKeybinding(@NotNull CustomKeyBinding customKeyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(customKeyBinding.getKeybinding());
+
         classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
         if (inInventory)
             keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);

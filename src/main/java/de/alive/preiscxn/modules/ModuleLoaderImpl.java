@@ -31,6 +31,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
         for (Module module : modules) {
             list.addAll(getInterfaces(module.getPrimaryPackage(), interfaceClass));
         }
+        list.remove(interfaceClass);
         return list;
     }
 
