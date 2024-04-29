@@ -6,9 +6,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.DigestInputStream;
@@ -19,20 +16,18 @@ import static de.alive.api.LogPrinter.LOGGER;
 public class RemoteModule implements Module {
     private final String remotePath;
     private final Path jarPath;
-    private final Package defaultPackage;
-    private ClassLoader parentClassLoader = null;
-    private ClassLoader moduleClassLoader = null;
+    private final String primaryPackage;
 
-    private RemoteModule(String remotePath, Path jarPath, Package defaultPackage) {
+    private RemoteModule(String remotePath, Path jarPath, String primaryPackage) {
         this.remotePath = remotePath;
         this.jarPath = jarPath;
-        this.defaultPackage = defaultPackage;
+        this.primaryPackage = primaryPackage;
     }
 
-    public static Mono<Module> create(String remotePath, Path jarPath, Package defaultPackage) {
-        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, defaultPackage);
+    public static Mono<Module> create(String remotePath, Path jarPath, String primaryPackage) {
+        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage);
 
-        if(defaultPackage != null)
+        if(primaryPackage != null)
             return Mono.just(remoteModule);
 
         return remoteModule
@@ -43,37 +38,8 @@ public class RemoteModule implements Module {
     }
 
     @Override
-    public void load(ClassLoader parentClassloader) {
-        if(parentClassloader == null)
-            throw new IllegalArgumentException("Parent classloader must not be null");
-
-        this.parentClassLoader = parentClassloader;
-    }
-
-    @Override
-    public ClassLoader getModuleClassLoader() {
-        if(moduleClassLoader == null)
-            moduleClassLoader = createClassLoader();
-
-        return moduleClassLoader;
-    }
-
-    private ClassLoader createClassLoader() {
-        if(this.parentClassLoader == null)
-            throw new IllegalStateException("Parent classloader must not be null (call load first)");
-
-        if(defaultPackage != null)
-            return this.parentClassLoader;
-
-        LOGGER.info("Loading interfaces from {}", jarPath);
-        try {
-            URL url = jarPath.toUri().toURL();
-            URL[] urls = new URL[]{url};
-
-            return new URLClassLoader(urls, this.parentClassLoader == null ? this.getClass().getClassLoader() : this.parentClassLoader);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+    public String getPrimaryPackage() {
+        return primaryPackage;
     }
 
     private Mono<Void> download() {

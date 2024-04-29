@@ -1,4 +1,4 @@
-package de.alive.preiscxn.inventory.scanner;
+package de.alive.inventory_scanner;
 
 import de.alive.api.module.PriceCxnModule;
 

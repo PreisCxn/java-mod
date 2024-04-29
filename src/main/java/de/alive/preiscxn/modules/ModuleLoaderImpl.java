@@ -14,19 +14,14 @@ import static de.alive.api.LogPrinter.LOGGER;
 
 public class ModuleLoaderImpl implements ModuleLoader {
 
-    private final ClassLoader parentClassLoader;
-    private final Package defaultPackage;
     private final List<Module> modules = new ArrayList<>();
 
 
-    public ModuleLoaderImpl(ClassLoader parentClassLoader, Package defaultPackage) {
-        this.parentClassLoader = parentClassLoader;
-        this.defaultPackage = defaultPackage;
+    public ModuleLoaderImpl() {
     }
 
     @Override
     public void addModule(Module module) {
-        module.load(parentClassLoader);
         this.modules.add(module);
     }
 
@@ -34,18 +29,18 @@ public class ModuleLoaderImpl implements ModuleLoader {
     public <I> Set<Class<? extends I>> loadInterfaces(Class<I> interfaceClass) {
         Set<Class<? extends I>> list = new HashSet<>();
         for (Module module : modules) {
-            list.addAll(getInterfaces(module.getModuleClassLoader(), interfaceClass));
+            list.addAll(getInterfaces(module.getPrimaryPackage(), interfaceClass));
         }
         return list;
     }
 
-    private <I> List<Class<? extends I>> getInterfaces(ClassLoader classLoader, Class<I> interfaceClass) {
-        LOGGER.info("Loading interfaces for interface {}", interfaceClass.getName());
+    private <I> List<Class<? extends I>> getInterfaces(String primaryPackage, Class<I> interfaceClass) {
+        LOGGER.info("Loading interfaces for {}", interfaceClass.getName());
         List<Class<? extends I>> list = new ArrayList<>();
         try{
             Enumeration<URL> resources = Thread.currentThread()
                     .getContextClassLoader()
-                    .getResources(defaultPackage.getName().replace(".", File.separator));
+                    .getResources(primaryPackage.replace(".", File.separator));
 
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
@@ -58,12 +53,12 @@ public class ModuleLoaderImpl implements ModuleLoader {
                                     .replace(".class", "")
                                     .replace(File.separator, "."))
                             .forEach(className -> {
-                                int index = className.indexOf("de.alive.preiscxn");
+                                int index = className.indexOf(primaryPackage);
                                 if (index != -1) {
                                     className = className.substring(index);
                                 }
                                 try{
-                                    Class<?> clazz = classLoader.loadClass(className);
+                                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
                                     if (interfaceClass.isAssignableFrom(clazz)) {
                                         list.add(clazz.asSubclass(interfaceClass));
                                     }

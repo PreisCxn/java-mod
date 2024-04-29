@@ -1,4 +1,4 @@
-package de.alive.preiscxn.inventory.scanner.keybinds;
+package de.alive.inventory_scanner.keybinds;
 
 import de.alive.api.interfaces.IItemStack;
 import de.alive.api.interfaces.IMinecraftClient;

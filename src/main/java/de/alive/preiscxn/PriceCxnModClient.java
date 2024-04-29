@@ -7,6 +7,7 @@ import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.api.module.Module;
 import de.alive.api.module.ModuleLoader;
 import de.alive.api.module.PriceCxnModule;
 import de.alive.api.networking.DataAccess;
@@ -17,6 +18,7 @@ import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.MinecraftClientImpl;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
+import de.alive.preiscxn.modules.ClasspathModule;
 import de.alive.preiscxn.modules.MainModule;
 import de.alive.preiscxn.modules.ModuleLoaderImpl;
 import de.alive.preiscxn.modules.RemoteModule;
@@ -32,6 +34,7 @@ import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -68,10 +71,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
         LOGGER.info("PriceCxn client created");
 
-        this.projectLoader =
-                new ModuleLoaderImpl(
-                        Thread.currentThread().getContextClassLoader(),
-                        Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn"));
+        this.projectLoader = new ModuleLoaderImpl();
 
         this.projectLoader.addModule(new MainModule());
 
@@ -81,23 +81,15 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException(e);
         }
 
-        Package defaultListenerPackage;
+        this.projectLoader.addModule(new ClasspathModule("de.alive.api"));
 
-        try {
-            defaultListenerPackage = Class.forName("de.alive.preiscxn.inventory.listener.AuctionHouseListener")
-                    .getPackage();
-            LOGGER.info("Found default listener package: {}", defaultListenerPackage.getName());
-        } catch (ClassNotFoundException e) {
-            defaultListenerPackage = null;
-            LOGGER.info("No default listener package found");
-        }
-
-        RemoteModule.create("Listener.jar",
-                        Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
-                        defaultListenerPackage)
+        registerRemoteModule(
+                "de.alive.inventory.listener.AuctionHouseListener",
+                "Listener.jar",
+                Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
+                "de.alive.inventory")
                 .doOnNext(module1 -> {
                     this.projectLoader.addModule(module1);
-
                     this.cxnListener.loadModules(this.projectLoader);
 
                     Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
@@ -111,6 +103,20 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                         }
                     });
                 }).subscribe();
+    }
+
+    private Mono<Module> registerRemoteModule(String classPath, String remotePath, Path localPath, String primaryPackage) {
+        boolean isInClasspath;
+        try {
+            Thread.currentThread().getContextClassLoader().loadClass(classPath);
+            isInClasspath = true;
+        } catch (Exception e) {
+            isInClasspath = false;
+        }
+
+        return RemoteModule.create(remotePath,
+                localPath,
+                isInClasspath ? primaryPackage : null);
     }
 
     @Override

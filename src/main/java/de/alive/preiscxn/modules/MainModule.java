@@ -4,11 +4,8 @@ import de.alive.api.module.Module;
 
 public class MainModule implements Module {
     @Override
-    public void load(ClassLoader parentClassloader) {
+    public String getPrimaryPackage() {
+        return "de.alive.preiscxn";
     }
 
-    @Override
-    public ClassLoader getModuleClassLoader() {
-        return this.getClass().getClassLoader();
-    }
 }

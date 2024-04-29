@@ -1,4 +1,4 @@
-package de.alive.preiscxn.inventory.listener;
+package de.alive.inventory.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -9,7 +9,7 @@ import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.listener.InventoryListener;
 import de.alive.api.networking.DataAccess;
-import de.alive.preiscxn.inventory.InventoryDataAccess;
+import de.alive.inventory.InventoryDataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;

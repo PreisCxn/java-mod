@@ -1,4 +1,4 @@
-package de.alive.preiscxn.inventory;
+package de.alive.inventory;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
