@@ -16,12 +16,16 @@ public class OpenBrowserKeybindExecutor implements KeybindExecutor {
 
         JsonObject data = priceCxnItemStackImpl.findItemInfo("pricecxn.data.item_data");
 
-        System.out.println(data);
         if (data != null && data.has("item_info_url")) {
             String itemInfoUrl = data.get("item_info_url").getAsString();
 
-            if (itemInfoUrl != null && !itemInfoUrl.isEmpty() && !itemInfoUrl.equals("null"))
-                Util.getOperatingSystem().open(URL_PREFIX + itemInfoUrl);
+            if (itemInfoUrl != null && !itemInfoUrl.isEmpty() && !itemInfoUrl.equals("null")){
+                String amount = (itemInfoUrl.contains("?") ? "&" : "?") +
+                        "amount=" +
+                        priceCxnItemStackImpl.getAmount();
+
+                Util.getOperatingSystem().open(URL_PREFIX + itemInfoUrl + amount);
+            }
         }
 
     }
