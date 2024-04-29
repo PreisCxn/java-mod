@@ -2,6 +2,7 @@ package de.alive.preiscxn.modules;
 
 import de.alive.api.PriceCxn;
 import de.alive.api.module.Module;
+import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -19,39 +20,59 @@ import static de.alive.api.LogPrinter.LOGGER;
 public class RemoteModule implements Module {
     private final String remotePath;
     private final Path jarPath;
+    private final String defaultPackageName;
     private ClassLoader parentClassLoader = null;
+    private ClassLoader moduleClassLoader = null;
 
-    private RemoteModule(String remotePath, Path jarPath) {
+    private RemoteModule(String remotePath, Path jarPath, String defaultPackageName) {
         this.remotePath = remotePath;
         this.jarPath = jarPath;
+        this.defaultPackageName = defaultPackageName;
     }
 
-    public static Mono<Module> create(String remotePath, Path jarPath) {
-        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath);
-
-        return remoteModule
-                .isOutdated()
-                .filter(aBoolean -> aBoolean)
-                .flatMap(outdated -> remoteModule.download())
-                .then(Mono.just(remoteModule));
+    public static Module create(String remotePath, Path jarPath, String defaultPackageName) {
+        return new RemoteModule(remotePath, jarPath, defaultPackageName);
     }
 
     @Override
-    public void load(ClassLoader parentClassloader) {
-        if(parentClassloader == null)
-            throw new IllegalArgumentException("Parent classloader must not be null");
+    public Mono<Void> load(@NotNull ClassLoader parentClassloader) {
+        if(this.parentClassLoader != null)
+            throw new IllegalStateException("RemoteModule#load may not be called once.");
 
         this.parentClassLoader = parentClassloader;
+
+        Package definedPackage = parentClassloader.getDefinedPackage(defaultPackageName);
+
+        if(definedPackage != null){
+            LOGGER.info("Found local version of inventory listener.");
+            moduleClassLoader = parentClassLoader;
+            return Mono.empty();
+        }
+
+        return this
+                .isOutdated()
+                .filter(aBoolean -> aBoolean)
+                .flatMap(outdated -> download())
+                .then();
     }
 
     @Override
     public ClassLoader getModuleClassLoader() {
+        if(moduleClassLoader != null)
+            return moduleClassLoader;
+
+
         LOGGER.info("Loading interfaces from {}", jarPath);
         try {
             URL url = jarPath.toUri().toURL();
             URL[] urls = new URL[]{url};
 
-            return new URLClassLoader(urls, this.parentClassLoader == null ? this.getClass().getClassLoader() : this.parentClassLoader);
+            URLClassLoader urlClassLoader = new URLClassLoader(urls, this.parentClassLoader == null ? this.getClass().getClassLoader() : this.parentClassLoader);
+
+            moduleClassLoader = urlClassLoader;
+
+            return urlClassLoader;
+
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

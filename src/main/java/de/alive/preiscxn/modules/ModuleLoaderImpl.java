@@ -2,6 +2,7 @@ package de.alive.preiscxn.modules;
 
 import de.alive.api.module.Module;
 import de.alive.api.module.ModuleLoader;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.net.URL;
@@ -25,9 +26,9 @@ public class ModuleLoaderImpl implements ModuleLoader {
     }
 
     @Override
-    public void addModule(Module module) {
-        module.load(parentClassLoader);
-        this.modules.add(module);
+    public Mono<Void> addModule(Module module) {
+        return module.load(parentClassLoader)
+                .doOnSuccess(unused -> this.modules.add(module));
     }
 
     @Override

@@ -7,6 +7,7 @@ import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.api.module.Module;
 import de.alive.api.module.ModuleLoader;
 import de.alive.api.module.PriceCxnModule;
 import de.alive.api.networking.DataAccess;
@@ -73,32 +74,33 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                         Thread.currentThread().getContextClassLoader(),
                         Thread.currentThread().getContextClassLoader().getDefinedPackage("de.alive.preiscxn"));
 
-        this.projectLoader.addModule(new MainModule());
-
         try {
             cxnListener = new CxnListener();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        RemoteModule.create("Listener.jar",
-                        Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"))
-                .doOnNext(module1 -> {
-                    this.projectLoader.addModule(module1);
+        Module module = RemoteModule.create("Listener.jar",
+                Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
+                "de.alive.preiscxn.inventory.listener");
 
-                    this.cxnListener.loadModules(this.projectLoader);
+        this.projectLoader.addModule(new MainModule())
+                .then(this.projectLoader.addModule(module)
+                        .doOnSuccess(unused -> {
+                            this.cxnListener.loadModules(this.projectLoader);
 
-                    Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
-                    classes1.forEach(aClass -> {
-                        try {
-                            aClass.getConstructor().newInstance().loadModule();
-                        LOGGER.info("Loaded module: {}", aClass);
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                                 NoSuchMethodException e) {
-                            LOGGER.error("Failed to load module: {}", aClass, e);
-                        }
-                    });
-                }).subscribe();
+                            Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
+                            classes1.forEach(aClass -> {
+                                try {
+                                    aClass.getConstructor().newInstance().loadModule();
+                                    LOGGER.info("Loaded module: {}", aClass);
+                                } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                         NoSuchMethodException e) {
+                                    LOGGER.error("Failed to load module: {}", aClass, e);
+                                }
+                            });
+                        }))
+        .subscribe();
     }
 
     @Override
