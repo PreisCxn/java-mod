@@ -27,6 +27,7 @@
   "cxn_listener.display_prices.days_singular": "day",
   "cxn_listener.display_prices.view_in_browser": "Press %s, for more info.",
 
-  "cxn_listener.keys.open_in_browser": "Open item in browser"
+  "cxn_listener.keys.open_in_browser": "Open item in browser",
+  "cxn_listener.keys.cycle_amount": "Cycle amount for calculation"
 
 }

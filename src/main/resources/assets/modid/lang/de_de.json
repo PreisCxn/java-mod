@@ -27,7 +27,8 @@
   "cxn_listener.display_prices.days_singular": "Tag",
   "cxn_listener.display_prices.view_in_browser": "Drücke %s, für mehr Infos.",
 
-  "cxn_listener.keys.open_in_browser": "Item in Browser öffnen"
+  "cxn_listener.keys.open_in_browser": "Item in Browser öffnen",
+  "cxn_listener.keys.cycle_amount": "Menge für die Berechnung ändern"
 
 }
 
