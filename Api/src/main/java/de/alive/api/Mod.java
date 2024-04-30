@@ -34,4 +34,6 @@ public interface Mod {
     KeyBinding getKeyBinding(Class<? extends KeybindExecutor> keybindExecutorClass);
     void forEachKeybindExecutor(BiConsumer<? super KeyBinding, ? super KeybindExecutor> keyBinding);
     ModuleLoader getProjectLoader();
+    PriceCxnItemStack.ViewMode getViewMode();
+    void nextViewMode();
 }
