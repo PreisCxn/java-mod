@@ -81,7 +81,7 @@ public class TradeListener extends InventoryListener {
 
                     Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
 
-                    printTester(result.isPresent() ? result.get().getAsString() : "Failed to get result");
+                    printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
 
                     return mono;
                 })

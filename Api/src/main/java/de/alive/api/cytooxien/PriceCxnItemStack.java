@@ -2,10 +2,14 @@ package de.alive.api.cytooxien;
 
 import com.google.gson.JsonObject;
 import de.alive.api.networking.DataAccess;
+import de.alive.api.networking.IServerChecker;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public interface PriceCxnItemStack {
 
@@ -29,6 +33,11 @@ public interface PriceCxnItemStack {
     void updateData(@NotNull PriceCxnItemStack item);
 
     int getAmount();
+
+    /**
+     * This includes the stack amount, but also spawn amount
+     */
+    int getAdvancedAmount(IServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText, List<Text> list);
 
     @NotNull
     Map<String, DataAccess> getSearchData();

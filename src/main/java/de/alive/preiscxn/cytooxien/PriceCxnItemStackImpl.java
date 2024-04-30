@@ -4,7 +4,10 @@ import com.google.gson.*;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.cytooxien.PriceText;
+import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.DataAccess;
+import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.ComponentMap;
@@ -14,11 +17,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Unique;
 import reactor.util.function.Tuples;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static de.alive.api.LogPrinter.LOGGER;
@@ -27,29 +33,27 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
-    private final @NotNull ItemStack item;
-
     private final @NotNull Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
 
     private String itemName;
 
-    private final String displayName;
-
-    private int amount = 0;
+    private final int amount;
 
     private List<String> toolTips;
+    private @Nullable JsonObject nookPrice = null;
+    private @Nullable JsonObject pcxnPrice = null;
+    private final StorageItemStack storageItemStack = new StorageItemStack();
 
     public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
         this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
-        this.item = item;
         if(addTooltips)
-            this.toolTips = StringUtil.getToolTips(this.item);
-        this.itemName = this.item.getItem().getTranslationKey();
-        this.displayName = this.item.getName().getString();
+            this.toolTips = StringUtil.getToolTips(item);
+        this.itemName = item.getItem().getTranslationKey();
+        String displayName = item.getName().getString();
         this.amount = item.getCount();
 
         if(item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
@@ -71,7 +75,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         data.addProperty(DISPLAY_NAME_KEY, displayName);
         data.addProperty(MC_CLIENT_LANG_KEY, MinecraftClient.getInstance().getLanguageManager().getLanguage());
         if (addComment)
-            data.add(COMMENT_KEY, getCustomData(this.item));
+            data.add(COMMENT_KEY, getCustomData(item));
 
         LOGGER.debug(itemName);
 
@@ -87,7 +91,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             String searchResult = this.toolTipSearch(access);
 
             if (searchResult != null) {
-                if (entry.getValue().getData().hasProcessData()) {
+                if (entry.getValue().getData().hasProcessData() && access.getData().getProcessData() != null) {
                     result = access.getData().getProcessData().apply(new JsonPrimitive(searchResult));
                 } else {
                     result = new JsonPrimitive(searchResult);
@@ -97,6 +101,8 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             data.add(entry.getKey(), result);
         }
 
+        this.pcxnPrice = findItemInfo("pricecxn.data.item_data");
+        this.nookPrice = findItemInfo("pricecxn.data.nook_data");
     }
 
     public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
@@ -215,7 +221,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
                 JsonElement el1 = item.getData().get(entry.getKey());
                 JsonElement el2 = this.getData().get(entry.getKey());
 
-                if (!entry.getValue().getData().getEqualData().apply(Tuples.of(el1, el2)))
+                if (!Objects.requireNonNull(entry.getValue().getData().getEqualData()).apply(Tuples.of(el1, el2)))
                     return false;
             }
         }
@@ -307,6 +313,24 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         return amount;
     }
 
+    public @Nullable JsonObject getPcxnPrice() {
+        return pcxnPrice;
+    }
+
+    public @Nullable JsonObject getNookPrice() {
+        return nookPrice;
+    }
+
+    @Override
+    public int getAdvancedAmount(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText> pcxnPriceText, @Nullable List<Text> list) {
+        int amount = this.getAmount();
+
+        amount *= getPbvAmountFactor(serverChecker, pcxnPriceText);
+        amount *= getTransactionAmountFactor(list);
+
+        return amount;
+    }
+
     @Override
     public @NotNull Map<String, DataAccess> getSearchData() {
         return searchData;
@@ -390,10 +414,83 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
 
         if (foundItems.size() == 1) {
-            return array.get(foundItems.get(0)).getAsJsonObject();
+            return array.get(foundItems.getFirst()).getAsJsonObject();
         }
 
         return null;
     }
 
+    @Unique
+    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText> pcxnPriceText) {
+        if (pcxnPrice == null
+                || !pcxnPrice.has("pbv_search_key")
+                || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
+                || !this.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
+            return 1;
+
+        String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
+        JsonObject nbtData = this.getDataWithoutDisplay().get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
+
+        if (!nbtData.has("PublicBukkitValues")) return 1;
+        JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
+        if (!pbvData.has(pbvKey)) return 1;
+
+        String pbvSearchResult = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
+
+        int pbvAmount;
+
+        try {
+            pbvAmount = Integer.parseInt(pbvSearchResult);
+        } catch (NumberFormatException e) {
+            LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
+            return 1;
+        }
+
+        if (StorageItemStack.isOf(pcxnPrice)) {
+
+            storageItemStack.setup(pcxnPrice, serverChecker.getWebsocket());
+            if (pcxnPriceText != null)
+                pcxnPriceText.set(storageItemStack.getText());
+            storageItemStack.search(pbvAmount).block();
+
+        } else {
+
+            return pbvAmount;
+
+        }
+
+        return 1;
+    }
+
+    @Unique
+    public int getTransactionAmountFactor(@Nullable List<Text> list) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.currentScreen == null)
+            return 1;
+
+        String inventoryTitle = client.currentScreen.getTitle().getString();
+        if (inventoryTitle == null)
+            return 1;
+
+        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().getData().contains(inventoryTitle))
+            return 1;
+
+        if (list != null) {
+            for (Text text : list) {
+                for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData().getData()) {
+                    if (text.getString().contains(datum)) {
+                        String amount = StringUtil.removeChars(text.getString());
+                        try {
+                            return Integer.parseInt(amount);
+                        } catch (NumberFormatException e) {
+                            LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        return 1;
+    }
 }
