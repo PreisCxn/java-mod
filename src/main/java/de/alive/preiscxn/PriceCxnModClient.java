@@ -19,6 +19,7 @@ import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.MinecraftClientImpl;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
+import de.alive.preiscxn.keybinds.SwitchItemViewKeybindExecutor;
 import de.alive.preiscxn.modules.ClasspathModule;
 import de.alive.preiscxn.modules.MainModule;
 import de.alive.preiscxn.modules.ModuleLoaderImpl;
@@ -56,6 +57,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     private final CxnListener cxnListener;
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
+
+    private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
 
     public PriceCxnModClient(){
         this.http = new HttpImpl();
@@ -125,13 +128,17 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public void onInitializeClient() {
         LOGGER.info("PriceCxn client initialized");
 
-        CustomKeyBinding keyBinding = new CustomKeyBinding(
+        registerKeybinding(new CustomKeyBinding(
                 "cxn_listener.keys.open_in_browser",
                 GLFW.GLFW_KEY_H,
                 "cxn_listener.mod_text"
-        );
+        ), new OpenBrowserKeybindExecutor(), true);
+        registerKeybinding(new CustomKeyBinding(
+                "cxn_listener.keys.cycle_amount",
+                GLFW.GLFW_KEY_KP_ADD,
+                "cxn_listener.mod_text"
+        ), new SwitchItemViewKeybindExecutor(), true);
 
-        registerKeybinding(keyBinding, new OpenBrowserKeybindExecutor(), true);
     }
 
     @Override
@@ -219,6 +226,16 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public ModuleLoader getProjectLoader() {
         return this.projectLoader;
+    }
+
+    @Override
+    public PriceCxnItemStack.ViewMode getViewMode() {
+        return this.viewMode;
+    }
+
+    @Override
+    public void nextViewMode() {
+        this.viewMode = PriceCxnItemStack.ViewMode.values()[(this.viewMode.ordinal() + 1) % PriceCxnItemStack.ViewMode.values().length];
     }
 
 }

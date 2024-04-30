@@ -45,4 +45,18 @@ public interface PriceCxnItemStack {
     @Nullable
     JsonObject findItemInfo(String dataKey);
 
+    enum ViewMode {
+        SINGLE("cxn_listener.display_prices.amount_type.single"),
+        CURRENT_STACK("cxn_listener.display_prices.current_stack"),;
+
+        private final String translationString;
+
+        ViewMode(String translationString) {
+            this.translationString = translationString;
+        }
+
+        public String getTranslationString() {
+            return translationString;
+        }
+    }
 }

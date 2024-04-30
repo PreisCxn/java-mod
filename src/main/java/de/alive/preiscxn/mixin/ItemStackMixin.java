@@ -1,10 +1,7 @@
 package de.alive.preiscxn.mixin;
 
 import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.cytooxien.Modes;
-import de.alive.api.cytooxien.PriceText;
-import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.cytooxien.*;
 import de.alive.api.networking.DataHandler;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
@@ -67,19 +64,23 @@ public abstract class ItemStackMixin {
         int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, list);
 
         list.add(PriceText.space());
+        PriceCxnItemStack.ViewMode viewMode = PriceCxn.getMod().getViewMode();
 
         list.add(
                 MutableText.of(new PlainTextContent.Literal("--- "))
                         .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
                         .append(PriceCxnMod.MOD_TEXT.copy())
-                        .append(MutableText.of(new PlainTextContent.Literal("---"))
+                        .append(MutableText.of(new PlainTextContent.Literal("x" + (viewMode == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)))
+                                .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
+                        )
+                        .append(MutableText.of(new PlainTextContent.Literal(" ---"))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         LOGGER.debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
         if(this.cxnItemStack.getPcxnPrice() != null){
             list.add(pcxnPriceText.get()
                              .withPrices(this.cxnItemStack.getPcxnPrice().get("lower_price").getAsDouble(), this.cxnItemStack.getPcxnPrice().get("upper_price").getAsDouble())
-                             .withPriceMultiplier(amount)
+                    .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
                              .getText());
         }
 
