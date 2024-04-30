@@ -1,6 +1,6 @@
 import os
 
-from file_sender import upload_file, get_version_from_build_gradle, select_file
+from file_sender import upload_file, select_file, get_version
 
 selected_file = select_file('./Listener/build/libs', 'Listener')
 
@@ -9,7 +9,6 @@ if selected_file:
 else:
     exit(-1)
 
-version = get_version_from_build_gradle("Listener")
-url = f"https://cdn.preiscxn.de/Listener.jar?version={version}"
+url = f"https://cdn.preiscxn.de/Listener.jar?version={get_version()}"
 
 upload_file(file_path, url)

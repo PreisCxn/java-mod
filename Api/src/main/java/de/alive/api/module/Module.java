@@ -1,5 +1,7 @@
 package de.alive.api.module;
 
+import java.util.function.Consumer;
+
 public interface Module {
-    String getPrimaryPackage();
+    void forEach(Consumer<Class<?>> consumer);
 }
