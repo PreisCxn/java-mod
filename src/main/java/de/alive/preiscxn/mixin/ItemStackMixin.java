@@ -1,19 +1,15 @@
 package de.alive.preiscxn.mixin;
 
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.Modes;
+import de.alive.api.cytooxien.PriceText;
 import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.DataHandler;
 import de.alive.api.networking.IServerChecker;
-import de.alive.api.utils.StringUtil;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.PriceCxnMod;
 import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
-import de.alive.preiscxn.cytooxien.PriceText;
-import de.alive.preiscxn.cytooxien.StorageItemStack;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
@@ -49,12 +45,6 @@ public abstract class ItemStackMixin {
     public abstract boolean isEmpty();
 
     @Unique
-    private @Nullable JsonObject nookPrice = null;
-    @Unique
-    private @Nullable JsonObject pcxnPrice = null;
-    @Unique
-    private final StorageItemStack storageItemStack = new StorageItemStack();
-    @Unique
     private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -67,17 +57,14 @@ public abstract class ItemStackMixin {
 
         findInfo();
 
-        if ((pcxnPrice == null || pcxnPrice.isEmpty()) && (nookPrice == null || nookPrice.isEmpty())) return;
-
         if (this.cxnItemStack == null) return;
 
-        int amount = this.cxnItemStack.getAmount();
+        if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty()) && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty())) return;
+
 
         AtomicReference<PriceText> pcxnPriceText = new AtomicReference<>(PriceText.create());
 
-
-        amount *= getPbvAmountFactor(serverChecker, pcxnPriceText);
-        amount *= getTransactionAmountFactor(list);
+        int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, list);
 
         list.add(PriceText.space());
 
@@ -88,27 +75,26 @@ public abstract class ItemStackMixin {
                         .append(MutableText.of(new PlainTextContent.Literal("---"))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
-        int finalAmount = amount;
         LOGGER.debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
-        if(pcxnPrice != null){
+        if(this.cxnItemStack.getPcxnPrice() != null){
             list.add(pcxnPriceText.get()
-                             .withPrices(pcxnPrice.get("lower_price").getAsDouble(), pcxnPrice.get("upper_price").getAsDouble())
-                             .withPriceMultiplier(finalAmount)
+                             .withPrices(this.cxnItemStack.getPcxnPrice().get("lower_price").getAsDouble(), this.cxnItemStack.getPcxnPrice().get("upper_price").getAsDouble())
+                             .withPriceMultiplier(amount)
                              .getText());
         }
 
-        if(nookPrice != null){
+        if(this.cxnItemStack.getNookPrice() != null){
             list.add(PriceText.create()
                              .withIdentifierText("Tom Block:")
-                             .withPrices(nookPrice.get("price").getAsDouble())
-                             .withPriceMultiplier(finalAmount)
+                             .withPrices(this.cxnItemStack.getNookPrice().get("price").getAsDouble())
+                             .withPriceMultiplier(amount)
                              .getText());
 
         }
-        if(pcxnPrice != null){
+        if(this.cxnItemStack.getPcxnPrice() != null){
 
             KeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
-            if(pcxnPrice.has("item_info_url") && !keyBinding.isUnbound()){
+            if(this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()){
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
                                       keyBinding
                                               .getBoundKeyLocalizedText()
@@ -122,7 +108,7 @@ public abstract class ItemStackMixin {
             list.add(PriceText.space());
 
             Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate
-                    = TimeUtil.getTimestampDifference(Long.parseLong(pcxnPrice.get("timestamp").getAsString()));
+                    = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().get("timestamp").getAsString()));
 
             lastUpdate.ifPresent(s -> {
 
@@ -178,87 +164,10 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @NotNull AtomicReference<PriceText> pcxnPriceText) {
-        if (pcxnPrice == null
-                || !pcxnPrice.has("pbv_search_key")
-                || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
-                || this.cxnItemStack == null
-                || !this.cxnItemStack.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
-            return 1;
-
-        String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
-        JsonObject nbtData = this.cxnItemStack.getDataWithoutDisplay().get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
-
-        if (!nbtData.has("PublicBukkitValues")) return 1;
-        JsonObject pbvData = nbtData.get("PublicBukkitValues").getAsJsonObject();
-        if (!pbvData.has(pbvKey)) return 1;
-
-        String pbvSearchResult = StringUtil.removeChars(pbvData.get(pbvKey).getAsString());
-
-        int pbvAmount;
-
-        try {
-            pbvAmount = Integer.parseInt(pbvSearchResult);
-        } catch (NumberFormatException e) {
-            LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
-            return 1;
-        }
-
-        if (StorageItemStack.isOf(pcxnPrice)) {
-
-            storageItemStack.setup(pcxnPrice, serverChecker.getWebsocket());
-            pcxnPriceText.set(storageItemStack.getText());
-            storageItemStack.search(pbvAmount).block();
-
-        } else {
-
-            return pbvAmount;
-
-        }
-
-        return 1;
-    }
-
-    @Unique
-    public int getTransactionAmountFactor(@NotNull List<Text> list){
-        MinecraftClient client = MinecraftClient.getInstance();
-        if(client.currentScreen == null)
-            return 1;
-
-        String inventoryTitle = client.currentScreen.getTitle().getString();
-        if(inventoryTitle == null)
-            return 1;
-
-        if (!TranslationDataAccess.TRANSACTION_TITLE.getData().getData().contains(inventoryTitle))
-            return 1;
-
-        for (Text text : list) {
-            for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData().getData()) {
-                if (text.getString().contains(datum)) {
-                    String amount = StringUtil.removeChars(text.getString());
-                    try {
-                        return Integer.parseInt(amount);
-                    } catch (NumberFormatException e) {
-                        LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
-                    }
-                    break;
-                }
-            }
-        }
-
-        return 1;
-    }
-
-    @Unique
     private void findInfo() {
         long lastUpdate = 0;
         if (lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
-        ItemStack itemStack = (ItemStack) (Object) this;
-        this.cxnItemStack = new PriceCxnItemStackImpl(itemStack, null, true, false);
-
-        this.pcxnPrice = cxnItemStack.findItemInfo("pricecxn.data.item_data");
-        this.nookPrice = cxnItemStack.findItemInfo("pricecxn.data.nook_data");
-
+        this.cxnItemStack = new PriceCxnItemStackImpl((ItemStack) (Object) this, null, true, false);
     }
 }

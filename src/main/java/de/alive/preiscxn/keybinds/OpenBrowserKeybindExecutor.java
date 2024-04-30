@@ -1,6 +1,7 @@
 package de.alive.preiscxn.keybinds;
 
 import com.google.gson.JsonObject;
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
@@ -22,7 +23,11 @@ public class OpenBrowserKeybindExecutor implements KeybindExecutor {
             if (itemInfoUrl != null && !itemInfoUrl.isEmpty() && !itemInfoUrl.equals("null")){
                 String amount = (itemInfoUrl.contains("?") ? "&" : "?") +
                         "amount=" +
-                        priceCxnItemStackImpl.getAmount();
+                        priceCxnItemStackImpl.getAdvancedAmount(
+                                PriceCxn.getMod().getCxnListener().getServerChecker(),
+                                null,
+                                null
+                        );
 
                 Util.getOperatingSystem().open(URL_PREFIX + itemInfoUrl + amount);
             }

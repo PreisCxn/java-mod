@@ -2,6 +2,7 @@ package de.alive.preiscxn.cytooxien;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.api.cytooxien.PriceText;
 import de.alive.api.networking.sockets.IWebSocketConnector;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.networking.sockets.WebSocketCompletion;

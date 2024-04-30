@@ -1,4 +1,4 @@
-package de.alive.preiscxn.cytooxien;
+package de.alive.api.cytooxien;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
