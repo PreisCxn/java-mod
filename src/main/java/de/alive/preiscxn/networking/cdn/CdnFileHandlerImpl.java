@@ -69,7 +69,14 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
     @Override
     public @NotNull Mono<String> getHash(@NotNull String file, @Nullable String version) {
-        return http.GET(BASE_URL, getPath(file, version) + "?type=hash")
+        String path = getPath(file, version);
+
+        if(path.contains("?"))
+            path += "&type=hash";
+        else
+            path += "?type=hash";
+
+        return http.GET(BASE_URL, path)
                 .map(s -> JsonParser.parseString(s).getAsString());
     }
 }

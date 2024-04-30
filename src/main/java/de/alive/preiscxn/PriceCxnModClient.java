@@ -107,17 +107,18 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     private Mono<Module> registerRemoteModule(String classPath, String remotePath, Path localPath, String primaryPackage) {
-        boolean isInClasspath;
+        boolean useRemote;
         try {
             Thread.currentThread().getContextClassLoader().loadClass(classPath);
-            isInClasspath = true;
+            useRemote = false;
         } catch (Exception e) {
-            isInClasspath = false;
+            useRemote = true;
         }
 
         return RemoteModule.create(remotePath,
                 localPath,
-                isInClasspath ? primaryPackage : null);
+                primaryPackage,
+                useRemote);
     }
 
     @Override
