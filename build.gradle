@@ -27,7 +27,7 @@ dependencies {
 	implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
 	implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
 	implementation 'org.java-websocket:Java-WebSocket:1.5.6'
-	implementation 'io.projectreactor:reactor-core:3.4.13'
+	implementation 'io.projectreactor:reactor-core:3.6.5'
 	implementation project(path: ":Api", configuration: "namedElements")
 	implementation project(path: ":InventoryScanner")
 	implementation project(path: ":Listener")
@@ -36,7 +36,7 @@ dependencies {
 	include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
 	include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
 	include 'org.java-websocket:Java-WebSocket:1.5.6'
-	include 'io.projectreactor:reactor-core:3.4.13'
+	include 'io.projectreactor:reactor-core:3.6.5'
 	include 'org.reactivestreams:reactive-streams:1.0.4'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

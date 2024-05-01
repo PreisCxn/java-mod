@@ -12,7 +12,7 @@ repositories {
 dependencies {
     implementation project(path: ":Api", configuration: "namedElements")
 
-    implementation 'io.projectreactor:reactor-core:3.4.13'
+    implementation 'io.projectreactor:reactor-core:3.6.5'
     implementation "org.slf4j:slf4j-api:2.0.13"
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
