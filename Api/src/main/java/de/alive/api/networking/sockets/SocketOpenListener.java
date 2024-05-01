@@ -1,6 +1,6 @@
 package de.alive.api.networking.sockets;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
 public interface SocketOpenListener {
     void onOpen(Session session);
