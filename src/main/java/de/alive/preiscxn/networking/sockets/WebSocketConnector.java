@@ -4,6 +4,7 @@ import de.alive.api.networking.sockets.IWebSocketConnector;
 import de.alive.api.networking.sockets.SocketCloseListener;
 import de.alive.api.networking.sockets.SocketMessageListener;
 import de.alive.api.networking.sockets.SocketOpenListener;
+import jakarta.websocket.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
@@ -11,7 +12,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
