@@ -12,6 +12,7 @@ import de.alive.api.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentType;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -117,11 +118,12 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         ComponentMap nbt = item.getComponents();
         if (nbt == null) return new JsonObject();
 
-        if(componentMapToJson(nbt).get("minecraft:custom_data") instanceof JsonPrimitive){
+        JsonObject jsonObject = componentMapToJson(nbt);
+        if(jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive){
             LOGGER.warn("Found no custom_data in item: " + item.getItem().getTranslationKey());
             return new JsonObject();
         }
-        return componentMapToJson(nbt).getAsJsonObject("minecraft:custom_data");
+        return jsonObject.getAsJsonObject("minecraft:custom_data");
     }
 
     private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
@@ -134,7 +136,19 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
             if(component instanceof ComponentMap subComponentMap){
                 json.add(key.toString(), componentMapToJson(subComponentMap));
-            } else {
+            } else if (component instanceof NbtComponent subComponentMap){
+                try{
+                    JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
+                    json.add(key.toString(), asJsonObject);
+                }catch (JsonParseException e){
+                    try{
+                        JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                        json.add(key.toString(), asJsonObject);
+                    }catch (JsonParseException e1){
+                        json.addProperty(key.toString(), subComponentMap.toString());
+                    }
+                }
+            }else {
                 Object object = object(component.toString());
                 if (object instanceof JsonElement element)
                     json.add(key.toString(), element);
