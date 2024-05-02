@@ -28,8 +28,15 @@ def get_version():
         for line in f:
             if line.startswith("mod_version"):
                 version = line.split("=")[1].strip()
+            if line.startswith("minecraft_version"):
+                minecraft_version = line.split("=")[1].strip()
 
-    return version if version else "1.0.0"
+    if version and minecraft_version:
+        return f"{minecraft_version}-{version}"
+    elif version:
+        return version
+    else:
+        return "1.0.0"
 
 
 def get_version_from_build_gradle(module_name):
