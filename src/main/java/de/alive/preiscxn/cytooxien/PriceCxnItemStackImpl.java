@@ -131,30 +131,32 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         for (DataComponentType<?> key : componentMap.getTypes()) {
             Object component = componentMap.get(key);
-            if (component == null)
-                continue;
-
-            if(component instanceof ComponentMap subComponentMap){
-                json.add(key.toString(), componentMapToJson(subComponentMap));
-            } else if (component instanceof NbtComponent subComponentMap){
-                try{
-                    JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
-                    json.add(key.toString(), asJsonObject);
-                }catch (JsonParseException e){
-                    try{
-                        JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+            switch (component) {
+                case null -> {
+                }
+                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
+                case NbtComponent subComponentMap -> {
+                    try {
+                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
                         json.add(key.toString(), asJsonObject);
-                    }catch (JsonParseException e1){
-                        json.addProperty(key.toString(), subComponentMap.toString());
+                    } catch (JsonParseException e) {
+                        try {
+                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                            json.add(key.toString(), asJsonObject);
+                        } catch (JsonParseException e1) {
+                            json.addProperty(key.toString(), subComponentMap.toString());
+                        }
                     }
                 }
-            }else {
-                Object object = object(component.toString());
-                if (object instanceof JsonElement element)
-                    json.add(key.toString(), element);
-                else
-                    json.addProperty(key.toString(), object.toString());
+                default -> {
+                    Object object = object(component.toString());
+                    if (object instanceof JsonElement element)
+                        json.add(key.toString(), element);
+                    else
+                        json.addProperty(key.toString(), object.toString());
+                }
             }
+
         }
 
         return json;
