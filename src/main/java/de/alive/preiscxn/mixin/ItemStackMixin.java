@@ -2,7 +2,6 @@ package de.alive.preiscxn.mixin;
 
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.*;
-import de.alive.api.networking.DataHandler;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.PriceCxnMod;
@@ -44,6 +43,9 @@ public abstract class ItemStackMixin {
     @Unique
     private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
+    @Unique
+    private long lastUpdate = 0;
+
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
         List<Text> list = cir.getReturnValue();
@@ -52,10 +54,12 @@ public abstract class ItemStackMixin {
         if(shouldCancel(list))
             return;
 
-        findInfo();
+        if (this.cxnItemStack == null || this.lastUpdate > 50){//uncomment the lastUpdate check to update the prices every 50th tooltip
+            this.cxnItemStack = getPriceCxnItemStack();
+            this.lastUpdate = 0;
+        }
 
-        if (this.cxnItemStack == null) return;
-
+        this.lastUpdate++;
         if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty()) && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty())) return;
 
 
@@ -165,10 +169,7 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    private void findInfo() {
-        long lastUpdate = 0;
-        if (lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
-
-        this.cxnItemStack = PriceCxnItemStackImpl.getInstance((ItemStack) (Object) this, null, true, false);
+    private PriceCxnItemStackImpl getPriceCxnItemStack() {
+        return PriceCxnItemStackImpl.getInstance((ItemStack) (Object) this, null, true, false);
     }
 }
