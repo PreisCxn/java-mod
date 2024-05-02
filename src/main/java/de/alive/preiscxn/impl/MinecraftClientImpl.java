@@ -1,16 +1,32 @@
 package de.alive.preiscxn.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import de.alive.api.interfaces.IInventory;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 
+import java.util.concurrent.ExecutionException;
+
 public class MinecraftClientImpl implements IMinecraftClient {
+    private static final Cache<MinecraftClient, MinecraftClientImpl> CACHE = CacheBuilder
+            .newBuilder()
+            .maximumSize(100)
+            .build();
     private final MinecraftClient minecraftClient;
 
-    public MinecraftClientImpl(MinecraftClient minecraftClient) {
+    private MinecraftClientImpl(MinecraftClient minecraftClient) {
         this.minecraftClient = minecraftClient;
+    }
+
+    public static MinecraftClientImpl getInstance(MinecraftClient minecraftClient) {
+        try {
+            return CACHE.get(minecraftClient, () -> new MinecraftClientImpl(minecraftClient));
+        } catch (ExecutionException e) {
+            return new MinecraftClientImpl(minecraftClient);
+        }
     }
 
     @Override
@@ -45,10 +61,10 @@ public class MinecraftClientImpl implements IMinecraftClient {
 
     @Override
     public IScreenHandler getScreenHandler() {
-        return minecraftClient.player != null ? new ScreenHandlerImpl(minecraftClient.player.currentScreenHandler) : null;
+        return minecraftClient.player != null ? ScreenHandlerImpl.getInstance(minecraftClient.player.currentScreenHandler) : null;
     }
 
     public IInventory getInventory(){
-        return minecraftClient.player != null ? new InventoryImpl(minecraftClient, minecraftClient.player.getInventory()) : null;
+        return minecraftClient.player != null ? InventoryImpl.getInstance(minecraftClient, minecraftClient.player.getInventory()) : null;
     }
 }
