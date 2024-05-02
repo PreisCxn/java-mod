@@ -135,7 +135,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ), new OpenBrowserKeybindExecutor(), true);
         registerKeybinding(new CustomKeyBinding(
                 "cxn_listener.keys.cycle_amount",
-                GLFW.GLFW_KEY_KP_ADD,
+                GLFW.GLFW_KEY_RIGHT_BRACKET,
                 "cxn_listener.mod_text"
         ), new SwitchItemViewKeybindExecutor(), true);
 
@@ -143,17 +143,17 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips);
+        return PriceCxnItemStackImpl.getInstance(item, searchData, addComment, addTooltips);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return new PriceCxnItemStackImpl(item, searchData, addComment);
+        return PriceCxnItemStackImpl.getInstance(item, searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
-        return new PriceCxnItemStackImpl(item, searchData);
+        return PriceCxnItemStackImpl.getInstance(item, searchData);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public void runOnEndClientTick(Consumer<IMinecraftClient> consumer) {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client != null) {
-                consumer.accept(new MinecraftClientImpl(client));
+                consumer.accept(MinecraftClientImpl.getInstance(client));
             }
         });
     }
@@ -187,7 +187,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IMinecraftClient getMinecraftClient() {
-        return new MinecraftClientImpl(MinecraftClient.getInstance());
+        return MinecraftClientImpl.getInstance(MinecraftClient.getInstance());
     }
 
     @Override
@@ -206,8 +206,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keyBinding.wasPressed() && client.player != null) {
                 keybindExecutor.onKeybindPressed(
-                        new MinecraftClientImpl(client),
-                        new ItemStackImpl(client.player.getInventory().getMainHandStack())
+                        MinecraftClientImpl.getInstance(client),
+                        ItemStackImpl.getInstance(client.player.getInventory().getMainHandStack())
                 );
             }
         });

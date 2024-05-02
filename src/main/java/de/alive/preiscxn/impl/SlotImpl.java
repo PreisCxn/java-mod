@@ -1,5 +1,7 @@
 package de.alive.preiscxn.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.ISlot;
@@ -8,12 +10,25 @@ import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class SlotImpl implements ISlot {
+    private static final Cache<Slot, SlotImpl> slotMap = CacheBuilder
+            .newBuilder()
+            .maximumSize(100)
+            .build();
     private final Slot slot;
 
-    public SlotImpl(Slot slot) {
+    private SlotImpl(Slot slot) {
         this.slot = slot;
+    }
+
+    public static SlotImpl getInstance(Slot slot) {
+        try {
+            return slotMap.get(slot, () -> new SlotImpl(slot));
+        } catch (ExecutionException e) {
+            return new SlotImpl(slot);
+        }
     }
 
     @Override

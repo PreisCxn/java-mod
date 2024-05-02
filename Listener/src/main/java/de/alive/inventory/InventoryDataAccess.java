@@ -2,7 +2,6 @@ package de.alive.inventory;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import de.alive.api.cytooxien.DataImpl;
 import de.alive.api.networking.Data;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.utils.StringUtil;
@@ -44,15 +43,15 @@ public enum InventoryDataAccess implements DataAccess {
     private final Data data;
 
     InventoryDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
-        this.data = new DataImpl(id, backupData, processData, equalData, defaultResult);
+        this.data = new Data(id, backupData, processData, equalData, defaultResult);
     }
 
     InventoryDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
-        this.data = new DataImpl(id, backupData, processData, equalData);
+        this.data = new Data(id, backupData, processData, equalData);
     }
 
     InventoryDataAccess(String id, List<String> backupData) {
-        this.data = new DataImpl(id, backupData);
+        this.data = new Data(id, backupData);
     }
 
     public Data getData() {

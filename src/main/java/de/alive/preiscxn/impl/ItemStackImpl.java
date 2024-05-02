@@ -1,5 +1,7 @@
 package de.alive.preiscxn.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IItemStack;
@@ -14,13 +16,27 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class ItemStackImpl implements IItemStack{
+    private static final Cache<ItemStack, ItemStackImpl> itemStackMap = CacheBuilder
+            .newBuilder()
+            .maximumSize(100)
+            .build();
     private final ItemStack stack;
 
-    public ItemStackImpl(ItemStack stack) {
+    private ItemStackImpl(ItemStack stack) {
         this.stack = stack;
     }
+
+    public static ItemStackImpl getInstance(ItemStack stack) {
+        try {
+            return itemStackMap.get(stack, () -> new ItemStackImpl(stack));
+        } catch (ExecutionException e) {
+            return new ItemStackImpl(stack);
+        }
+    }
+
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
         return PriceCxn.getMod().createItemStack(stack, searchData, addComment);
