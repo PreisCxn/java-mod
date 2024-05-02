@@ -117,6 +117,10 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         ComponentMap nbt = item.getComponents();
         if (nbt == null) return new JsonObject();
 
+        if(componentMapToJson(nbt).get("minecraft:custom_data") instanceof JsonPrimitive){
+            LOGGER.warn("Found no custom_data in item: " + item.getItem().getTranslationKey());
+            return new JsonObject();
+        }
         return componentMapToJson(nbt).getAsJsonObject("minecraft:custom_data");
     }
 
