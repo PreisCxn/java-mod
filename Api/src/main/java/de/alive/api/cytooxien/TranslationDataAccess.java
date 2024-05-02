@@ -51,15 +51,15 @@ public enum TranslationDataAccess implements DataAccess {
     private final Data data;
 
     TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
-        this.data = new DataImpl(id, backupData, processData, equalData, defaultResult);
+        this.data = new Data(id, backupData, processData, equalData, defaultResult);
     }
 
     TranslationDataAccess(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
-        this.data = new DataImpl(id, backupData, processData, equalData);
+        this.data = new Data(id, backupData, processData, equalData);
     }
 
     TranslationDataAccess(String id, List<String> backupData) {
-        this.data = new DataImpl(id, backupData);
+        this.data = new Data(id, backupData);
     }
 
     public Data getData() {
