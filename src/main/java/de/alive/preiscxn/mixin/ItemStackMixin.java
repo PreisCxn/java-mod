@@ -169,6 +169,6 @@ public abstract class ItemStackMixin {
         long lastUpdate = 0;
         if (lastUpdate + DataHandler.ITEM_REFRESH_INTERVAL > System.currentTimeMillis()) return;
 
-        this.cxnItemStack = new PriceCxnItemStackImpl((ItemStack) (Object) this, null, true, false);
+        this.cxnItemStack = PriceCxnItemStackImpl.getInstance((ItemStack) (Object) this, null, true, false);
     }
 }

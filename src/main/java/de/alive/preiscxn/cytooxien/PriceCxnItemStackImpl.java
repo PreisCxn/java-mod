@@ -1,5 +1,7 @@
 package de.alive.preiscxn.cytooxien;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.*;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
@@ -22,15 +24,22 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Unique;
+import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
 public class PriceCxnItemStackImpl implements PriceCxnItemStack {
+    private static final Cache<Tuple4<ItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
+            = CacheBuilder
+            .newBuilder()
+            .maximumSize(100)
+            .build();
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
@@ -47,7 +56,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private @Nullable JsonObject pcxnPrice = null;
     private final StorageItemStack storageItemStack = new StorageItemStack();
 
-    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    private PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
         this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
@@ -106,12 +115,20 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         this.nookPrice = findItemInfo("pricecxn.data.nook_data");
     }
 
-    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        this(item, searchData, addComment, true);
+    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+        return getInstance(item, searchData, addComment, true);
     }
 
-    public PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
-        this(item, searchData, true);
+    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
+        return getInstance(item, searchData, true, true);
+    }
+
+    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+        try {
+            return CACHE.get(Tuples.of(item, searchData == null ? Collections.emptyMap() : searchData, addComment, addTooltips), () -> new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips));
+        } catch (ExecutionException e) {
+            return new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips);
+        }
     }
 
     private @NotNull JsonObject getCustomData(@NotNull ItemStack item) {

@@ -143,17 +143,17 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips);
+        return PriceCxnItemStackImpl.getInstance(item, searchData, addComment, addTooltips);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return new PriceCxnItemStackImpl(item, searchData, addComment);
+        return PriceCxnItemStackImpl.getInstance(item, searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
-        return new PriceCxnItemStackImpl(item, searchData);
+        return PriceCxnItemStackImpl.getInstance(item, searchData);
     }
 
     @Override
