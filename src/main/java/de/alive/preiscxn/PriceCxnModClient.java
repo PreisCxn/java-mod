@@ -135,7 +135,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ), new OpenBrowserKeybindExecutor(), true);
         registerKeybinding(new CustomKeyBinding(
                 "cxn_listener.keys.cycle_amount",
-                GLFW.GLFW_KEY_KP_ADD,
+                GLFW.GLFW_KEY_RIGHT_BRACKET,
                 "cxn_listener.mod_text"
         ), new SwitchItemViewKeybindExecutor(), true);
 
