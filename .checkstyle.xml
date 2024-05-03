@@ -20,7 +20,7 @@
     <module name="FileLength"/>
     <module name="LineLength">
         <property name="fileExtensions" value="java"/>
-        <property name="max" value="120"/>
+        <property name="max" value="150"/>
     </module>
 
     <!-- Checks for whitespace                             -->
@@ -52,10 +52,6 @@
         <!-- See https://checkstyle.org/config_imports.html -->
         <module name="AvoidStarImport"/>
         <module name="IllegalImport"/>
-        <module name="ImportOrder">
-            <property name="groups" value="java,javax,*,com.mojang,net.minecraft,net.fabricmc,me.axieum.mcmod.authme"/>
-            <property name="separated" value="true"/>
-        </module>
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
 
@@ -103,16 +99,6 @@
         <!-- <module name="NeedBraces"/>-->
         <!-- <module name="RightCurly"/>-->
 
-        <!-- Checks for K&R brace styling                                  -->
-        <!-- See https://en.wikipedia.org/wiki/Indentation_style#K&R_style -->
-        <module name="LeftCurly"> <!-- braces on new line for class structure -->
-            <property name="option" value="nl"/>
-            <property name="tokens" value="ANNOTATION_DEF,CLASS_DEF,CTOR_DEF,ENUM_DEF,INTERFACE_DEF,METHOD_DEF,OBJBLOCK,RECORD_DEF"/>
-        </module>
-        <module name="LeftCurly"> <!-- braces at end of line within blocks -->
-            <property name="option" value="eol"/>
-            <property name="tokens" value="ENUM_CONSTANT_DEF,LAMBDA,LITERAL_CASE,LITERAL_CATCH,LITERAL_DEFAULT,LITERAL_DO,LITERAL_ELSE,LITERAL_FINALLY,LITERAL_FOR,LITERAL_IF,LITERAL_SWITCH,LITERAL_SYNCHRONIZED,LITERAL_TRY,LITERAL_WHILE,STATIC_INIT,COMPACT_CTOR_DEF"/>
-        </module>
         <module name="RightCurly"/>
 
         <!-- Checks for naming conventions                 -->
@@ -152,10 +138,6 @@
         <!-- Checks for whitespace                             -->
         <!-- See https://checkstyle.org/config_whitespace.html -->
         <module name="EmptyForIteratorPad"/>
-        <module name="EmptyLineSeparator">
-            <property name="allowMultipleEmptyLines" value="false"/>
-            <property name="allowNoEmptyLineBetweenFields" value="true"/>
-        </module>
         <module name="GenericWhitespace"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
