@@ -6,8 +6,8 @@
     <!-- See https://checkstyle.org/config.html#Checker_Properties -->
     <property name="charset" value="UTF-8"/>
     <property name="fileExtensions" value="java"/>
-    <property name="localeLanguage" value="en"/>
-    <property name="localeCountry" value="US"/>
+    <property name="localeLanguage" value="de"/>
+    <property name="localeCountry" value="DE"/>
     <property name="severity" value="error"/>
     <property name="tabWidth" value="4"/>
 
