@@ -34,8 +34,8 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getModVersions_returnsExpectedVersions() {
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just("[\"1.0\", \"1.1\", \"1.2\"]"));
+    public void getModVersionsReturnsExpectedVersions() {
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just("[\"1.0\", \"1.1\", \"1.2\"]"));
 
         StepVerifier.create(cdnFileHandler.getVersions("mod"))
                 .expectNext(List.of("1.0", "1.1", "1.2"))
@@ -43,8 +43,8 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getModVersions_returnsEmptyListWhenNoVersions() {
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just("[]"));
+    public void getModVersionsReturnsEmptyListWhenNoVersions() {
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just("[]"));
 
         StepVerifier.create(cdnFileHandler.getVersions("mod"))
                 .expectNext(List.of())
@@ -52,8 +52,8 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getNewestVersion_returnsExpectedVersion() {
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just( "1.2"));
+    public void getNewestVersionReturnsExpectedVersion() {
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just("1.2"));
 
         StepVerifier.create(cdnFileHandler.getNewestVersion("mod"))
                 .expectNext("1.2")
@@ -61,8 +61,8 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getNewestVersion_returnsEmptyStringWhenNoVersion() {
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just(""));
+    public void getNewestVersionReturnsEmptyStringWhenNoVersion() {
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just(""));
 
         StepVerifier.create(cdnFileHandler.getNewestVersion("mod"))
                 .expectNext("")
@@ -70,9 +70,9 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getHash_returnsExpectedHash() {
+    public void getHashReturnsExpectedHash() {
         String expectedHash = "abc123";
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just(expectedHash));
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just(expectedHash));
 
         StepVerifier.create(cdnFileHandler.getHash("file", "version"))
                 .expectNext(expectedHash)
@@ -80,9 +80,9 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getFiles_returnsExpectedFiles() {
+    public void getFilesReturnsExpectedFiles() {
         String expectedFilesJson = "[\"file1\", \"file2\", \"file3\"]";
-        when(http.GET(anyString(), anyString())).thenReturn(Mono.just(expectedFilesJson));
+        when(http.get(anyString(), anyString())).thenReturn(Mono.just(expectedFilesJson));
 
         StepVerifier.create(cdnFileHandler.getFiles("prefix"))
                 .expectNext(List.of("file1", "file2", "file3"))
@@ -90,7 +90,7 @@ class CdnFileHandlerImplTest {
     }
 
     @Test
-    public void getFile_returnsExpectedFile() {
+    public void getFileReturnsExpectedFile() {
         byte[] expectedFile = new byte[] {1, 2, 3};
         when(http.getBytes(anyString(), anyString())).thenReturn(Mono.just(expectedFile));
 

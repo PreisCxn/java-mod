@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 
 import java.util.concurrent.ExecutionException;
 
-public class MinecraftClientImpl implements IMinecraftClient {
+public final class MinecraftClientImpl implements IMinecraftClient {
     private static final Cache<MinecraftClient, MinecraftClientImpl> CACHE = CacheBuilder
             .newBuilder()
             .maximumSize(100)
@@ -64,7 +64,7 @@ public class MinecraftClientImpl implements IMinecraftClient {
         return minecraftClient.player != null ? ScreenHandlerImpl.getInstance(minecraftClient.player.currentScreenHandler) : null;
     }
 
-    public IInventory getInventory(){
+    public IInventory getInventory() {
         return minecraftClient.player != null ? InventoryImpl.getInstance(minecraftClient, minecraftClient.player.getInventory()) : null;
     }
 }

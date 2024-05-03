@@ -67,7 +67,7 @@ public enum {{CLASSNAME}}Listener extends InventoryListener implements DataAcces
             array.add(item.getDataWithoutDisplay());
         }
 
-        if (!array.isEmpty()){
+        if (!array.isEmpty()) {
             return sendData("/auctionhouse", array)
                     .doOnSuccess(aVoid -> {
                         if (client.isPlayerNull())

@@ -60,7 +60,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
 
-    public PriceCxnModClient(){
+    public PriceCxnModClient() {
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
         try {
@@ -100,9 +100,9 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                     classes1.forEach(aClass -> {
                         try {
                             aClass.getConstructor().newInstance().loadModule();
-                        LOGGER.info("Loaded module: {}", aClass);
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                                 NoSuchMethodException e) {
+                            LOGGER.info("Loaded module: {}", aClass);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
+                                 | NoSuchMethodException e) {
                             LOGGER.error("Failed to load module: {}", aClass, e);
                         }
                     });
@@ -142,7 +142,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    public PriceCxnItemStack createItemStack(@NotNull ItemStack item,
+                                             @Nullable Map<String, DataAccess> searchData,
+                                             boolean addComment,
+                                             boolean addTooltips) {
         return PriceCxnItemStackImpl.getInstance(item, searchData, addComment, addTooltips);
     }
 

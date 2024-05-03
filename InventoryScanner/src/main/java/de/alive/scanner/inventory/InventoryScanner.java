@@ -15,7 +15,6 @@ public class InventoryScanner implements PriceCxnModule {
                 .registerKeybinding(
                         new CustomKeyBinding("a", CustomKeyBinding.GLFW_KEY_M, "b"),
                         new ScanInventoryKeybind(),
-                        true
-                );
+                        true);
     }
 }

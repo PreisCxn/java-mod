@@ -9,7 +9,11 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
@@ -21,21 +25,21 @@ public class WebSocketCompletion {
     private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(1);
     private final @NotNull IWebSocketConnector connector;
 
-    public WebSocketCompletion(@NotNull IWebSocketConnector connector, @NotNull String query, @Nullable String @Nullable ... data) {
+    public WebSocketCompletion(@NotNull IWebSocketConnector connector, @NotNull String query, @Nullable String... data) {
         this.connector = connector;
 
         SocketMessageListener listener = new SocketMessageListener() {
             @Override
             public void onMessage(@NotNull String message) {
-                if(message.contains(query)) {
-                    try{
+                if (message.contains(query)) {
+                    try {
                         JsonObject json = JsonParser.parseString(message).getAsJsonObject();
-                        if(json.has(query)) {
+                        if (json.has(query)) {
                             future.complete(json.get(query).getAsString());
                             connector.removeMessageListener(this);
                             cancelTimeout();
                         }
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         future.completeExceptionally(e);
                         cancelTimeout();
                     }

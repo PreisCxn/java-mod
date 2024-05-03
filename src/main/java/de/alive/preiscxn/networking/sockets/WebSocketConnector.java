@@ -4,7 +4,14 @@ import de.alive.api.networking.sockets.IWebSocketConnector;
 import de.alive.api.networking.sockets.SocketCloseListener;
 import de.alive.api.networking.sockets.SocketMessageListener;
 import de.alive.api.networking.sockets.SocketOpenListener;
-import jakarta.websocket.*;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.WebSocketContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.Disposable;
@@ -42,7 +49,7 @@ public class WebSocketConnector implements IWebSocketConnector {
     @OnOpen
     public void onOpen(@NotNull Session session) {
         this.session = session;
-        synchronized(openListeners){
+        synchronized (openListeners) {
             for (SocketOpenListener listener : openListeners) {
                 listener.onOpen(session);
             }
@@ -64,7 +71,7 @@ public class WebSocketConnector implements IWebSocketConnector {
     @OnMessage
     public void onMessage(String message) {
         LOGGER.debug("WebSocket message: " + message);
-        synchronized(messageListeners){
+        synchronized (messageListeners) {
             for (SocketMessageListener listener : messageListeners) {
                 listener.onMessage(message);
             }
@@ -75,12 +82,12 @@ public class WebSocketConnector implements IWebSocketConnector {
     public void onClose() {
         this.session = null;
 
-        synchronized(closeListeners){
+        synchronized (closeListeners) {
             for (SocketCloseListener listener : closeListeners) {
                 listener.onClose();
             }
         }
-        synchronized(disposables){
+        synchronized (disposables) {
             for (Disposable disposable : disposables) {
                 disposable.dispose();
             }
@@ -96,10 +103,10 @@ public class WebSocketConnector implements IWebSocketConnector {
     public @NotNull Mono<Session> establishWebSocketConnection() {
         return Mono.justOrEmpty(this.session)
                 .switchIfEmpty(Mono.fromCallable(() -> {
-                    try{
+                    try {
                         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                         return container.connectToServer(this, this.uri);
-                    }catch(Exception e){
+                    } catch (Exception e) {
                         LOGGER.error("Failed to connect to WebSocket server", e);
                         return null;
                     }
@@ -107,24 +114,24 @@ public class WebSocketConnector implements IWebSocketConnector {
     }
 
     public void sendMessage(String message) {
-        try{
+        try {
             session.getBasicRemote().sendText(message);
-        }catch(IOException e){
+        } catch (IOException e) {
             LOGGER.error("Failed to send message", e);
         }
     }
 
     public void closeWebSocket() {
-        try{
+        try {
             session.close();
-        }catch(IOException e){
+        } catch (IOException e) {
             LOGGER.error("Failed to close WebSocket", e);
         }
     }
 
     @Override
     public boolean isConnected() {
-        if(this.session == null){
+        if (this.session == null) {
             return false;
         }
         return this.session.isOpen();
@@ -132,42 +139,42 @@ public class WebSocketConnector implements IWebSocketConnector {
 
     @Override
     public void addMessageListener(SocketMessageListener listener) {
-        synchronized(messageListeners){
+        synchronized (messageListeners) {
             messageListeners.add(listener);
         }
     }
 
     @Override
     public void addCloseListener(SocketCloseListener listener) {
-        synchronized(closeListeners){
+        synchronized (closeListeners) {
             closeListeners.add(listener);
         }
     }
 
     @Override
     public void addOpenListener(SocketOpenListener listener) {
-        synchronized(openListeners){
+        synchronized (openListeners) {
             openListeners.add(listener);
         }
     }
 
     @Override
     public void removeMessageListener(SocketMessageListener listener) {
-        synchronized(messageListeners){
+        synchronized (messageListeners) {
             messageListeners.remove(listener);
         }
     }
 
     @Override
     public void removeCloseListener(SocketCloseListener listener) {
-        synchronized(closeListeners){
+        synchronized (closeListeners) {
             closeListeners.remove(listener);
         }
     }
 
     @Override
     public void removeOpenListener(SocketOpenListener listener) {
-        synchronized(openListeners){
+        synchronized (openListeners) {
             openListeners.remove(listener);
         }
     }

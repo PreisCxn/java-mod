@@ -20,8 +20,7 @@ public class HttpTest {
     private static class HttpMocker extends HttpImpl {
         private final HttpResponse<byte[]> mockResponse;
 
-        public HttpMocker(HttpResponse<byte[]> mockResponse) {
-            super();
+        HttpMocker(HttpResponse<byte[]> mockResponse) {
             this.mockResponse = mockResponse;
         }
 
@@ -41,7 +40,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+        Mono<String> result = http.get("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -59,7 +58,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+        Mono<String> result = http.get("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -77,7 +76,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.GET("https://api.preiscxn.de/api", "/test")
+        Mono<String> result = http.get("https://api.preiscxn.de/api", "/test")
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -95,7 +94,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject())
+        Mono<String> result = http.post("/test", new JsonObject())
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -113,7 +112,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject())
+        Mono<String> result = http.post("/test", new JsonObject())
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -131,7 +130,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject())
+        Mono<String> result = http.post("/test", new JsonObject())
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -149,7 +148,7 @@ public class HttpTest {
 
         HttpImpl http = new HttpMocker(mockResponse);
 
-        Mono<String> result = http.POST("/test", new JsonObject())
+        Mono<String> result = http.post("/test", new JsonObject())
                 .map(stringFunction);
 
         StepVerifier.create(result)
@@ -185,7 +184,7 @@ public class HttpTest {
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test GET
-        Mono<String> result = http.GET("/test");
+        Mono<String> result = http.get("/test");
         StepVerifier.create(result).expectNext("Success").verifyComplete();
     }
 
@@ -201,7 +200,7 @@ public class HttpTest {
         Mockito.doReturn(Mono.just(mockResponse)).when(http).sendAsync(Mockito.any(HttpRequest.class));
 
         // Test POST
-        Mono<Void> result = http.POST("/test", new JsonObject())
+        Mono<Void> result = http.post("/test", new JsonObject())
                 .then();
         StepVerifier.create(result).verifyComplete();
     }

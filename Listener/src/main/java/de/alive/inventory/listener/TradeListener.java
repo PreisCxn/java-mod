@@ -19,10 +19,16 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.*;
+import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.printDebug;
+import static de.alive.api.LogPrinter.printTester;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -77,16 +83,17 @@ public class TradeListener extends InventoryListener {
         array.add("traderControls", traderControls.getData());
 
         return Mono.fromSupplier(() -> {
-                    Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory), TradeStackRow.getItemStacks(traderInventory), selfControls.getData(), traderControls.getData());
+            Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory),
+                    TradeStackRow.getItemStacks(traderInventory),
+                    selfControls.getData(),
+                    traderControls.getData());
 
-                    Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
+            Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
 
-                    printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
+            printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
 
-                    return mono;
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .then();
+            return mono;
+        }).subscribeOn(Schedulers.boundedElastic()).then();
 
     }
 
@@ -103,7 +110,10 @@ public class TradeListener extends InventoryListener {
         ).then();
     }
 
-    private @NotNull Optional<JsonElement> processData(@NotNull List<PriceCxnItemStack> selfInv, @NotNull List<PriceCxnItemStack> traderInv, @NotNull JsonArray selfControls, @NotNull JsonArray traderControls) {
+    private @NotNull Optional<JsonElement> processData(@NotNull List<PriceCxnItemStack> selfInv,
+                                                       @NotNull List<PriceCxnItemStack> traderInv,
+                                                       @NotNull JsonArray selfControls,
+                                                       @NotNull JsonArray traderControls) {
         if (selfControls.isEmpty() || traderControls.isEmpty()) return Optional.empty();
         if (selfInv.isEmpty() == traderInv.isEmpty())
             return Optional.empty(); //return empty wenn beide empty oder beide nicht empty
@@ -198,7 +208,7 @@ public class TradeListener extends InventoryListener {
         }
 
         void update(@NotNull IScreenHandler handler, @Nullable Map<String, DataAccess> searchData, boolean bool) {
-            synchronized(slots){
+            synchronized (slots) {
                 slots.clear();
                 for (int i = slotRange.getT1(); i <= slotRange.getT2(); i++) {
                     ISlot slot = handler.getSlot(i);

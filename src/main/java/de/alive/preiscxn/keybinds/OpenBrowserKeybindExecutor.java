@@ -9,6 +9,8 @@ import de.alive.api.keybinds.KeybindExecutor;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class OpenBrowserKeybindExecutor implements KeybindExecutor {
     private static final String URL_PREFIX = "https://preiscxn.de/";
     @Override
@@ -20,10 +22,10 @@ public class OpenBrowserKeybindExecutor implements KeybindExecutor {
         if (data != null && data.has("item_info_url")) {
             String itemInfoUrl = data.get("item_info_url").getAsString();
 
-            if (itemInfoUrl != null && !itemInfoUrl.isEmpty() && !itemInfoUrl.equals("null")){
-                String amount = (itemInfoUrl.contains("?") ? "&" : "?") +
-                        "amount=" +
-                        priceCxnItemStackImpl.getAdvancedAmount(
+            if (itemInfoUrl != null && !itemInfoUrl.isEmpty() && !Objects.equals(itemInfoUrl, "null")) {
+                String amount = (itemInfoUrl.contains("?") ? "&" : "?")
+                                + "amount="
+                                + priceCxnItemStackImpl.getAdvancedAmount(
                                 PriceCxn.getMod().getCxnListener().getServerChecker(),
                                 null,
                                 null

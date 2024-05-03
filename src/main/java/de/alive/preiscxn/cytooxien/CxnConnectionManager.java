@@ -35,12 +35,16 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     private final AtomicBoolean listenerActive;
     /**
      * Constructor for the CxnConnectionManager class.
+     *
      * @param dataHandler Handles data related operations.
      * @param serverChecker Checks the server status.
      * @param themeChecker Checks the theme status.
      * @param listenerActive Indicates if the listener is active.
      */
-    public CxnConnectionManager(ICxnDataHandler dataHandler, IServerChecker serverChecker, IThemeServerChecker themeChecker, AtomicBoolean listenerActive) {
+    public CxnConnectionManager(ICxnDataHandler dataHandler,
+                                IServerChecker serverChecker,
+                                IThemeServerChecker themeChecker,
+                                AtomicBoolean listenerActive) {
         this.dataHandler = dataHandler;
         this.serverChecker = serverChecker;
         this.themeChecker = themeChecker;
@@ -48,7 +52,9 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Checks the connection to the server asynchronously.
+     *
      * @param refresh Indicates if the theme should be refreshed.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     @Override
@@ -59,7 +65,9 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Checks the connection to the server.
+     *
      * @param refresh Indicates if the theme should be refreshed.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     @Override
@@ -69,10 +77,17 @@ public class CxnConnectionManager implements ICxnConnectionManager {
         NetworkingState stateBackup = this.state;
 
         return Mono.zip(serverChecker.isConnected(), isMinVersion(), this.serverChecker.getServerMinVersion())
-                .flatMap(tuple3 -> processConnectionStatus(refresh, tuple3.getT1(), tuple3.getT2(), tuple3.getT3(), activeCache, isRightVersionBackup, stateBackup));
+                .flatMap(tuple3 -> processConnectionStatus(refresh,
+                        tuple3.getT1(),
+                        tuple3.getT2(),
+                        tuple3.getT3(),
+                        activeCache,
+                        isRightVersionBackup,
+                        stateBackup));
     }
     /**
      * Processes the connection status.
+     *
      * @param refresh Indicates if the theme should be refreshed.
      * @param isConnected Indicates if the server is connected.
      * @param isMinVersion Indicates if the server version is the minimum required version.
@@ -80,9 +95,16 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      * @param activeCache The cache of the active status.
      * @param isRightVersionBackup A backup of the isRightVersion status.
      * @param stateBackup A backup of the state.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> processConnectionStatus(Refresh refresh, boolean isConnected, boolean isMinVersion, String serverMinVersion, boolean activeCache, Boolean isRightVersionBackup, NetworkingState stateBackup) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> processConnectionStatus(Refresh refresh,
+                                                                                     boolean isConnected,
+                                                                                     boolean isMinVersion,
+                                                                                     String serverMinVersion,
+                                                                                     boolean activeCache,
+                                                                                     Boolean isRightVersionBackup,
+                                                                                     NetworkingState stateBackup) {
         this.state = serverChecker.getState();
         if (!isConnected) {
             return handleServerNotReachable(activeCache);
@@ -94,7 +116,9 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Handles the case when the server is not reachable.
+     *
      * @param activeCache The cache of the active status.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
@@ -104,8 +128,10 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Handles the case when the server version is incorrect.
+     *
      * @param serverMinVersion The minimum version of the server.
      * @param isRightVersionBackup A backup of the isRightVersion status.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     private @NotNull Mono<Pair<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, @Nullable Boolean isRightVersionBackup) {
@@ -117,9 +143,11 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Handles the case when the server is online.
+     *
      * @param refresh Indicates if the theme should be refreshed.
      * @param activeCache The cache of the active status.
      * @param stateBackup A backup of the state.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerOnline(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
@@ -138,18 +166,23 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     }
     /**
      * Handles the case when the server is in maintenance mode.
+     *
      * @param refresh Indicates if the theme should be refreshed.
      * @param activeCache The cache of the active status.
      * @param stateBackup A backup of the state.
+     *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleMaintenance(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
+    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleMaintenance(Refresh refresh,
+                                                                               boolean activeCache,
+                                                                               NetworkingState stateBackup) {
         return isSpecialUser()
                 .flatMap(isSpecialUser -> {
                     if (isSpecialUser) {
                         LOGGER.info("Benutzer hat Berechtigung");
                         return this.activate(refresh).then(
-                                Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
+                                Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE
+                                                     || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                     } else {
                         LOGGER.info("Benutzer hat keine Berechtigung");
                         this.deactivate();
@@ -160,6 +193,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
 
     /**
      * Checks if the server version is the minimum required version.
+     *
      * @return A Mono object containing a Boolean indicating if the server version is the minimum required version.
      */
     @Override
@@ -168,9 +202,11 @@ public class CxnConnectionManager implements ICxnConnectionManager {
                 .map(serverMinVersion -> {
                     String clientVersion = PriceCxnMod.MOD_VERSION;
                     return isClientVersionSameOrNewer(serverMinVersion, clientVersion);
-                });    }
+                });
+    }
     /**
      * Checks if the user is a special user.
+     *
      * @return A Mono object containing a Boolean indicating if the user is a special user.
      */
     @Override
@@ -178,13 +214,18 @@ public class CxnConnectionManager implements ICxnConnectionManager {
         if (MinecraftClient.getInstance().player == null)
             return Mono.just(false);
 
-        return new WebSocketCompletion(serverChecker.getWebsocket(), "isSpecialUser", MinecraftClient.getInstance().player.getUuidAsString()).getMono()
+        return new WebSocketCompletion(
+                serverChecker.getWebsocket(),
+                "isSpecialUser",
+                MinecraftClient.getInstance().player.getUuidAsString()).getMono()
                 .map(s -> s.equals("true"))
                 .onErrorReturn(false);
     }
     /**
      * Activates the connection manager.
+     *
      * @param refresh Indicates if the theme should be refreshed.
+     *
      * @return A Mono object.
      */
     @Override
@@ -229,6 +270,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
 
     /**
      * Checks if the connection manager is active.
+     *
      * @return A Boolean indicating if the connection manager is active.
      */
     @Override

@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.*;
+import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.api.LogPrinter.printDebug;
+import static de.alive.api.LogPrinter.printTester;
 import static de.alive.api.utils.ItemUpdater.updateItemsAsync;
 
 public class TomNookListener extends InventoryListener {
@@ -34,7 +36,7 @@ public class TomNookListener extends InventoryListener {
     private @Nullable String invBuyPrice = null;
 
     /**
-     * This constructor is used to listen to a specific inventory
+     * This constructor is used to listen to a specific inventory.
      *
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
@@ -65,7 +67,7 @@ public class TomNookListener extends InventoryListener {
 
         if (!items.isEmpty()) {
             for (PriceCxnItemStack item : items) {
-                if(this.invBuyPrice != null){
+                if (this.invBuyPrice != null) {
                     JsonObject obj = item.getData();
                     obj.addProperty("buyPrice", this.invBuyPrice);
                     array.add(obj);
@@ -76,8 +78,7 @@ public class TomNookListener extends InventoryListener {
         LOGGER.debug("Nook: " + array.size() + " items");
         LOGGER.debug(array.toString());
 
-
-        if(!array.isEmpty())
+        if (!array.isEmpty())
             return sendData("/tomnook", array).doOnSuccess(aVoid -> printTester("Nook data sent"));
 
         return Mono.empty();
@@ -89,13 +90,13 @@ public class TomNookListener extends InventoryListener {
 
         String screenTitle = client.getInventory().getTitle();
 
-        for(String s : this.searchData.getData().getData()) {
-            if(s.contains("--##--")) {
+        for (String s : this.searchData.getData().getData()) {
+            if (s.contains("--##--")) {
                 String[] split = s.split("--##--");
 
-                if(split.length == 2) {
+                if (split.length == 2) {
                     String result = StringUtil.extractBetweenParts(screenTitle, split[0], split[1]);
-                    if(result != null && StringUtil.isValidPrice(result)) {
+                    if (result != null && StringUtil.isValidPrice(result)) {
                         return result;
                     }
                 }

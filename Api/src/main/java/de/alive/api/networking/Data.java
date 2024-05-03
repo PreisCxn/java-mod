@@ -20,7 +20,11 @@ public class Data {
 
     private final @NotNull JsonElement defaultResult;
 
-    public Data(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData, @Nullable JsonElement defaultResult) {
+    public Data(String id,
+                List<String> backupData,
+                @Nullable Function<JsonElement, JsonElement> processData,
+                @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData,
+                @Nullable JsonElement defaultResult) {
         this.id = id;
         this.backupData = backupData;
         this.processData = processData;
@@ -28,7 +32,10 @@ public class Data {
         this.defaultResult = defaultResult != null ? defaultResult : JsonNull.INSTANCE;
     }
 
-    public Data(String id, List<String> backupData, @Nullable Function<JsonElement, JsonElement> processData, @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
+    public Data(String id,
+                List<String> backupData,
+                @Nullable Function<JsonElement, JsonElement> processData,
+                @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData) {
         this(id, backupData, processData, equalData, null);
     }
 

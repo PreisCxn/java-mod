@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Enumeration;
 import java.util.function.Consumer;
@@ -20,7 +19,7 @@ import java.util.jar.JarFile;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
-public class RemoteModule implements Module {
+public final class RemoteModule implements Module {
     private final String remotePath;
     private final Path jarPath;
     private final String primaryPackage;
@@ -45,7 +44,6 @@ public class RemoteModule implements Module {
                 .flatMap(outdated -> remoteModule.download())
                 .then(Mono.just(remoteModule));
     }
-
 
     private Mono<Void> download() {
         if (remotePath == null)
@@ -90,15 +88,13 @@ public class RemoteModule implements Module {
             LOGGER.info("Calculating hash for {}", filePath);
             try {
                 MessageDigest md = MessageDigest.getInstance("SHA-256");
-                try (DigestInputStream dis = new DigestInputStream(Files.newInputStream(filePath), md)) {
-                    while (dis.read() != -1) ;
-                    md = dis.getMessageDigest();
-                }
-
+                md.update(Files.readAllBytes(filePath));
                 StringBuilder result = new StringBuilder();
+
                 for (byte b : md.digest()) {
                     result.append(String.format("%02x", b));
                 }
+
                 return result.toString();
 
             } catch (Exception e) {
@@ -114,11 +110,11 @@ public class RemoteModule implements Module {
 
     @Override
     public String toString() {
-        return "RemoteModule{" +
-               "remotePath='" + remotePath + '\'' +
-               ", jarPath=" + jarPath +
-               ", primaryPackage='" + primaryPackage + '\'' +
-               '}';
+        return "RemoteModule{"
+               + "remotePath='" + remotePath + '\''
+               + ", jarPath=" + jarPath
+               + ", primaryPackage='" + primaryPackage + '\''
+               + '}';
     }
 
     @Override

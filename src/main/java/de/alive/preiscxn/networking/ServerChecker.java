@@ -81,7 +81,7 @@ public class ServerChecker implements IServerChecker {
      */
     @Override
     public @NotNull Mono<Boolean> isConnected() {
-        if(!this.websocket.isConnected())
+        if (!this.websocket.isConnected())
             return checkConnection();
         return Mono.just(true);
     }
@@ -112,7 +112,7 @@ public class ServerChecker implements IServerChecker {
     }
 
     private void onWebsocketMessage(@NotNull String message) {
-        try{
+        try {
             JsonObject json = JsonParser.parseString(message).getAsJsonObject();
             if (json.has("min-version")) {
                 this.minVersionFuture.complete(json.get("min-version").getAsString());
@@ -126,7 +126,7 @@ public class ServerChecker implements IServerChecker {
                 this.maintenanceFuture.complete(true);
             }
 
-        }catch(JsonSyntaxException ignored){
+        } catch (JsonSyntaxException ignored) {
             connectionFuture.complete(state != NetworkingState.OFFLINE);
         }
     }

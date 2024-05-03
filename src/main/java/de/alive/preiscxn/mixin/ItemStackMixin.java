@@ -1,7 +1,11 @@
 package de.alive.preiscxn.mixin;
 
 import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.*;
+import de.alive.api.cytooxien.IThemeServerChecker;
+import de.alive.api.cytooxien.Modes;
+import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.cytooxien.PriceText;
+import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.PriceCxnMod;
@@ -51,17 +55,18 @@ public abstract class ItemStackMixin {
         List<Text> list = cir.getReturnValue();
         IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
 
-        if(shouldCancel(list))
+        if (shouldCancel(list))
             return;
 
-        if (this.cxnItemStack == null || this.lastUpdate > 50){//uncomment the lastUpdate check to update the prices every 50th tooltip
+        if (this.cxnItemStack == null || this.lastUpdate > 50) {
             this.cxnItemStack = getPriceCxnItemStack();
             this.lastUpdate = 0;
         }
 
         this.lastUpdate++;
-        if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty()) && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty())) return;
-
+        if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty())
+            && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
+            return;
 
         AtomicReference<PriceText> pcxnPriceText = new AtomicReference<>(PriceText.create());
 
@@ -81,14 +86,20 @@ public abstract class ItemStackMixin {
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         LOGGER.debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
-        if(this.cxnItemStack.getPcxnPrice() != null){
+        if (this.cxnItemStack.getPcxnPrice() != null) {
             list.add(pcxnPriceText.get()
-                             .withPrices(this.cxnItemStack.getPcxnPrice().get("lower_price").getAsDouble(), this.cxnItemStack.getPcxnPrice().get("upper_price").getAsDouble())
+                    .withPrices(this.cxnItemStack
+                            .getPcxnPrice()
+                            .get("lower_price")
+                            .getAsDouble(),
+                            this.cxnItemStack.getPcxnPrice()
+                                    .get("upper_price")
+                                    .getAsDouble())
                     .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
-                             .getText());
+                    .getText());
         }
 
-        if(this.cxnItemStack.getNookPrice() != null){
+        if (this.cxnItemStack.getNookPrice() != null) {
             list.add(PriceText.create()
                              .withIdentifierText("Tom Block:")
                              .withPrices(this.cxnItemStack.getNookPrice().get("price").getAsDouble())
@@ -96,10 +107,10 @@ public abstract class ItemStackMixin {
                              .getText());
 
         }
-        if(this.cxnItemStack.getPcxnPrice() != null){
+        if (this.cxnItemStack.getPcxnPrice() != null) {
 
             KeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
-            if(this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()){
+            if (this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
                                       keyBinding
                                               .getBoundKeyLocalizedText()
@@ -121,13 +132,13 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                                 .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting( )));
+                        .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting()));
             });
         }
     }
 
     @Unique
-    public boolean shouldCancel(@NotNull List<Text> list){
+    public boolean shouldCancel(@NotNull List<Text> list) {
         IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         Modes mode = themeChecker.getMode();
@@ -141,7 +152,7 @@ public abstract class ItemStackMixin {
         if (client.currentScreen.getTitle().getString() == null || client.currentScreen.getTitle().getString().isEmpty())
             return true;
 
-        List<String> invBlocks = switch(mode){
+        List<String> invBlocks = switch (mode) {
             case SKYBLOCK -> TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData().getData();
             case CITYBUILD -> TranslationDataAccess.CITYBUILD_INV_BLOCK.getData().getData();
             default -> null;

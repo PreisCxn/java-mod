@@ -21,7 +21,9 @@ import java.util.Locale;
 /**
  * This class is used to provide some useful methods for Strings
  */
-public class StringUtil {
+public final class StringUtil {
+    private StringUtil() {
+    }
 
     public static String removeLastChar(@Nullable String text) {
         if (text == null || text.isEmpty()) {
@@ -47,7 +49,7 @@ public class StringUtil {
         Locale.setDefault(locale);
 
         DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(locale);
-        if(time >= 100000) {
+        if (time >= 100000) {
             decimalFormat.setMaximumFractionDigits(0);
             decimalFormat.setMinimumFractionDigits(0);
         } else {
@@ -64,6 +66,7 @@ public class StringUtil {
 
     /**
      * This method converts all Strings in a list to lower case
+     *
      * @param list The list to convert
      * @return The converted list
      */
@@ -82,8 +85,8 @@ public class StringUtil {
         return new ArrayList<>(Arrays.asList(words));
     }
 
-    public static List<String> getToolTips(@Nullable ItemStack stack){
-        if(stack == null) return null;
+    public static List<String> getToolTips(@Nullable ItemStack stack) {
+        if (stack == null) return null;
         List<String> result = new ArrayList<>();
 
         List<Text> tooltip = stack.getTooltip(
@@ -91,7 +94,7 @@ public class StringUtil {
                 MinecraftClient.getInstance().player,
                 MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
 
-        for (Text line : tooltip){
+        for (Text line : tooltip) {
             result.add(line.getString());
         }
 

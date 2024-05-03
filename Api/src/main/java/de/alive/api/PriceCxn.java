@@ -1,6 +1,9 @@
 package de.alive.api;
 
-public class PriceCxn {
+public final class PriceCxn {
+    private PriceCxn() {
+    }
+
     private static Mod mod;
 
     public static Mod getMod() {

@@ -2,7 +2,13 @@ package de.alive.preiscxn.cytooxien;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.PriceCxnItemStack;
@@ -27,14 +33,20 @@ import org.spongepowered.asm.mixin.Unique;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
-public class PriceCxnItemStackImpl implements PriceCxnItemStack {
+public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private static final Cache<Tuple4<ItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
             = CacheBuilder
             .newBuilder()
@@ -60,13 +72,13 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
-        if(addTooltips)
+        if (addTooltips)
             this.toolTips = StringUtil.getToolTips(item);
         this.itemName = item.getItem().getTranslationKey();
         String displayName = item.getName().getString();
         this.amount = item.getCount();
 
-        if(item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
+        if (item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
 
             Optional<RegistryKey<Item>> key = item.getRegistryEntry().getKey();
             key.map(itemRegistryKey -> this.itemName += "." + itemRegistryKey.getValue().getPath());
@@ -88,7 +100,6 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             data.add(COMMENT_KEY, getCustomData(item));
 
         LOGGER.debug(itemName);
-
 
         /*
         zusätzlich suche nach den keys in searchData:
@@ -123,9 +134,20 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         return getInstance(item, searchData, true, true);
     }
 
-    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item,
+                                                    @Nullable Map<String, DataAccess> searchData,
+                                                    boolean addComment,
+                                                    boolean addTooltips) {
         try {
-            return CACHE.get(Tuples.of(item, searchData == null ? Collections.emptyMap() : searchData, addComment, addTooltips), () -> new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips));
+            return CACHE
+                    .get(Tuples.of(item,
+                                    searchData == null ? Collections.emptyMap() : searchData,
+                                    addComment,
+                                    addTooltips),
+                            () -> new PriceCxnItemStackImpl(item,
+                                    searchData,
+                                    addComment,
+                                    addTooltips));
         } catch (ExecutionException e) {
             return new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips);
         }
@@ -136,7 +158,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         if (nbt == null) return new JsonObject();
 
         JsonObject jsonObject = componentMapToJson(nbt);
-        if(jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive){
+        if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
             LOGGER.warn("Found no custom_data in item: " + item.getItem().getTranslationKey());
             return new JsonObject();
         }
@@ -197,16 +219,14 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
             try {
                 return JsonParser.parseString(nbtString).getAsJsonArray();
             } catch (IllegalStateException ignored) {
+                //test if JsonKey is missing
+                try {
+                    return JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e2) {
+                    //else add as normal String
+                    return nbtString;
+                }
             }
-
-            //test if JsonKey is missing
-            try {
-                return JsonParser.parseString(nbtString).getAsJsonObject();
-            } catch (IllegalStateException e2) {
-                //else add as normal String
-                return nbtString;
-            }
-
         } catch (JsonParseException e) {
             //else add as normal String
             return nbtString;
@@ -243,8 +263,8 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     @Override
     public boolean equals(Object o) {
-        return (o == this) || (o instanceof PriceCxnItemStackImpl
-                && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData()));
+        return o == this || o instanceof PriceCxnItemStackImpl
+                            && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData());
     }
 
     @Override
@@ -359,7 +379,9 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
     }
 
     @Override
-    public int getAdvancedAmount(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText> pcxnPriceText, @Nullable List<Text> list) {
+    public int getAdvancedAmount(@NotNull IServerChecker serverChecker,
+                                 @Nullable AtomicReference<PriceText> pcxnPriceText,
+                                 @Nullable List<Text> list) {
         int amount = this.getAmount();
 
         amount *= getPbvAmountFactor(serverChecker, pcxnPriceText);
@@ -375,7 +397,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     @Override
     public @Nullable JsonObject findItemInfo(String dataKey) {
-        if(PriceCxn.getMod().getCxnListener().getData(dataKey) == null)
+        if (PriceCxn.getMod().getCxnListener().getData(dataKey) == null)
             return null;
 
         JsonObject obj = PriceCxn.getMod().getCxnListener().getData(dataKey).getDataObject();
@@ -393,9 +415,9 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
         List<Integer> foundItems = new ArrayList<>();
 
         //item ist special_item?
-        if (data.has(PriceCxnItemStackImpl.COMMENT_KEY) &&
-            data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject() &&
-            data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
+        if (data.has(PriceCxnItemStackImpl.COMMENT_KEY)
+            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()
+            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
             JsonObject nbtData = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
             String pbvString = nbtData.get("PublicBukkitValues").getAsJsonObject().toString();
 
@@ -409,7 +431,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
                 String[] searches = searchKey.split("\\.");
 
                 for (String s : searches) {
-                    if(s.equals("special_item")) continue;
+                    if (Objects.equals(s, "special_item")) continue;
                     if (!pbvString.contains(s)) continue outer;
                 }
 
@@ -420,7 +442,7 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         }
 
-        if(foundItems.isEmpty()) {
+        if (foundItems.isEmpty()) {
             outer:
             for (int i = 0; i < array.size(); i++) {
                 JsonObject item = array.get(i).getAsJsonObject();
@@ -448,7 +470,6 @@ public class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
             }
         }
-
 
         if (foundItems.size() == 1) {
             return array.get(foundItems.getFirst()).getAsJsonObject();

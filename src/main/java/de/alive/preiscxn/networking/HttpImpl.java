@@ -29,7 +29,9 @@ public class HttpImpl implements Http {
         this.apiUrl = apiUrl;
     }
 
-    private static <T> void applyPushPromise(HttpRequest initiatingRequest, HttpRequest pushPromiseRequest, Function<HttpResponse.BodyHandler<T>, CompletableFuture<HttpResponse<T>>> acceptor) { }
+    private static <T> void applyPushPromise(HttpRequest initiatingRequest,
+                                             HttpRequest pushPromiseRequest,
+                                             Function<HttpResponse.BodyHandler<T>, CompletableFuture<HttpResponse<T>>> acceptor) { }
 
     @Override
     public String getApiUrl() {
@@ -41,12 +43,12 @@ public class HttpImpl implements Http {
     }
 
     @Override
-    public Mono<String> GET(String uri) {
-        return GET(DEFAULT_API_URL, uri);
+    public Mono<String> get(String uri) {
+        return get(DEFAULT_API_URL, uri);
     }
 
     @Override
-    public @NotNull Mono<String> GET(String baseUri, String uri) {
+    public @NotNull Mono<String> get(String baseUri, String uri) {
         HttpRequest.Builder get = HttpRequest.newBuilder()
                 .uri(URI.create(baseUri + uri))
                 .GET();
@@ -66,7 +68,7 @@ public class HttpImpl implements Http {
     }
 
     @Override
-    public @NotNull Mono<String> POST(@NotNull String uri, @Nullable JsonObject json) {
+    public @NotNull Mono<String> post(@NotNull String uri, @Nullable JsonObject json) {
         HttpRequest.Builder post = HttpRequest
                 .newBuilder()
                 .uri(URI.create(apiUrl + uri));

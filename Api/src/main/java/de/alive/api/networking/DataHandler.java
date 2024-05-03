@@ -1,12 +1,20 @@
 package de.alive.api.networking;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import de.alive.api.PriceCxn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
@@ -34,7 +42,12 @@ public class DataHandler {
      * @param keyColumnName   The name of the column that should be used as key
      * @param refreshInterval The interval in which the data should be refreshed in milliseconds
      */
-    public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval, @Nullable DataAccess @Nullable ... dataAccess) {
+    public DataHandler(@NotNull IServerChecker serverChecker,
+                       @NotNull String uri,
+                       @Nullable List<String> columnNames,
+                       @Nullable String keyColumnName,
+                       int refreshInterval,
+                       @Nullable DataAccess... dataAccess) {
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
@@ -46,7 +59,11 @@ public class DataHandler {
         }
     }
 
-    public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, @Nullable List<String> columnNames, @Nullable String keyColumnName, int refreshInterval) {
+    public DataHandler(@NotNull IServerChecker serverChecker,
+                       @NotNull String uri,
+                       @Nullable List<String> columnNames,
+                       @Nullable String keyColumnName,
+                       int refreshInterval) {
         this(serverChecker, uri, columnNames, keyColumnName, refreshInterval, (DataAccess) null);
     }
 
@@ -101,8 +118,10 @@ public class DataHandler {
      * @param keyColumnName The name of the column that should be used as key
      * @return A CompletableFuture which returns the data as a Map with the key as the key and the values as a List
      */
-    private @NotNull Mono<Map<String, List<String>>> getServerDataAsync(String url, @Nullable List<String> columnNames, @Nullable String keyColumnName) {
-        return PriceCxn.getMod().getHttp().GET(url)
+    private @NotNull Mono<Map<String, List<String>>> getServerDataAsync(String url,
+                                                                        @Nullable List<String> columnNames,
+                                                                        @Nullable String keyColumnName) {
+        return PriceCxn.getMod().getHttp().get(url)
                 .mapNotNull(jsonString -> {
                     if (JsonParser.parseString(jsonString).isJsonArray()) {
                         dataArray = JsonParser.parseString(jsonString).getAsJsonArray();
@@ -126,18 +145,18 @@ public class DataHandler {
                         JsonObject json = object.getAsJsonObject();
                         String key;
 
-                        try{
+                        try {
                             key = json.get(keyColumnName).getAsString();
-                        }catch(Exception e){
+                        } catch (Exception e) {
                             return null;
                         }
 
                         List<String> values = new ArrayList<>();
 
                         for (String columnName : columnNames) {
-                            try{
+                            try {
                                 JsonNull no = json.get(columnName).getAsJsonNull();
-                            }catch(Exception e){
+                            } catch (Exception e) {
                                 String[] rowData = json.get(columnName).getAsString().split(", ");
                                 values.addAll(Arrays.asList(rowData));
                             }

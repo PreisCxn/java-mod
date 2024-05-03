@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ItemUpdater {
+public final class ItemUpdater {
+    private ItemUpdater() {
+    }
     public static @NotNull Mono<Void> updateItemsAsync(@NotNull List<PriceCxnItemStack> items,
                                                        @NotNull IScreenHandler handler,
                                                        @NotNull Tuple2<Integer, Integer> range,
@@ -29,14 +31,14 @@ public class ItemUpdater {
 
                 boolean add = true;
 
-                synchronized(items){
+                synchronized (items) {
                     for (PriceCxnItemStack item : items) {
                         if (item.equals(newItem)) {
 
                             if (searchData != null && searchData.containsKey("timestamp")) {
-                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                    item.getData().get("timestamp") != JsonNull.INSTANCE &&
-                                    !TimeUtil.timestampsEqual(
+                                if (newItem.getData().get("timestamp") != JsonNull.INSTANCE
+                                    && item.getData().get("timestamp") != JsonNull.INSTANCE
+                                    && !TimeUtil.timestampsEqual(
                                             item.getData().get("timestamp").getAsLong(),
                                             newItem.getData().get("timestamp").getAsLong(),
                                             5)) {

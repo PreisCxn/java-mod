@@ -29,7 +29,9 @@ public abstract class HandledScreenMixin {
             PriceCxn.getMod().forEachKeybindExecutor(
                     (keyBinding, keybindExecutor) -> {
                         if (keyBinding.matchesKey(keyCode, scanCode)) {
-                            keybindExecutor.onKeybindPressed(MinecraftClientImpl.getInstance(MinecraftClient.getInstance()), ItemStackImpl.getInstance(this.focusedSlot.getStack()));
+                            keybindExecutor.onKeybindPressed(
+                                    MinecraftClientImpl.getInstance(MinecraftClient.getInstance()),
+                                    ItemStackImpl.getInstance(this.focusedSlot.getStack()));
                         }
                     }
             );
