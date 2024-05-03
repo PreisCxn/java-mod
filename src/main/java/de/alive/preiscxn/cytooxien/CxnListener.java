@@ -47,7 +47,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
 
         //checking connection and activating mod
         connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.NONE)
-                .doOnSuccess((a) -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
+                .doOnSuccess(a -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
                 .subscribe();
 
     }
@@ -58,12 +58,12 @@ public class CxnListener extends ServerListener implements ICxnListener {
 
         for (Class<? extends InventoryListener> clazz : classes) {
             LOGGER.info("Found listener: {}", clazz.getName());
-            try{
+            try {
                 InventoryListener inventoryListener = clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                         .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
 
                 init(inventoryListener);
-            }catch(Exception e){
+            } catch (Exception e) {
                 LOGGER.error("Could not instantiate listener", e);
             }
         }
@@ -99,7 +99,12 @@ public class CxnListener extends ServerListener implements ICxnListener {
     public @NotNull Mono<Void> onServerJoin() {
 
         return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
-                .doOnSuccess(messageInformation -> CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight(), true))
+                .doOnSuccess(messageInformation ->
+                        CxnConnectionManager
+                                .sendConnectionInformation(
+                                        messageInformation.getLeft(),
+                                        messageInformation.getRight(),
+                                        true))
                 .then();
 
     }
@@ -129,7 +134,6 @@ public class CxnListener extends ServerListener implements ICxnListener {
     public @NotNull IThemeServerChecker getThemeChecker() {
         return themeChecker;
     }
-
 
     @Override
     public @Nullable List<String> getModUsers() {

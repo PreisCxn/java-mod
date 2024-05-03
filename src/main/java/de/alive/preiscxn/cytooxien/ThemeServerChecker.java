@@ -49,11 +49,11 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
     protected @NotNull Mono<Void> handleData(@NotNull String data) {
         String lowerCaseData = data.toLowerCase();
 
-        if(lowerCaseData.contains(Modes.SKYBLOCK.toString().toLowerCase())) {
+        if (lowerCaseData.contains(Modes.SKYBLOCK.toString().toLowerCase())) {
             this.mode = Modes.SKYBLOCK;
-        } else if(lowerCaseData.contains(Modes.CITYBUILD.toString().toLowerCase())) {
+        } else if (lowerCaseData.contains(Modes.CITYBUILD.toString().toLowerCase())) {
             this.mode = Modes.CITYBUILD;
-        } else if(lowerCaseData.contains(Modes.LOBBY.toString().toLowerCase())) {
+        } else if (lowerCaseData.contains(Modes.LOBBY.toString().toLowerCase())) {
             this.mode = Modes.LOBBY;
         } else {
             this.mode = Modes.NOTHING;
@@ -62,19 +62,23 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
         setNotInValue(this.mode.toString());
 
         Mono<Void> voidMono = Mono.empty();
-        if(serverListener != null)
+        if (serverListener != null)
             voidMono = voidMono.then(serverListener.onTabChange());
 
         printDebug("New Mode: " + this.mode.toString());
 
-        if(DEBUG_MODE && MinecraftClient.getInstance().player != null)
-            MinecraftClient.getInstance().player.sendMessage(Text.translatable("cxn_listener.theme_checker.changed", this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
+        if (DEBUG_MODE && MinecraftClient.getInstance().player != null)
+            MinecraftClient.getInstance()
+                    .player
+                    .sendMessage(
+                            Text.translatable("cxn_listener.theme_checker.changed",
+                            this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
 
         return voidMono;
     }
 
     @Override
-    protected int getRefreshesAfterJoinEvent(){
+    protected int getRefreshesAfterJoinEvent() {
         return 5;
     }
 

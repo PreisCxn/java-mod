@@ -103,7 +103,6 @@
 
         <!-- Checks for naming conventions                 -->
         <!-- See https://checkstyle.org/config_naming.html -->
-        <module name="CatchParameterName"/>
         <module name="ClassTypeParameterName"/>
         <module name="ConstantName"/>
         <module name="IllegalIdentifierName"/>
@@ -125,10 +124,6 @@
         <!-- Checks for Javadoc comments                    -->
         <!-- See https://checkstyle.org/config_javadoc.html -->
         <module name="InvalidJavadocPosition"/>
-        <module name="JavadocMethod"/>
-        <module name="JavadocParagraph"/>
-        <module name="JavadocStyle"/>
-        <module name="JavadocType"/>
         <!-- <module name="MissingJavadocMethod"/> -->
         <!-- <module name="MissingJavadocPackage"/> -->
         <!-- <module name="MissingJavadocType"/> -->

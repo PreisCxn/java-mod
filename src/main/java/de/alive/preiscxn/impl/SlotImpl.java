@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class SlotImpl implements ISlot {
-    private static final Cache<Slot, SlotImpl> slotMap = CacheBuilder
+public final class SlotImpl implements ISlot {
+    private static final Cache<Slot, SlotImpl> SLOT_MAP = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
@@ -25,7 +25,7 @@ public class SlotImpl implements ISlot {
 
     public static SlotImpl getInstance(Slot slot) {
         try {
-            return slotMap.get(slot, () -> new SlotImpl(slot));
+            return SLOT_MAP.get(slot, () -> new SlotImpl(slot));
         } catch (ExecutionException e) {
             return new SlotImpl(slot);
         }

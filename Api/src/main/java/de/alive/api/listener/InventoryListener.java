@@ -69,7 +69,7 @@ public abstract class InventoryListener {
             if (!(client.getInventory().getSize() == inventorySize)) return mono;
             IScreenHandler handler = client.getScreenHandler();
             return mono.then(initSlotsAsync(handler)
-                                     .doOnSuccess((a) -> {
+                                     .doOnSuccess(a -> {
                                          this.isOpen = true;
                                          lastUpdate = System.currentTimeMillis();
                                      }).then(onInventoryOpen(client, handler)));
@@ -180,7 +180,7 @@ public abstract class InventoryListener {
                 obj.addProperty("uuid", uuid);
                 obj.addProperty("username", instance.getPlayerNameString());
                 obj.add("data", data);
-                return PriceCxn.getMod().getHttp().POST("/datahandler/" + uri, obj).then();
+                return PriceCxn.getMod().getHttp().post("/datahandler/" + uri, obj).then();
             } else
                 return Mono.error(new NullPointerException("Not connected"));
         }));

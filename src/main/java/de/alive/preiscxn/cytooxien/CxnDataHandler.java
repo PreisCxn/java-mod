@@ -16,7 +16,12 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
@@ -54,9 +59,18 @@ public class CxnDataHandler implements ICxnDataHandler {
         if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
 
             if (this.themeChecker.getMode().equals(Modes.SKYBLOCK)) {
-                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/skyblock/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
+                data.put(dataKey, new DataHandler(
+                        serverChecker,
+                        "/datahandler/items/skyblock/true/"
+                        + (isNook ? "true" : "false"),
+                        DataHandler.ITEM_REFRESH_INTERVAL));
             } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD)) {
-                data.put(dataKey, new DataHandler(serverChecker, "/datahandler/items/citybuild/true/" + (isNook ? "true" : "false"), DataHandler.ITEM_REFRESH_INTERVAL));
+                data.put(dataKey,
+                        new DataHandler(
+                                serverChecker,
+                                "/datahandler/items/citybuild/true/"
+                                + (isNook ? "true" : "false"),
+                                DataHandler.ITEM_REFRESH_INTERVAL));
             } else return Mono.empty();
 
         } else {

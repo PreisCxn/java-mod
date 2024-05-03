@@ -70,7 +70,7 @@ public class PriceText {
     }
 
     private void sortPrices() {
-        if(prices != null)
+        if (prices != null)
             Arrays.sort(prices);
     }
 
@@ -83,19 +83,25 @@ public class PriceText {
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
         LOGGER.debug("preise!!! ");
         LOGGER.debug(String.valueOf(this.priceAdder));
-        return getLowerPriceText().flatMap(text -> getUpperPriceText().map(mutableText -> MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
+        return getLowerPriceText()
+                .flatMap(text -> getUpperPriceText()
+                        .map(mutableText -> MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " "))
+                                .setStyle(GRAY_STYLE)
                         .append(text)
                         .append(MutableText.of(new PlainTextContent.Literal(
                                 " - ")).setStyle(GRAY_STYLE))
                         .append(mutableText)
-                        .append(COIN_TEXT)).or(() -> Optional.ofNullable(MutableText.of(new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " ")).setStyle(GRAY_STYLE)
+                                .append(COIN_TEXT)).or(() ->
+                                Optional.ofNullable(MutableText.of(
+                                                new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " "))
+                                        .setStyle(GRAY_STYLE)
                         .append(text)
                         .append(COIN_TEXT))))
                 .orElse(getSearchingText());
     }
 
     private MutableText getSearchingText() {
-        if(isSearching == SearchingState.FAILED_SEARCHING)
+        if (isSearching == SearchingState.FAILED_SEARCHING)
             return Text.translatable("cxn_listener.display_prices.search_failed")
                     .setStyle(GRAY_STYLE.withFormatting(Formatting.ITALIC));
         else {

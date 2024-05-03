@@ -35,7 +35,7 @@ public interface PriceCxnItemStack {
     int getAmount();
 
     /**
-     * This includes the stack amount, but also spawn amount
+     * This includes the stack amount, but also spawn amount.
      */
     int getAdvancedAmount(IServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText, List<Text> list);
 

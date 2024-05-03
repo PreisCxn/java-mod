@@ -27,7 +27,7 @@ public class StorageItemStack {
 
     }
 
-    public void setup(@NotNull JsonObject object, IWebSocketConnector connector){
+    public void setup(@NotNull JsonObject object, IWebSocketConnector connector) {
         this.type = isOf(object, Type.VENDITORPL) ? Type.VENDITORPL : Type.ITEM_STORAGE;
         this.connector = connector;
         this.setup = true;
@@ -37,18 +37,20 @@ public class StorageItemStack {
         setup(object, connector);
     }
     public @NotNull Mono<Void> search(Integer storageSearchResult) {
-        if(!setup) return Mono.empty();
-        if(changedStorage(storageSearchResult)) {
-            //this.priceText = PriceText.create(true);
-        } else return Mono.empty();
+        if (!setup) return Mono.empty();
+        if (!changedStorage(storageSearchResult)) {
+            return Mono.empty();
+        } /*else {
+            this.priceText = PriceText.create(true);
+        }*/
 
-        if(lastUpdate + REFRESH_AFTER_SECONDS * TimeUtil.TimeUnit.SECONDS.getMilliseconds() > System.currentTimeMillis())
+        if (lastUpdate + REFRESH_AFTER_SECONDS * TimeUtil.TimeUnit.SECONDS.getMilliseconds() > System.currentTimeMillis())
             return Mono.empty();
         lastUpdate = System.currentTimeMillis();
 
         Mono<Void> searchCompletion;
 
-        if(type.containsAmount(storageSearchResult)) {
+        if (type.containsAmount(storageSearchResult)) {
             searchCompletion = Mono.empty();
         } else {
             searchCompletion = type.requestAmount(storageSearchResult, this.connector);
@@ -73,7 +75,7 @@ public class StorageItemStack {
     }
 
     public static boolean isOf(@NotNull JsonObject data, @NotNull Type item) {
-        if(!data.has("item_search_key") || !data.has("pbv_search_key")
+        if (!data.has("item_search_key") || !data.has("pbv_search_key")
                 || data.get("item_search_key") == JsonNull.INSTANCE || data.get("pbv_search_key") == JsonNull.INSTANCE) return false;
 
         return data.get("item_search_key").getAsString().contains(item.getKey());
@@ -104,13 +106,13 @@ public class StorageItemStack {
         }
 
         public @NotNull Optional<Double> getPrice(int amount) {
-            if(amount <= this.startPrice) return Optional.of(0D);
-            if(!priceMap.containsKey(amount)) return Optional.empty();
+            if (amount <= this.startPrice) return Optional.of(0D);
+            if (!priceMap.containsKey(amount)) return Optional.empty();
             return Optional.of(priceMap.get(amount));
         }
 
         public boolean containsAmount(int amount) {
-            if(amount <= this.startPrice) return true;
+            if (amount <= this.startPrice) return true;
             return priceMap.containsKey(amount);
         }
 
@@ -123,7 +125,7 @@ public class StorageItemStack {
                 try {
                     double price = Double.parseDouble(s);
                     priceMap.put(amount, price);
-                }catch(NumberFormatException e){
+                } catch (NumberFormatException e) {
                     return null;
                 }
                 return null;

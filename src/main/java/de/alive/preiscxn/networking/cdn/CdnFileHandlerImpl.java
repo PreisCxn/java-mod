@@ -32,7 +32,7 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
     @Override
     public @NotNull Mono<List<String>> getFiles(@NotNull String prefix) {
-        return http.GET(BASE_URL, prefix)
+        return http.get(BASE_URL, prefix)
                 .map(s -> {
                     JsonArray jsonElements = JsonParser.parseString(s).getAsJsonArray();
                     List<String> files = new ArrayList<>();
@@ -45,7 +45,7 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
     @Override
     public @NotNull Mono<List<String>> getVersions(@NotNull String file) {
-        return http.GET(BASE_URL, file + "?type=list-versions")
+        return http.get(BASE_URL, file + "?type=list-versions")
                 .map(s -> {
                     JsonArray jsonElements = JsonParser.parseString(s).getAsJsonArray();
                     List<String> versions = new ArrayList<>();
@@ -58,10 +58,10 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
     @Override
     public @NotNull Mono<String> getNewestVersion(@NotNull String file) {
-        return http.GET(BASE_URL, file + "?type=newest-version")
+        return http.get(BASE_URL, file + "?type=newest-version")
                 .map(s -> {
                     JsonElement jsonElement = JsonParser.parseString(s);
-                    if(jsonElement.isJsonNull())
+                    if (jsonElement.isJsonNull())
                         return "";
                     return jsonElement.getAsString();
                 });
@@ -71,12 +71,12 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
     public @NotNull Mono<String> getHash(@NotNull String file, @Nullable String version) {
         String path = getPath(file, version);
 
-        if(path.contains("?"))
+        if (path.contains("?"))
             path += "&type=hash";
         else
             path += "?type=hash";
 
-        return http.GET(BASE_URL, path)
+        return http.get(BASE_URL, path)
                 .map(s -> JsonParser.parseString(s).getAsString());
     }
 }

@@ -28,25 +28,25 @@ public abstract class PlayerListEntryMixin {
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void getDisplayName(@NotNull CallbackInfoReturnable<Text> ci) {
         Text originalDisplayName = this.displayName;
-        if(originalDisplayName == null) return;
+        if (originalDisplayName == null) return;
 
         ICxnListener listener = PriceCxn.getMod().getCxnListener();
 
-        if(!listener.isOnServer().get()) return;
-        if(!listener.isActive()) return;
+        if (!listener.isOnServer().get()) return;
+        if (!listener.isActive()) return;
 
         List<String> modUsers = listener.getModUsers();
 
-        if(modUsers == null) return;
+        if (modUsers == null) return;
 
         String[] strings = originalDisplayName.getString().split(" ");
         List<String> displayList = new ArrayList<>(Arrays.asList(strings));
 
-        if(displayList.size() != 2) return;
+        if (displayList.size() != 2) return;
 
         String playerName = displayList.get(1).replace(" ", "");
 
-        if(!modUsers.contains(playerName)) return;
+        if (!modUsers.contains(playerName)) return;
 
         MutableText text = MutableText.of(new PlainTextContent.Literal("")).setStyle(Style.EMPTY.withColor(Formatting.WHITE));
         text.append(originalDisplayName).append("\uE202 ");

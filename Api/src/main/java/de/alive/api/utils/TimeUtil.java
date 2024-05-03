@@ -10,11 +10,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class TimeUtil {
+public final class TimeUtil {
     private static final DataAccess MINUTE_SEARCH = TranslationDataAccess.MINUTE_SEARCH;
     private static final DataAccess NOW_SEARCH = TranslationDataAccess.NOW_SEARCH;
     private static final DataAccess HOUR_SEARCH = TranslationDataAccess.HOUR_SEARCH;
     private static final DataAccess SECOND_SEARCH = TranslationDataAccess.SECOND_SEARCH;
+
+    private TimeUtil() {
+
+    }
 
     public enum TimeUnit {
         SECONDS(1000, "", ""),
@@ -45,7 +49,7 @@ public class TimeUtil {
         }
 
         public String getTranslatable(Long amount) {
-            if(amount == 1)
+            if (amount == 1)
                 return getSingularTranslatable();
             else
                 return getPluralTranslatable();
@@ -87,13 +91,13 @@ public class TimeUtil {
         LogPrinter.LOGGER.debug("hours: {}", hours.orElse(-1));
         LogPrinter.LOGGER.debug("minutes: {}", minutes.orElse(-1));
 
-        if(minutes.isEmpty() && hours.isEmpty())
+        if (minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();
 
-        if(hours.isEmpty())
+        if (hours.isEmpty())
             hours = Optional.of(0);
 
-        if(minutes.isEmpty())
+        if (minutes.isEmpty())
             minutes = Optional.of(0);
 
         long elapsedSeconds = (hours.get() * 3600L + minutes.get() * 60L) * 1000;
@@ -121,16 +125,16 @@ public class TimeUtil {
             try {
                 int minutes = Integer.parseInt(parts[2]);
                 return Optional.of(minutes);
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return Optional.empty();
             }
         } else {
-            if(!StringUtil.containsString(parts[1], MINUTE_SEARCH.getData().getData())) return Optional.of(0);
+            if (!StringUtil.containsString(parts[1], MINUTE_SEARCH.getData().getData())) return Optional.of(0);
 
-            try{
+            try {
                 int minutes = Integer.parseInt(parts[0]);
                 return Optional.of(minutes);
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return Optional.empty();
             }
         }
@@ -157,7 +161,7 @@ public class TimeUtil {
                 .flatMap(s -> {
                     //getting index before
                     int index = partsList.indexOf(s);
-                    if(index > 0) {
+                    if (index > 0) {
                         try {
                             int hours = Integer.parseInt(partsList.get(index - 1));
                             return Optional.of(hours);
@@ -172,9 +176,9 @@ public class TimeUtil {
     /**
      * Überprüft, ob zwei Zeitstempel innerhalb eines Zeitfensters (in Minuten) gleich sind.
      *
-     * @param timestamp1     Der erste Zeitstempel in Millisekunden.
-     * @param timestamp2     Der zweite Zeitstempel in Millisekunden.
-     * @param windowMinutes  Das Zeitfenster in Minuten.
+     * @param timestamp1    Der erste Zeitstempel in Millisekunden.
+     * @param timestamp2    Der zweite Zeitstempel in Millisekunden.
+     * @param windowMinutes Das Zeitfenster in Minuten.
      * @return true, wenn die Zeitstempel innerhalb des Zeitfensters gleich sind, andernfalls false.
      */
     public static boolean timestampsEqual(long timestamp1, long timestamp2, int windowMinutes) {

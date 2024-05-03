@@ -31,7 +31,6 @@ public class AuctionHouseListener extends InventoryListener {
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
 
-
     /**
      * This constructor is used to listen to a specific inventory
      *
@@ -39,7 +38,7 @@ public class AuctionHouseListener extends InventoryListener {
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
     public AuctionHouseListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
-        super(mod, inventoryTitles, inventorySize <= 0 ? 6*9 : inventorySize, active);
+        super(mod, inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
 
         searchData.put("sellerName", InventoryDataAccess.SELLER_SEARCH);
         searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
@@ -67,18 +66,18 @@ public class AuctionHouseListener extends InventoryListener {
 
         JsonArray array = new JsonArray();
 
-        if(!items.isEmpty()) {
+        if (!items.isEmpty()) {
             for (PriceCxnItemStack item : items) {
                 array.add(item.getDataWithoutDisplay());
             }
         }
 
-        if(!array.isEmpty())
+        if (!array.isEmpty())
             return sendData("/auctionhouse", array)
                     .doOnSuccess(aVoid -> {
-                        if(client.isPlayerNull())
+                        if (client.isPlayerNull())
                             return;
-                        printTester( "AuctionHouse data sent: " + array.size() + " items");
+                        printTester("AuctionHouse data sent: " + array.size() + " items");
                     });
         return Mono.empty();
     }

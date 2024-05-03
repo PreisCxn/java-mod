@@ -8,13 +8,13 @@ import reactor.core.publisher.Mono;
 public interface Http {
     String getApiUrl();
 
-    Mono<String> GET(String uri);
+    Mono<String> get(String uri);
 
     @NotNull
-    Mono<String> GET(String baseUri, String uri);
+    Mono<String> get(String baseUri, String uri);
 
     @NotNull
-    Mono<String> POST(@NotNull String uri, @Nullable JsonObject json);
+    Mono<String> post(@NotNull String uri, @Nullable JsonObject json);
 
     Mono<byte[]> getBytes(String baseUrl, String s);
 }

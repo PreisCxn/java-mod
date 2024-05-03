@@ -45,7 +45,13 @@ public class ScanInventoryKeybind implements KeybindExecutor {
 
         StringBuilder dataAccesses = new StringBuilder();
         StringBuilder enumValues = new StringBuilder(
-                "    " + shortName.toUpperCase() + "(\"cxnprice.translation." + shortName.toLowerCase() + ".title\", List.of(\"" + inventory.getTitle().replaceAll("\"", "\\\"") + "\"))," + System.lineSeparator()
+                "    "
+                + shortName.toUpperCase()
+                + "(\"cxnprice.translation."
+                + shortName.toLowerCase()
+                + ".title\", List.of(\""
+                + inventory.getTitle().replaceAll("\"", "\\\"") + "\")),"
+                + System.lineSeparator()
         );
 
         for (Tuple2<String, String> itemDataAccess : itemDataAccesses) {
@@ -81,7 +87,7 @@ public class ScanInventoryKeybind implements KeybindExecutor {
         Path path = Path.of("./ScannedInventories/" + shortName + ".java");
         Path parent = path.getParent();
         try {
-            if(!Files.exists(parent))
+            if (!Files.exists(parent))
                 Files.createDirectories(parent);
 
             Files.write(path, template.getBytes());

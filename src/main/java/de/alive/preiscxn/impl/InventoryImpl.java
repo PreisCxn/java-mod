@@ -10,8 +10,9 @@ import reactor.util.function.Tuples;
 
 import java.util.concurrent.ExecutionException;
 
-public class InventoryImpl implements IInventory {
-    private static final Cache<Tuple2<MinecraftClient, Inventory>, InventoryImpl> inventoryMap = CacheBuilder
+public final class InventoryImpl implements IInventory {
+    private static final Cache<Tuple2<MinecraftClient, Inventory>, InventoryImpl> INVENTORY_MAP
+            = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
@@ -25,7 +26,7 @@ public class InventoryImpl implements IInventory {
 
     public static InventoryImpl getInstance(MinecraftClient minecraftClient, Inventory inventory) {
         try {
-            return inventoryMap.get(Tuples.of(minecraftClient, inventory), () -> new InventoryImpl(minecraftClient, inventory));
+            return INVENTORY_MAP.get(Tuples.of(minecraftClient, inventory), () -> new InventoryImpl(minecraftClient, inventory));
         } catch (ExecutionException e) {
             return new InventoryImpl(minecraftClient, inventory);
         }
@@ -38,7 +39,9 @@ public class InventoryImpl implements IInventory {
 
     @Override
     public int getSize() {
-        if(minecraftClient.player == null || minecraftClient.player.currentScreenHandler == null || minecraftClient.player.currentScreenHandler.getSlot(0) == null)
+        if (minecraftClient.player == null
+            || minecraftClient.player.currentScreenHandler == null
+            || minecraftClient.player.currentScreenHandler.getSlot(0) == null)
             return 0;
 
         return minecraftClient.player == null ? 0 : minecraftClient.player.currentScreenHandler.getSlot(0).inventory.size();

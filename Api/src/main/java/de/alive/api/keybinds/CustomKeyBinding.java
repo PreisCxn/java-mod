@@ -74,9 +74,8 @@ public class CustomKeyBinding {
         return new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category);
     }
 
-    public KeyBinding registerKeybinding(){
+    public KeyBinding registerKeybinding() {
         return KeyBindingHelper.registerKeyBinding(getKeybinding());
     }
-
 
 }

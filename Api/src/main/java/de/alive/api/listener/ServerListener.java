@@ -31,11 +31,11 @@ public abstract class ServerListener {
         init();
     }
 
-    private void init(){
+    private void init() {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if(client == null) return;
-            if(client.getCurrentServerEntry() == null) return;
-            if(onServer.get()) return;
+            if (client == null) return;
+            if (client.getCurrentServerEntry() == null) return;
+            if (onServer.get()) return;
 
             String lowerCasedAddress = client.getCurrentServerEntry().address.toLowerCase();
             Flux.fromIterable(ips)
@@ -50,15 +50,15 @@ public abstract class ServerListener {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             boolean doMethod = this.onServer.get();
             this.onServer.set(false);
-            if(doMethod) this.onServerLeave();
+            if (doMethod) this.onServerLeave();
         });
     }
 
-    public @NotNull Mono<Void> onTabChange(){
+    public @NotNull Mono<Void> onTabChange() {
         return Mono.empty();
     }
 
-    public @NotNull Mono<Void> onJoinEvent(){
+    public @NotNull Mono<Void> onJoinEvent() {
         return Mono.empty();
     }
 
@@ -73,10 +73,11 @@ public abstract class ServerListener {
     public abstract void onServerLeave();
 
     /**
-     * Returns the AtomicBoolean that is used to check if the player is on the server
+     * Returns the AtomicBoolean that is used to check if the player is on the server.
+     *
      * @return The AtomicBoolean
      */
-    public @NotNull AtomicBoolean isOnServer(){
+    public @NotNull AtomicBoolean isOnServer() {
         return onServer;
     }
 

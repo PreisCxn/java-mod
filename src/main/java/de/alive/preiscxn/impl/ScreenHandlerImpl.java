@@ -8,8 +8,8 @@ import net.minecraft.screen.ScreenHandler;
 
 import java.util.concurrent.ExecutionException;
 
-public class ScreenHandlerImpl implements IScreenHandler {
-    private static final Cache<ScreenHandler, ScreenHandlerImpl> screenHandlerMap = CacheBuilder
+public final class ScreenHandlerImpl implements IScreenHandler {
+    private static final Cache<ScreenHandler, ScreenHandlerImpl> SCREEN_HANDLER_MAP = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
@@ -21,7 +21,7 @@ public class ScreenHandlerImpl implements IScreenHandler {
 
     public static ScreenHandlerImpl getInstance(ScreenHandler screenHandler) {
         try {
-            return screenHandlerMap.get(screenHandler, () -> new ScreenHandlerImpl(screenHandler));
+            return SCREEN_HANDLER_MAP.get(screenHandler, () -> new ScreenHandlerImpl(screenHandler));
         } catch (ExecutionException e) {
             return new ScreenHandlerImpl(screenHandler);
         }

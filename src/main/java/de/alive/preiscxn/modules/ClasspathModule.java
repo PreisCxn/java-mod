@@ -21,13 +21,13 @@ public class ClasspathModule implements Module {
 
     @Override
     public void forEach(Consumer<Class<?>> consumer) {
-        try{
+        try {
             Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(primaryPackage.replace(".", "/"));
 
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 Path path = Path.of(url.toURI());
-                try(Stream<Path> pathStream = Files.walk(path)) {
+                try (Stream<Path> pathStream = Files.walk(path)) {
                     pathStream.filter(Files::isRegularFile)
                             .filter(p -> p.toString().endsWith(".class"))
                             .filter(p -> !p.toString().toLowerCase().contains("mixin"))//mixins cannot be loaded in this phase
@@ -39,18 +39,18 @@ public class ClasspathModule implements Module {
                                 if (index != -1) {
                                     className = className.substring(index);
                                 }
-                                try{
+                                try {
                                     consumer.accept(Thread.currentThread().getContextClassLoader().loadClass(className));
-                                }catch(ClassNotFoundException e){
+                                } catch (ClassNotFoundException e) {
                                     LOGGER.error("Error while loading class", e);
-                                }catch (RuntimeException e){
+                                } catch (RuntimeException e) {
                                     LOGGER.info("Got RuntimeException while loading class {}.", className, e);
                                 }
                             });
 
                 }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             LOGGER.error("Error while loading module", e);
         }
 

@@ -14,7 +14,6 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
     private final List<Module> modules = new ArrayList<>();
 
-
     public ModuleLoaderImpl() {
     }
 

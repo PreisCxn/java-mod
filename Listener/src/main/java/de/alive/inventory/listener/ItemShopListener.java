@@ -44,7 +44,7 @@ public class ItemShopListener extends InventoryListener {
      * @param active
      */
     public ItemShopListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, @Nullable AtomicBoolean... active) {
-        super(mod, inventoryTitles, inventorySize <= 0 ? 3*9 : inventorySize, active);
+        super(mod, inventoryTitles, inventorySize <= 0 ? 3 * 9 : inventorySize, active);
 
         searchData.put("buyPrice", InventoryDataAccess.SHOP_BUY_SEARCH);
         searchData.put("sellPrice", InventoryDataAccess.SHOP_SELL_SEARCH);
@@ -69,19 +69,19 @@ public class ItemShopListener extends InventoryListener {
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
         printDebug("ItemShop close");
-        if((sellItem == null && buyItem == null) || itemStack == null) return Mono.empty();
+        if (sellItem == null && buyItem == null || itemStack == null) return Mono.empty();
 
         JsonObject object = itemStack.getData();
 
-        if(!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return Mono.empty();
+        if (!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return Mono.empty();
 
-        JsonElement buyItemE =  buyItem.getData().get("buyPrice");
-        JsonElement sellItemE =  sellItem.getData().get("sellPrice");
+        JsonElement buyItemE = buyItem.getData().get("buyPrice");
+        JsonElement sellItemE = sellItem.getData().get("sellPrice");
 
-        if(buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return Mono.empty();
+        if (buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return Mono.empty();
 
-        object.add("sellPrice",  sellItem.getData().get("sellPrice"));
-        object.add("buyPrice",  buyItem.getData().get("buyPrice"));
+        object.add("sellPrice", sellItem.getData().get("sellPrice"));
+        object.add("buyPrice", buyItem.getData().get("buyPrice"));
 
         return sendData("/itemshop", object).doOnSuccess(aVoid -> printTester("ItemShop data sent"));
     }
@@ -92,7 +92,7 @@ public class ItemShopListener extends InventoryListener {
         return updateItemStacks(handler);
     }
 
-    private @NotNull Mono<Void> updateItemStacks(@NotNull IScreenHandler handler){
+    private @NotNull Mono<Void> updateItemStacks(@NotNull IScreenHandler handler) {
         return Mono.fromRunnable(() -> {
             //middleItem
             Optional<PriceCxnItemStack> middle = updateItem(itemStack, handler, itemStackSlot);

@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class ItemStackImpl implements IItemStack{
-    private static final Cache<ItemStack, ItemStackImpl> itemStackMap = CacheBuilder
+public final class ItemStackImpl implements IItemStack {
+    private static final Cache<ItemStack, ItemStackImpl> ITEM_STACK_MAP = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
@@ -31,14 +31,15 @@ public class ItemStackImpl implements IItemStack{
 
     public static ItemStackImpl getInstance(ItemStack stack) {
         try {
-            return itemStackMap.get(stack, () -> new ItemStackImpl(stack));
+            return ITEM_STACK_MAP.get(stack, () -> new ItemStackImpl(stack));
         } catch (ExecutionException e) {
             return new ItemStackImpl(stack);
         }
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
+    public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData,
+                                             boolean addComment) {
         return PriceCxn.getMod().createItemStack(stack, searchData, addComment);
     }
 

@@ -71,9 +71,9 @@ public abstract class TabListener {
         return Flux.fromArray(playerListHud.getClass().getDeclaredFields())
                 .doOnNext(field -> field.setAccessible(true))
                 .mapNotNull(field -> {
-                    try{
+                    try {
                         return field.get(playerListHud);
-                    }catch(IllegalAccessException e){
+                    } catch (IllegalAccessException e) {
                         LOGGER.error("Error while accessing field", e);
                         return null;
                     }
