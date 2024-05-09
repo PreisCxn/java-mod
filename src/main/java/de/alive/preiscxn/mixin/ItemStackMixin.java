@@ -52,6 +52,10 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
     private void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+        if (!PriceCxn.getMod().getConnectionManager().isActive()) {
+            return;
+        }
+
         List<Text> list = cir.getReturnValue();
         IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
 
