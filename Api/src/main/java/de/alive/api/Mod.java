@@ -1,5 +1,6 @@
 package de.alive.api;
 
+import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
@@ -36,4 +37,5 @@ public interface Mod {
     ModuleLoader getProjectLoader();
     PriceCxnItemStack.ViewMode getViewMode();
     void nextViewMode();
+    ICxnConnectionManager getConnectionManager();
 }

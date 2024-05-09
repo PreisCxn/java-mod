@@ -2,6 +2,7 @@ package de.alive.preiscxn;
 
 import de.alive.api.Mod;
 import de.alive.api.PriceCxn;
+import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
@@ -239,6 +240,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public void nextViewMode() {
         this.viewMode = PriceCxnItemStack.ViewMode.values()[(this.viewMode.ordinal() + 1) % PriceCxnItemStack.ViewMode.values().length];
+    }
+
+    @Override
+    public ICxnConnectionManager getConnectionManager() {
+        return cxnListener.getConnectionManager();
     }
 
 }
