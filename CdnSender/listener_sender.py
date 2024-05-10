@@ -9,6 +9,6 @@ if selected_file:
 else:
     exit(-1)
 
-url = f"https://cdn.preiscxn.de/Listener.jar?version={get_version()}"
+url = f"https://cdn.preiscxn.de/Listener.jar?version={get_version(False)}"
 
 upload_file(file_path, url)
