@@ -12,7 +12,10 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.alive.api.LogPrinter.LOGGER;
+
 public class CdnFileHandlerImpl implements CdnFileHandler {
+
     private static final String BASE_URL = "https://cdn.preiscxn.de/";
 
     private final Http http;
@@ -76,7 +79,16 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
         else
             path += "?type=hash";
 
+        String finalPath = path;
         return http.get(BASE_URL, path)
-                .map(s -> JsonParser.parseString(s).getAsString());
+                .mapNotNull(s -> {
+                    JsonElement jsonElement = JsonParser.parseString(s);
+                    if (jsonElement.isJsonNull()) {
+                        LOGGER.error("Hash is null from url: {} and return: '{}'", BASE_URL + finalPath, s);
+                        return null;
+                    }
+                    return jsonElement.getAsString();
+                });
     }
+
 }

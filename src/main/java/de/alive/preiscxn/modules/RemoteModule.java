@@ -50,7 +50,7 @@ public final class RemoteModule implements Module {
             return Mono.empty();
 
         return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, null)
-                .doOnNext(bytes -> LOGGER.info("Downloaded module from {}", remotePath))
+                .doOnNext(bytes -> LOGGER.info("Downloaded module from {} with length: {}", remotePath, bytes.length))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(content -> {
                     try {
@@ -135,7 +135,7 @@ public final class RemoteModule implements Module {
                         try {
                             consumer.accept(urlClassLoader.loadClass(className));
                         } catch (ClassNotFoundException e) {
-                            LOGGER.error("Error while loading class", e);
+                            LOGGER.error("Error while loading class {}", className);
                         }
                     }
                 }
