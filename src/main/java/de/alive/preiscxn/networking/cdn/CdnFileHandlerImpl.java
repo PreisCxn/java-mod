@@ -81,10 +81,9 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
 
         String finalPath = path;
         return http.get(BASE_URL, path)
-                .map(s -> JsonParser.parseString(s).getAsString());
-    }
                 .mapNotNull(s -> {
                     JsonElement jsonElement = JsonParser.parseString(s);
+                    if (jsonElement.isJsonNull()) {
                         LOGGER.error("Hash is null from url: {} and return: '{}'", BASE_URL + finalPath, s);
                         return null;
                     }
