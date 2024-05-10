@@ -2,8 +2,9 @@ package de.alive.preiscxn.modules;
 
 import de.alive.api.module.Module;
 
-import java.io.File;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 import static de.alive.api.LogPrinter.LOGGER;
 
 public class ClasspathModule implements Module {
+
     private final String primaryPackage;
 
     public ClasspathModule(String primaryPackage) {
@@ -26,14 +28,22 @@ public class ClasspathModule implements Module {
 
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
-                Path path = Path.of(url.toURI());
+                Path path;
+                URI uri = url.toURI();
+                try {
+                    path = Path.of(uri);
+                } catch (FileSystemNotFoundException e) {
+                    LOGGER.error("Error while loading module with uri: {}", uri, e);
+                    continue;
+                }
                 try (Stream<Path> pathStream = Files.walk(path)) {
                     pathStream.filter(Files::isRegularFile)
                             .filter(p -> p.toString().endsWith(".class"))
                             .filter(p -> !p.toString().toLowerCase().contains("mixin"))//mixins cannot be loaded in this phase
                             .map(p -> p.toString()
                                     .replace(".class", "")
-                                    .replace(File.separator, "."))
+                                    .replace("\\", ".")
+                                    .replace("/", "."))
                             .forEach(className -> {
                                 int index = className.indexOf(primaryPackage);
                                 if (index != -1) {
