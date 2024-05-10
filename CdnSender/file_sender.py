@@ -23,7 +23,7 @@ def select_file(directory, pattern):
     return selected_file if selected_file else None
 
 
-def get_version():
+def get_version(with_mc_version=True):
     with open("./gradle.properties") as f:
         for line in f:
             if line.startswith("mod_version"):
@@ -31,7 +31,7 @@ def get_version():
             if line.startswith("minecraft_version"):
                 minecraft_version = line.split("=")[1].strip()
 
-    if version and minecraft_version:
+    if with_mc_version and version and minecraft_version:
         return f"{minecraft_version}-{version}"
     elif version:
         return version
