@@ -1,20 +1,21 @@
 {
 	"schemaVersion": 1,
-	"id": "serverlistener",
+	"id": "pricecxn",
 	"version": "${version}",
 
-	"name": "CxnPrices",
+	"name": "PriceCxn",
 	"description": "Displays and listening for CxnPrices.",
 	"authors": [
-		"_Alive_"
+		"_Alive_",
+		"TeddyBear_2004"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://preiscxn.de/",
+		"sources": "https://preiscxn.de/mod"
 	},
 
 	"license": "MIT License",
-	"icon": " ",
+	"icon": "assets/modid/PreisCxnLogo.png",
 
 	"environment": "*",
 	"entrypoints": {
@@ -30,12 +31,9 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.14.19",
+		"fabricloader": ">=0.15.10",
 		"fabric-api": "*",
-		"minecraft": ">=1.19.4",
-		"java": ">=17"
-	},
-	"suggests": {
-		"another-mod": "*"
+		"minecraft": ">=1.20.5",
+		"java": ">=21"
 	}
 }
