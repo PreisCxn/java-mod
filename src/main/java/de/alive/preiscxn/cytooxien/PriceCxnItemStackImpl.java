@@ -2,7 +2,13 @@ package de.alive.preiscxn.cytooxien;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.PriceCxnItemStack;
@@ -27,7 +33,13 @@ import org.spongepowered.asm.mixin.Unique;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -124,7 +136,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
                                                     @Nullable Map<String, DataAccess> searchData,
                                                     boolean addComment,
                                                     boolean addTooltips) {
-        try{
+        try {
             return CACHE
                     .get(Tuples.of(item,
                                    searchData == null ? Collections.emptyMap() : searchData,
@@ -156,19 +168,19 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         for (DataComponentType<?> key : componentMap.getTypes()) {
             Object component = componentMap.get(key);
-            switch(component){
+            switch (component) {
                 case null -> {
                 }
                 case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
                 case NbtComponent subComponentMap -> {
-                    try{
+                    try {
                         JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
                         json.add(key.toString(), asJsonObject);
-                    }catch(JsonParseException e){
-                        try{
+                    } catch (JsonParseException e) {
+                        try {
                             JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
                             json.add(key.toString(), asJsonObject);
-                        }catch(JsonParseException e1){
+                        } catch (JsonParseException e1) {
                             json.addProperty(key.toString(), subComponentMap.toString());
                         }
                     }
@@ -196,24 +208,24 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         JsonObject valueJson;
 
         //test if only Delete Pattern is needed
-        try{
+        try {
             valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-        }catch(IllegalStateException e){
+        } catch (IllegalStateException e) {
             nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
 
             //test if JsonArray
-            try{
+            try {
                 return JsonParser.parseString(nbtString).getAsJsonArray();
-            }catch(IllegalStateException ignored){
+            } catch (IllegalStateException ignored) {
                 //test if JsonKey is missing
-                try{
+                try {
                     return JsonParser.parseString(nbtString).getAsJsonObject();
-                }catch(IllegalStateException e2){
+                } catch (IllegalStateException e2) {
                     //else add as normal String
                     return nbtString;
                 }
             }
-        }catch(JsonParseException e){
+        } catch (JsonParseException e) {
             //else add as normal String
             return nbtString;
         }
@@ -250,7 +262,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Override
     public boolean equals(Object o) {
         return o == this || o instanceof PriceCxnItemStackImpl
-                            && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData());
+                && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData());
     }
 
     @Override
@@ -402,8 +414,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         //item ist special_item?
         if (data.has(PriceCxnItemStackImpl.COMMENT_KEY)
-            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()
-            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
+                && data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()
+                && data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
             JsonObject nbtData = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
             String pbvString = nbtData.get("PublicBukkitValues").getAsJsonObject().toString();
 
@@ -467,9 +479,9 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Unique
     public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText> pcxnPriceText) {
         if (pcxnPrice == null
-            || !pcxnPrice.has("pbv_search_key")
-            || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
-            || !this.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
+                || !pcxnPrice.has("pbv_search_key")
+                || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
+                || !this.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
             return 1;
 
         String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
@@ -483,9 +495,9 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         int pbvAmount;
 
-        try{
+        try {
             pbvAmount = Integer.parseInt(pbvSearchResult);
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
             return 1;
         }
@@ -524,9 +536,9 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
                 for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData().getData()) {
                     if (text.getString().contains(datum)) {
                         String amount = StringUtil.removeChars(text.getString());
-                        try{
+                        try {
                             return Integer.parseInt(amount);
-                        }catch(NumberFormatException e){
+                        } catch (NumberFormatException e) {
                             LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
                         }
                         break;
