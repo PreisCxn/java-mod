@@ -3,6 +3,7 @@ package de.alive.preiscxn.networking.cdn;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import de.alive.api.PriceCxn;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,17 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
     }
 
     private String getPath(@NotNull String file, @Nullable String version) {
-        return file + (version == null ? "" : "?version=" + version);
+        boolean questionMark = false;
+        if (PriceCxn.RELEASE_CHANNEL != null) {
+            file += "?channel=" + PriceCxn.RELEASE_CHANNEL;
+            questionMark = true;
+        }
+
+        if (version != null) {
+            file += (questionMark ? "&" : "?") + "version=" + version;
+        }
+
+        return file;
     }
 
     @Override

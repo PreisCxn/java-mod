@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'java'
 }
@@ -18,4 +21,34 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.register('uploadBeta') {
+    dependsOn 'build'
+
+    doLast {
+        def jarFile = file('build/libs/Listener.jar')
+        def url = URI.create('https://cdn.preiscxn.de/Listener.jar?channel=beta&version=' + project(":").mod_version).toURL()
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+        connection.setRequestMethod('POST')
+        connection.setDoOutput(true)
+
+        // Use the environment variable as the header key
+        connection.setRequestProperty("pricecxn-auth", System.getenv("PRICECXNAUTH"))
+
+
+        byte[] jarBytes = Files.readAllBytes(Paths.get(jarFile.toURI()))
+
+        connection.getOutputStream().write(jarBytes)
+
+        println connection.responseCode + " " + connection.getResponseMessage()
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            println 'Upload successful'
+        } else {
+            println 'Upload failed'
+        }
+
+        connection.disconnect()
+    }
 }
