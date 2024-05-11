@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 import static de.alive.api.LogPrinter.LOGGER;
 
 public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
+
     private static final Cache<Tuple4<ItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
             = CacheBuilder
             .newBuilder()
@@ -58,15 +59,12 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private final @NotNull Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
-
-    private String itemName;
-
     private final int amount;
-
+    private final StorageItemStack storageItemStack = new StorageItemStack();
+    private String itemName;
     private List<String> toolTips;
     private @Nullable JsonObject nookPrice = null;
     private @Nullable JsonObject pcxnPrice = null;
-    private final StorageItemStack storageItemStack = new StorageItemStack();
 
     private PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
@@ -264,7 +262,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Override
     public boolean equals(Object o) {
         return o == this || o instanceof PriceCxnItemStackImpl
-                            && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData());
+                && ((PriceCxnItemStackImpl) o).getEqualData().equals(this.getEqualData());
     }
 
     @Override
@@ -306,7 +304,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private @NotNull JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
-        if (hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
+        if (hash.has(COMMENT_KEY) && hash.get(COMMENT_KEY).isJsonObject() && hash.getAsJsonObject(COMMENT_KEY).has("display"))
             hash.get(COMMENT_KEY).getAsJsonObject().remove("display");
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {
@@ -416,8 +414,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         //item ist special_item?
         if (data.has(PriceCxnItemStackImpl.COMMENT_KEY)
-            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()
-            && data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
+                && data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()
+                && data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().has("PublicBukkitValues")) {
             JsonObject nbtData = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
             String pbvString = nbtData.get("PublicBukkitValues").getAsJsonObject().toString();
 
@@ -551,4 +549,5 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         return 1;
     }
+
 }
