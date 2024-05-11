@@ -139,14 +139,14 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         try {
             return CACHE
                     .get(Tuples.of(item,
-                                   searchData == null ? Collections.emptyMap() : searchData,
-                                   addComment,
-                                   addTooltips),
-                         () -> new PriceCxnItemStackImpl(item,
-                                                         searchData,
-                                                         addComment,
-                                                         addTooltips));
-        }catch(ExecutionException e){
+                                    searchData == null ? Collections.emptyMap() : searchData,
+                                    addComment,
+                                    addTooltips),
+                            () -> new PriceCxnItemStackImpl(item,
+                                    searchData,
+                                    addComment,
+                                    addTooltips));
+        } catch (ExecutionException e) {
             return new PriceCxnItemStackImpl(item, searchData, addComment, addTooltips);
         }
     }
