@@ -33,6 +33,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -144,6 +146,21 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                 "cxn_listener.mod_text"
         ), new SwitchItemViewKeybindExecutor(), true);
 
+    }
+
+    @Override
+    public String getVersion() {
+        return PriceCxnMod.MOD_VERSION;
+    }
+
+    @Override
+    public Style getDefaultText() {
+        return PriceCxnMod.DEFAULT_TEXT;
+    }
+
+    @Override
+    public MutableText getModText() {
+        return PriceCxnMod.MOD_TEXT;
     }
 
     @Override

@@ -14,8 +14,6 @@ public class PriceCxnMod implements ModInitializer {
     // It is considered best practice to use your mod id as the logger's name.
     // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Style DEFAULT_TEXT = Style.EMPTY.withColor(Formatting.GRAY);
-    public static final Style GOLD_TEXT = Style.EMPTY.withColor(Formatting.GOLD);
-    public static final Style ERROR_TEXT = Style.EMPTY.withColor(Formatting.RED);
     public static final String MOD_NAME = "PriceCxn";
 
     public static final String MOD_VERSION = Version.MOD_VERSION;

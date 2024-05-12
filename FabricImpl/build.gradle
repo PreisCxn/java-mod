@@ -1,0 +1,56 @@
+plugins {
+    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'java'
+}
+
+version = project(":").version
+group = project(":").group
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    implementation project(path: ":", configuration: "namedElements")
+    implementation project(path: ":Api", configuration: "namedElements")
+    implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+    implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.6'
+    implementation 'io.projectreactor:reactor-core:3.6.5'
+
+    implementation project(path: ":", configuration: "namedElements")
+    implementation project(path: ":Api", configuration: "namedElements")
+    implementation project(path: ":InventoryScanner")
+    implementation project(path: ":Listener")
+
+    include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+    include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
+    include 'org.java-websocket:Java-WebSocket:1.5.6'
+    include 'io.projectreactor:reactor-core:3.6.5'
+    include 'org.reactivestreams:reactive-streams:1.0.4'
+
+    include project(path: ":", configuration: "namedElements")
+    include project(path: ":Api", configuration: "namedElements")
+
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}

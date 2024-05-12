@@ -13,6 +13,8 @@ import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +23,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface Mod {
+    String getVersion();
+    Style getDefaultText();
+    MutableText getModText();
     PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
     PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment);
     PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData);

@@ -1,12 +1,12 @@
 package de.alive.preiscxn.cytooxien;
 
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.Modes;
 import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.listener.ServerListener;
 import de.alive.api.listener.TabListener;
 import de.alive.api.networking.DataAccess;
-import de.alive.preiscxn.PriceCxnMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -40,10 +40,6 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
         this(serverListener, TranslationDataAccess.THEME_SERVER_SEARCH, onServer);
     }
 
-    public ThemeServerChecker(@NotNull AtomicBoolean onServer) {
-        this(null, TranslationDataAccess.THEME_SERVER_SEARCH, onServer);
-    }
-
     //check for the mode from the tab list
     @Override
     protected @NotNull Mono<Void> handleData(@NotNull String data) {
@@ -65,14 +61,14 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
         if (serverListener != null)
             voidMono = voidMono.then(serverListener.onTabChange());
 
-        printDebug("New Mode: " + this.mode.toString());
+        printDebug("New Mode: " + this.mode);
 
         if (DEBUG_MODE && MinecraftClient.getInstance().player != null)
             MinecraftClient.getInstance()
                     .player
                     .sendMessage(
                             Text.translatable("cxn_listener.theme_checker.changed",
-                            this.mode.toString()).setStyle(PriceCxnMod.DEFAULT_TEXT).formatted(Formatting.ITALIC), true);
+                            this.mode.toString()).setStyle(PriceCxn.getMod().getDefaultText()).formatted(Formatting.ITALIC), true);
 
         return voidMono;
     }

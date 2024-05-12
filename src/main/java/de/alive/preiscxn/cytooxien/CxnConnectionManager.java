@@ -1,12 +1,12 @@
 package de.alive.preiscxn.cytooxien;
 
+import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ActionNotification;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnDataHandler;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.networking.NetworkingState;
-import de.alive.preiscxn.PriceCxnMod;
 import de.alive.preiscxn.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -197,7 +197,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     public @NotNull Mono<Boolean> isMinVersion() {
         return this.serverChecker.getServerMinVersion()
                 .map(serverMinVersion -> {
-                    String clientVersion = PriceCxnMod.MOD_VERSION;
+                    String clientVersion = PriceCxn.getMod().getVersion();
                     return isClientVersionSameOrNewer(serverMinVersion, clientVersion);
                 });
     }
@@ -291,15 +291,15 @@ public class CxnConnectionManager implements ICxnConnectionManager {
                 MutableText msg;
                 if (message.hasTextVariables()) {
 
-                    msg = PriceCxnMod.MOD_TEXT.copy()
+                    msg = PriceCxn.getMod().getModText().copy()
                             .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
-                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
+                            .setStyle(PriceCxn.getMod().getDefaultText());
 
                 } else {
 
-                    msg = PriceCxnMod.MOD_TEXT.copy()
+                    msg = PriceCxn.getMod().getModText().copy()
                             .append(Text.translatable(message.getTranslationKey()))
-                            .setStyle(PriceCxnMod.DEFAULT_TEXT);
+                            .setStyle(PriceCxn.getMod().getDefaultText());
 
                 }
                 MinecraftClient.getInstance().player.sendMessage(msg);

@@ -8,7 +8,6 @@ import de.alive.api.cytooxien.PriceText;
 import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
-import de.alive.preiscxn.PriceCxnMod;
 import de.alive.preiscxn.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
@@ -82,7 +81,7 @@ public abstract class ItemStackMixin {
         list.add(
                 MutableText.of(new PlainTextContent.Literal("--- "))
                         .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
-                        .append(PriceCxnMod.MOD_TEXT.copy())
+                        .append(PriceCxn.getMod().getModText().copy())
                         .append(MutableText.of(new PlainTextContent.Literal("x" + (viewMode == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
                         )
@@ -136,7 +135,7 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                        .setStyle(PriceCxnMod.DEFAULT_TEXT.withFormatting()));
+                        .setStyle(PriceCxn.getMod().getDefaultText().withFormatting()));
             });
         }
     }
