@@ -33,7 +33,7 @@ public class ClasspathModule implements Module {
                 try {
                     path = Path.of(uri);
                 } catch (FileSystemNotFoundException e) {
-                    LOGGER.error("Error while loading module with uri: {}", uri, e);
+                    LOGGER.error("Error while loading module with uri: {}", uri);
                     continue;
                 }
                 try (Stream<Path> pathStream = Files.walk(path)) {

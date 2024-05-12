@@ -304,7 +304,10 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private @NotNull JsonObject getEqualData() {
         JsonObject hash = this.data.deepCopy();
 
-        if (hash.has(COMMENT_KEY) && hash.get(COMMENT_KEY).isJsonObject() && hash.getAsJsonObject(COMMENT_KEY).has("display"))
+        if (hash.has(COMMENT_KEY) && !hash.get(COMMENT_KEY).isJsonObject())
+            hash.add(COMMENT_KEY, new JsonObject());
+
+        if (hash.has(COMMENT_KEY) && hash.getAsJsonObject(COMMENT_KEY).has("display"))
             hash.get(COMMENT_KEY).getAsJsonObject().remove("display");
 
         for (Map.Entry<String, DataAccess> entry : this.searchData.entrySet()) {

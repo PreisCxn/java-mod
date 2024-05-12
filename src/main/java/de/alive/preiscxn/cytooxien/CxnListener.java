@@ -56,6 +56,8 @@ public class CxnListener extends ServerListener implements ICxnListener {
         Set<Class<? extends InventoryListener>> classes = cxnListenerModuleLoader
                 .loadInterfaces(InventoryListener.class);
 
+        LOGGER.info("Found {} listeners", classes.size());
+
         for (Class<? extends InventoryListener> clazz : classes) {
             LOGGER.info("Found listener: {}", clazz.getName());
             try {

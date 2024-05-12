@@ -94,11 +94,13 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                 Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
                 "de.alive.inventory")
                 .doOnNext(module1 -> {
+                    LOGGER.info("Adding module: {}", module1);
                     this.projectLoader.addModule(module1);
                     this.cxnListener.loadModules(this.projectLoader);
 
                     Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
                     classes1.forEach(aClass -> {
+                        LOGGER.info("Loading module: {}", aClass);
                         try {
                             aClass.getConstructor().newInstance().loadModule();
                             LOGGER.info("Loaded module: {}", aClass);
@@ -119,6 +121,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             useRemote = true;
         }
 
+        LOGGER.info("Registering remote module: {} ({}), local path: {}, primary package: {}, use remote: {}",
+                classPath, remotePath, localPath, primaryPackage, useRemote);
         return RemoteModule.create(remotePath,
                 localPath,
                 primaryPackage,

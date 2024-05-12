@@ -36,12 +36,19 @@ public final class RemoteModule implements Module {
         if (!useRemote)
             return Mono.just(new ClasspathModule(primaryPackage));
 
+        LOGGER.info("Creating remote module with remotePath: {}, jarPath: {}, primaryPackage: {}", remotePath, jarPath, primaryPackage);
         RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage);
 
         return remoteModule
                 .isOutdated()
-                .filter(aBoolean -> aBoolean)
-                .flatMap(outdated -> remoteModule.download())
+                .flatMap(outdated -> {
+                    if (outdated)
+                        return remoteModule.download();
+                    else {
+                        remoteModule.isDownloaded = true;
+                        return Mono.empty();
+                    }
+                })
                 .then(Mono.just(remoteModule));
     }
 
@@ -50,6 +57,7 @@ public final class RemoteModule implements Module {
             return Mono.empty();
 
         return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, null)
+                .switchIfEmpty(Mono.error(new RuntimeException("Could not download module from " + remotePath)))
                 .doOnNext(bytes -> LOGGER.info("Downloaded module from {} with length: {}", remotePath, bytes.length))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(content -> {
@@ -64,6 +72,7 @@ public final class RemoteModule implements Module {
                         throw new RuntimeException("Could not write file", e);
                     }
                 })
+                .doOnError(throwable -> LOGGER.error("Error while downloading module", throwable))
                 .then();
     }
 
@@ -111,17 +120,19 @@ public final class RemoteModule implements Module {
     @Override
     public String toString() {
         return "RemoteModule{"
-               + "remotePath='" + remotePath + '\''
-               + ", jarPath=" + jarPath
-               + ", primaryPackage='" + primaryPackage + '\''
-               + '}';
+                + "remotePath='" + remotePath + '\''
+                + ", jarPath=" + jarPath
+                + ", primaryPackage='" + primaryPackage + '\''
+                + '}';
     }
 
     @Override
     public void forEach(Consumer<Class<?>> consumer) {
-        if (!isDownloaded)
+        if (!isDownloaded) {
+            LOGGER.error("Module not downloaded");
             return;
-
+        }
+        LOGGER.info("Loading module from {}", jarPath);
         try (JarFile jarFile = new JarFile(jarPath.toFile());
              URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{jarPath.toUri().toURL()}, Thread.currentThread().getContextClassLoader())) {
             Enumeration<JarEntry> entries = jarFile.entries();
