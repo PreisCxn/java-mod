@@ -31,7 +31,7 @@ public class TomNookListener extends InventoryListener {
 
     private final Tuple2<Integer, Integer> itemRange = Tuples.of(13, 13);
 
-    private final DataAccess searchData = TranslationDataAccess.NOOK_BUY_SEARCH;
+    private final DataAccess searchData = InventoryDataAccess.NOOK_BUY_SEARCH;
 
     private @Nullable String invBuyPrice = null;
 
@@ -94,8 +94,8 @@ public class TomNookListener extends InventoryListener {
             if (s.contains("--##--")) {
                 String[] split = s.split("--##--");
 
-                if (split.length == 2) {
-                    String result = StringUtil.extractBetweenParts(screenTitle, split[0], split[1]);
+                if (split.length == 5) {
+                    String result = StringUtil.extractBetweenParts(screenTitle, split[2], split[3]);
                     if (result != null && StringUtil.isValidPrice(result)) {
                         return result;
                     }
