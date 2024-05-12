@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.alive.api.Mod;
 import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
 import de.alive.api.listener.InventoryListener;

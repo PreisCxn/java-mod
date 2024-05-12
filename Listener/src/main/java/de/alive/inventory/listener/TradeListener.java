@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -81,7 +80,6 @@ public class TradeListener extends InventoryListener {
         array.add("trader", TradeStackRow.getData(traderInventory));
         array.add("selfControls", selfControls.getData());
         array.add("traderControls", traderControls.getData());
-
 
         Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory),
                 TradeStackRow.getItemStacks(traderInventory),
