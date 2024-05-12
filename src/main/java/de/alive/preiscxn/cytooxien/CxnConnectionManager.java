@@ -15,7 +15,7 @@ import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuples;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,9 +59,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      */
     @Override
     public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(Refresh refresh) {
-        return Mono.fromCallable(() -> checkConnection(refresh))
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(result -> result);
+        return checkConnection(refresh);
     }
     /**
      * Checks the connection to the server.

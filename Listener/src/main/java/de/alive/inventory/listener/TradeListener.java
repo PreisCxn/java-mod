@@ -82,18 +82,15 @@ public class TradeListener extends InventoryListener {
         array.add("selfControls", selfControls.getData());
         array.add("traderControls", traderControls.getData());
 
-        return Mono.fromSupplier(() -> {
-            Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory),
-                    TradeStackRow.getItemStacks(traderInventory),
-                    selfControls.getData(),
-                    traderControls.getData());
 
-            Mono<Void> mono = result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
+        Optional<JsonElement> result = processData(TradeStackRow.getItemStacks(selfInventory),
+                TradeStackRow.getItemStacks(traderInventory),
+                selfControls.getData(),
+                traderControls.getData());
 
-            printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
+        printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
 
-            return mono;
-        }).subscribeOn(Schedulers.boundedElastic()).then();
+        return result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
 
     }
 

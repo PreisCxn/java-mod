@@ -48,7 +48,8 @@ public abstract class InventoryListener {
     }
 
     public Mono<Void> onTick() {
-        if (active != null && Arrays.stream(active).filter(Objects::nonNull).anyMatch(bool -> !bool.get())) return Mono.empty();
+        if (active != null && Arrays.stream(active).filter(Objects::nonNull).anyMatch(bool -> !bool.get()))
+            return Mono.empty();
         if (client.isPlayerNull()) return Mono.empty();
         if (client.isCurrentScreenHandlerNull()) return Mono.empty();
         Mono<Void> mono = Mono.empty();
@@ -69,10 +70,10 @@ public abstract class InventoryListener {
             if (!(client.getInventory().getSize() == inventorySize)) return mono;
             IScreenHandler handler = client.getScreenHandler();
             return mono.then(initSlotsAsync(handler)
-                                     .doOnSuccess(a -> {
-                                         this.isOpen = true;
-                                         lastUpdate = System.currentTimeMillis();
-                                     }).then(onInventoryOpen(client, handler)));
+                    .doOnSuccess(a -> {
+                        this.isOpen = true;
+                        lastUpdate = System.currentTimeMillis();
+                    }).then(onInventoryOpen(client, handler)));
         }
 
         return mono.then(
@@ -168,22 +169,24 @@ public abstract class InventoryListener {
         JsonObject obj = new JsonObject();
         String uri = datahandlerUri.contains("/") ? datahandlerUri.replace("/", "") : datahandlerUri;
 
-        return listener.getConnectionManager().checkConnectionAsync(ICxnConnectionManager.Refresh.THEME).then(Mono.defer(() -> {
-            if (listener.isActive()) {
-                Modes mode = listener.getThemeChecker().getMode();
-                if (mode == Modes.NOTHING) {
-                    return Mono.error(new NullPointerException("Mode is null"));
-                }
+        return listener.getConnectionManager()
+                .checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
+                .then(Mono.defer(() -> {
+                    if (listener.isActive()) {
+                        Modes mode = listener.getThemeChecker().getMode();
+                        if (mode == Modes.NOTHING) {
+                            return Mono.error(new NullPointerException("Mode is null"));
+                        }
 
-                obj.addProperty("listener", uri);
-                obj.addProperty("mode", mode.getTranslationKey());
-                obj.addProperty("uuid", uuid);
-                obj.addProperty("username", instance.getPlayerNameString());
-                obj.add("data", data);
-                return PriceCxn.getMod().getHttp().post("/datahandler/" + uri, obj).then();
-            } else
-                return Mono.error(new NullPointerException("Not connected"));
-        }));
+                        obj.addProperty("listener", uri);
+                        obj.addProperty("mode", mode.getTranslationKey());
+                        obj.addProperty("uuid", uuid);
+                        obj.addProperty("username", instance.getPlayerNameString());
+                        obj.add("data", data);
+                        return PriceCxn.getMod().getHttp().post("/datahandler/" + uri, obj).then();
+                    } else
+                        return Mono.error(new NullPointerException("Not connected"));
+                }));
     }
 
     protected @NotNull Mono<Void> sendData(@NotNull String datahandlerUri, @NotNull JsonElement data) {
