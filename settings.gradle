@@ -12,4 +12,6 @@ include 'Api'
 include 'Listener'
 include 'InventoryScanner'
 include 'FabricImpl'
+include 'LabyModImpl'
+include 'Core'
 
