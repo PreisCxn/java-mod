@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ":Api", configuration: "namedElements")
+    implementation project(path: ":api", configuration: "namedElements")
 
     implementation 'io.projectreactor:reactor-core:3.6.5'
     implementation "org.slf4j:slf4j-api:2.0.13"

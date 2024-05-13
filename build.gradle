@@ -1,7 +1,0 @@
-plugins {
-	id 'checkstyle'
-}
-apply from: "linter.gradle"
-
-version = "${project.mod_version}-${project.minecraft_version}"
-group = project.maven_group

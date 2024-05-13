@@ -29,9 +29,9 @@ dependencies {
     implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
     implementation 'org.java-websocket:Java-WebSocket:1.5.6'
     implementation 'io.projectreactor:reactor-core:3.6.5'
-    implementation project(path: ":Api", configuration: "namedElements")
-    implementation project(path: ":InventoryScanner")
-    implementation project(path: ":Listener")
+    implementation project(path: ":api", configuration: "namedElements")
+    implementation project(path: ":inventoryscanner")
+    implementation project(path: ":listener")
 
     include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
     include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
