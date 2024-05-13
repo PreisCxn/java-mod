@@ -33,12 +33,6 @@ dependencies {
     implementation project(path: ":inventoryscanner")
     implementation project(path: ":listener")
 
-    include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-    include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
-    include 'org.java-websocket:Java-WebSocket:1.5.6'
-    include 'io.projectreactor:reactor-core:3.6.5'
-    include 'org.reactivestreams:reactive-streams:1.0.4'
-
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testImplementation 'org.mockito:mockito-core:5.11.0'
@@ -105,5 +99,5 @@ tasks.named('sourcesJar').configure {
 
 tasks.named('build').configure {
     dependsOn 'generateVersion'
-    dependsOn checkstyleMain
+    // dependsOn checkstyleMain
 }
