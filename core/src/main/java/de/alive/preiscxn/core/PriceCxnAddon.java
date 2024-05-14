@@ -18,7 +18,9 @@ import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.core.events.TickListener;
-import de.alive.preiscxn.impl.Version;
+import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
+import de.alive.preiscxn.core.impl.LabyEntrypoint;
+import de.alive.preiscxn.core.impl.LabyPlayer;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
@@ -28,6 +30,7 @@ import de.alive.preiscxn.impl.modules.RemoteModule;
 import de.alive.preiscxn.impl.networking.HttpImpl;
 import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
 import net.labymod.api.addon.LabyAddon;
+import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.Style;
 import net.labymod.api.models.addon.annotation.AddonMain;
@@ -48,10 +51,15 @@ import static de.alive.api.LogPrinter.LOGGER;
 
 @AddonMain
 public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements Mod {
-    public static final Style DEFAULT_TEXT = Style.EMPTY.color(NamedTextColor.GRAY);
-    public static final String MOD_NAME = "PriceCxn";
-
-    public static final String MOD_VERSION = Version.MOD_VERSION;
+    public static final Style DEFAULT_STYLE = Style.EMPTY.color(NamedTextColor.GRAY);
+    public static final Component MOD_TEXT = Component
+            .text(Component.empty())
+            .append(Component.text(Component.text("["))
+                    .style(Style.EMPTY.color(NamedTextColor.DARK_GRAY)))
+            .append(Component.translatable("cxn_listener.mod_text")
+                    .style(Style.EMPTY.color(NamedTextColor.GOLD)))
+            .append(Component.text(Component.text("] "))
+                    .style(Style.EMPTY.color(NamedTextColor.DARK_GRAY)));
 
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
@@ -64,6 +72,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
 
     public PriceCxnAddon() {
+        LOGGER.info("Creating PriceCxn client");
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
         try {
@@ -90,6 +99,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         this.projectLoader.addModule(new ClasspathModule("de.alive.api"));
         this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory"));
 
+        this.tickListener = new TickListener(this.getMinecraftClient());
+
         registerRemoteModule(
                 "de.alive.inventory.listener.AuctionHouseListener",
                 "Listener.jar",
@@ -112,8 +123,6 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
                         }
                     });
                 }).subscribe();
-
-        this.tickListener = new TickListener(this.getMinecraftClient());
     }
 
     private Mono<Module> registerRemoteModule(String classPath, String remotePath, Path localPath, String primaryPackage) {
@@ -150,17 +159,17 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public String getVersion() {
-        return PriceCxnMod.MOD_VERSION;
+        return PriceCxn.getMod().getVersion();
     }
 
     @Override
-    public Style getDefaultText() {
-        return PriceCxnMod.DEFAULT_TEXT;
+    public Style getDefaultStyle() {
+        return DEFAULT_STYLE;
     }
 
     @Override
-    public String getModText() {
-        return PriceCxnMod.MOD_TEXT;
+    public Component getModText() {
+        return MOD_TEXT;
     }
 
     @Override
@@ -188,12 +197,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public IPlayer getPlayer() {
-        return () -> {
-            if (MinecraftClient.getInstance().player != null) {
-                return MinecraftClient.getInstance().player.getName().getString();
-            }
-            return "";
-        };
+        return new LabyPlayer(this.labyAPI().minecraft());
     }
 
     @Override
@@ -208,7 +212,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public IMinecraftClient getMinecraftClient() {
-        return MinecraftClientImpl.getInstance(MinecraftClient.getInstance());
+        return getLabyEntrypoint().createMinecraftClient();
     }
 
     @Override
@@ -218,21 +222,22 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public void registerKeybinding(@NotNull CustomKeyBinding customKeyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
-        //todo: implement me
-    /*IKeyBinding keyBinding = LabyKeyBinding.getInstance(KeyBindingHelper.registerKeyBinding(customKeyBinding.getKeybinding()));
+        IKeyBinding keyBinding = getLabyEntrypoint()
+                .createKeyBinding(customKeyBinding);
 
-    classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
-    if (inInventory)
-      keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
+        classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
+        if (inInventory)
+            keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
 
-    ClientTickEvents.END_CLIENT_TICK.register(client -> {
-      if (keyBinding.wasPressed() && client.player != null) {
-        keybindExecutor.onKeybindPressed(
-                LabyMinecraftClient.getInstance(client),
-                LabyItemStack.getInstance(client.player.getInventory().getMainHandStack())
-        );
-      }
-    });*/
+        tickListener.add(client -> {
+            if (keyBinding.wasPressed() && !client.isPlayerNull()) {
+
+                keybindExecutor.onKeybindPressed(
+                        getLabyEntrypoint().createMinecraftClient(),
+                        getLabyEntrypoint().createInventory().getMainHandStack()
+                );
+            }
+        });
     }
 
     @Override
@@ -265,4 +270,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         return cxnListener.getConnectionManager();
     }
 
+    private LabyEntrypoint getLabyEntrypoint() {
+        return ((DefaultReferenceStorage) this.referenceStorageAccessor()).labyEntrypoint();
+    }
 }

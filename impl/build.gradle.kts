@@ -91,7 +91,7 @@ tasks.register<Copy>("generateVersion") {
         println("mod_version is: ${project.property("mod_version")}")
     }
     from("src/templates/version_template.java")
-    into("src/main/java/de/alive/preiscxn/")
+    into("src/main/java/de/alive/preiscxn/impl")
     include("version_template.java")
     rename("version_template.java", "Version.java")
     expand("version" to project.property("mod_version"))

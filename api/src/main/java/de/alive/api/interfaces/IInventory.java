@@ -4,4 +4,6 @@ public interface IInventory {
     String getTitle();
 
     int getSize();
+
+    IItemStack getMainHandStack();
 }

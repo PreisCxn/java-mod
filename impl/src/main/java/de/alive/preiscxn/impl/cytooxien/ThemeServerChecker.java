@@ -8,6 +8,7 @@ import de.alive.api.listener.ServerListener;
 import de.alive.api.listener.TabListener;
 import de.alive.api.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +69,7 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
                     .player
                     .sendMessage(
                             Text.translatable("cxn_listener.theme_checker.changed",
-                            this.mode.toString()).setStyle(PriceCxn.getMod().getDefaultText()).formatted(Formatting.ITALIC), true);
+                            this.mode.toString()).setStyle(((Style) PriceCxn.getMod().getDefaultStyle())).formatted(Formatting.ITALIC), true);
 
         return voidMono;
     }

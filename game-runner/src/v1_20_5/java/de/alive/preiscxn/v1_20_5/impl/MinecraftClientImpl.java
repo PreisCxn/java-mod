@@ -1,16 +1,23 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
 import de.alive.api.interfaces.IInventory;
-import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.core.impl.LabyMinecraftClient;
+import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 
-public final class MinecraftClientImpl implements IMinecraftClient {
-    private final Minecraft minecraftClient;
+@Implements(LabyMinecraftClient.class)
+public final class MinecraftClientImpl implements LabyMinecraftClient {
+    private Minecraft minecraftClient;
 
-    public MinecraftClientImpl(Minecraft minecraftClient) {
+    public MinecraftClientImpl() {
+
+    }
+
+    MinecraftClientImpl setMinecraftClient(Minecraft minecraftClient) {
         this.minecraftClient = minecraftClient;
+        return this;
     }
 
     @Override
@@ -45,10 +52,10 @@ public final class MinecraftClientImpl implements IMinecraftClient {
 
     @Override
     public IScreenHandler getScreenHandler() {
-        return minecraftClient.player != null ? new ScreenHandlerImpl(minecraftClient.player.containerMenu) : null;
+        return minecraftClient.player != null ? new ScreenHandlerImpl().setScreenHandler(minecraftClient.player.containerMenu) : null;
     }
 
     public IInventory getInventory() {
-        return minecraftClient.player != null ? new InventoryImpl(minecraftClient) : null;
+        return minecraftClient.player != null ? new InventoryImpl().setMinecraftClient(minecraftClient) : null;
     }
 }

@@ -1,7 +1,5 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -29,29 +27,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 @Implements(LabyItemStack.class)
 public final class ItemStackImpl implements LabyItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
-    private static final Cache<ItemStack, ItemStackImpl> ITEM_STACK_MAP = CacheBuilder
-            .newBuilder()
-            .maximumSize(100)
-            .build();
-    private final ItemStack stack;
+    private ItemStack stack;
 
-    private ItemStackImpl(ItemStack stack) {
-        this.stack = stack;
+    public ItemStackImpl() {
     }
 
-    public static ItemStackImpl getInstance(ItemStack stack) {
-        try {
-            return ITEM_STACK_MAP.get(stack, () -> new ItemStackImpl(stack));
-        } catch (ExecutionException e) {
-            return new ItemStackImpl(stack);
-        }
+    ItemStackImpl setStack(ItemStack stack) {
+        this.stack = stack;
+        return this;
     }
 
     @Override

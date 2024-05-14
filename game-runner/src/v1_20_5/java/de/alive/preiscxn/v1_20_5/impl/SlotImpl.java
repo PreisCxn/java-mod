@@ -2,34 +2,39 @@ package de.alive.preiscxn.v1_20_5.impl;
 
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.interfaces.ISlot;
 import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.core.impl.LabySlot;
+import net.labymod.api.models.Implements;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public final class SlotImpl implements ISlot {
-    private final Slot slot;
+@Implements(LabySlot.class)
+public final class SlotImpl implements LabySlot {
+    private Slot slot;
 
-    public SlotImpl(Slot slot) {
-        this.slot = slot;
+    public SlotImpl() {
     }
 
+    SlotImpl setSlot(Slot slot) {
+        this.slot = slot;
+        return this;
+    }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getItem()), searchData, addComment);
+        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData) {
-        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getItem()), searchData);
+        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getItem()), searchData, addComment, addTooltips);
+        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData, addComment, addTooltips);
     }
 
     @Override

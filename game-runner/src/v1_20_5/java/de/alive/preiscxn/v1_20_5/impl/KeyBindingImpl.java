@@ -6,10 +6,14 @@ import net.minecraft.client.KeyMapping;
 
 @Implements(LabyKeyBinding.class)
 public class KeyBindingImpl implements LabyKeyBinding {
-    private final KeyMapping keyBinding;
+    private KeyMapping keyBinding;
 
-    public KeyBindingImpl(KeyMapping keyBinding) {
+    public KeyBindingImpl() {
+    }
+
+    KeyBindingImpl setKeyBinding(KeyMapping keyBinding) {
         this.keyBinding = keyBinding;
+        return this;
     }
 
     @Override

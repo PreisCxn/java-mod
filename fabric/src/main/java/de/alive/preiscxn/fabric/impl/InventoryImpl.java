@@ -3,6 +3,7 @@ package de.alive.preiscxn.fabric.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import de.alive.api.interfaces.IInventory;
+import de.alive.api.interfaces.IItemStack;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.concurrent.ExecutionException;
@@ -40,5 +41,12 @@ public final class InventoryImpl implements IInventory {
             return 0;
 
         return minecraftClient.player == null ? 0 : minecraftClient.player.currentScreenHandler.getSlot(0).inventory.size();
+    }
+
+    @Override
+    public IItemStack getMainHandStack() {
+        if(minecraftClient.player == null)
+            return null;
+        return ItemStackImpl.getInstance(minecraftClient.player.getMainHandStack());
     }
 }

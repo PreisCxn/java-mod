@@ -10,6 +10,7 @@ import de.alive.api.networking.NetworkingState;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -291,15 +292,15 @@ public class CxnConnectionManager implements ICxnConnectionManager {
                 MutableText msg;
                 if (message.hasTextVariables()) {
 
-                    msg = PriceCxn.getMod().getModText().copy()
+                    msg = ((Text) PriceCxn.getMod().getModText()).copy()
                             .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
-                            .setStyle(PriceCxn.getMod().getDefaultText());
+                            .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()));
 
                 } else {
 
-                    msg = PriceCxn.getMod().getModText().copy()
+                    msg = ((Text) PriceCxn.getMod().getModText()).copy()
                             .append(Text.translatable(message.getTranslationKey()))
-                            .setStyle(PriceCxn.getMod().getDefaultText());
+                            .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()));
 
                 }
                 MinecraftClient.getInstance().player.sendMessage(msg);

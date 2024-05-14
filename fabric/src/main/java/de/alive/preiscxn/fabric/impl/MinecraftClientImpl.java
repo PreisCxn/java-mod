@@ -65,6 +65,6 @@ public final class MinecraftClientImpl implements IMinecraftClient {
     }
 
     public IInventory getInventory() {
-        return minecraftClient.player != null ? InventoryImpl.getInstance(minecraftClient, minecraftClient.player.getInventory()) : null;
+        return minecraftClient.player != null ? InventoryImpl.getInstance(minecraftClient) : null;
     }
 }

@@ -1,4 +1,4 @@
-package de.alive.preiscxn;
+package de.alive.preiscxn.impl;
 
 public final class Version {
     private Version() {}

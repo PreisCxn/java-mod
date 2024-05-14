@@ -85,7 +85,7 @@ public abstract class ItemStackMixin {
         list.add(
                 MutableText.of(new PlainTextContent.Literal("--- "))
                         .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
-                        .append(PriceCxn.getMod().getModText().copy())
+                        .append(((Text) PriceCxn.getMod().getModText()).copy())
                         .append(MutableText.of(new PlainTextContent.Literal("x" + (viewMode == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))
                         )
@@ -138,7 +138,7 @@ public abstract class ItemStackMixin {
                 String unitTranslatable = s.getRight().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
-                        .setStyle(PriceCxn.getMod().getDefaultText().withFormatting()));
+                        .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()).withFormatting()));
             });
         }
     }

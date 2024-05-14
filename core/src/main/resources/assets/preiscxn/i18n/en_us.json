@@ -1,0 +1,10 @@
+{
+  "example": {
+    "settings": {
+      "name": "PriceCxn",
+      "enabled": {
+        "name": "Enabled"
+      }
+    }
+  }
+}

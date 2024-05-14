@@ -70,6 +70,18 @@ public class CustomKeyBinding {
         this.category = category;
     }
 
+    public int getCode() {
+        return code;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getTranslationKey() {
+        return translationKey;
+    }
+
     public KeyBinding getKeybinding() {
         return new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category);
     }

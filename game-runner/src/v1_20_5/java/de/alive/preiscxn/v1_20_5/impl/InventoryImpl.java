@@ -1,15 +1,20 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
+import de.alive.api.interfaces.IItemStack;
 import net.minecraft.client.Minecraft;
 import de.alive.preiscxn.core.impl.LabyInventory;
 import net.labymod.api.models.Implements;
 
 @Implements(LabyInventory.class)
 public final class InventoryImpl implements LabyInventory {
-    private final Minecraft minecraftClient;
+    private Minecraft minecraftClient;
 
-    public InventoryImpl(Minecraft minecraftClient) {
+    public InventoryImpl() {
+    }
+
+    InventoryImpl setMinecraftClient(Minecraft minecraftClient) {
         this.minecraftClient = minecraftClient;
+        return this;
     }
 
     @Override
@@ -26,5 +31,12 @@ public final class InventoryImpl implements LabyInventory {
         }
 
         return minecraftClient.player == null ? 0 : minecraftClient.player.containerMenu.getSlot(0).container.getContainerSize();
+    }
+
+    @Override
+    public IItemStack getMainHandStack() {
+        if(minecraftClient.player == null)
+            return null;
+        return new ItemStackImpl().setStack(minecraftClient.player.getMainHandItem());
     }
 }
