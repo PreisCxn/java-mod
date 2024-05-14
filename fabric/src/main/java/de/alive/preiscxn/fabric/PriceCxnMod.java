@@ -1,6 +1,6 @@
 package de.alive.preiscxn.fabric;
 
-import de.alive.preiscxn.core.Version;
+import de.alive.preiscxn.impl.Version;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
