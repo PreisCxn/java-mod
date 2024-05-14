@@ -5,6 +5,7 @@ import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.interfaces.IItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.CustomKeyBinding;
@@ -32,7 +33,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
@@ -164,7 +164,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@NotNull ItemStack item,
+    public PriceCxnItemStack createItemStack(@NotNull IItemStack item,
                                              @Nullable Map<String, DataAccess> searchData,
                                              boolean addComment,
                                              boolean addTooltips) {
@@ -172,12 +172,12 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+    public PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
         return PriceCxnItemStackImpl.getInstance(item, searchData, addComment);
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
+    public PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData) {
         return PriceCxnItemStackImpl.getInstance(item, searchData);
     }
 

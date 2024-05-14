@@ -3,6 +3,7 @@ package de.alive.api;
 import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
+import de.alive.api.interfaces.IItemStack;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.CustomKeyBinding;
@@ -12,7 +13,6 @@ import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
@@ -26,9 +26,9 @@ public interface Mod {
     String getVersion();
     Style getDefaultText();
     MutableText getModText();
-    PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
-    PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment);
-    PriceCxnItemStack createItemStack(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData);
+    PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
+    PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment);
+    PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData);
 
     ICxnListener getCxnListener();
     IPlayer getPlayer();

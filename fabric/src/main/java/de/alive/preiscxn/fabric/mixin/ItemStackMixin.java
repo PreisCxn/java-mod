@@ -9,6 +9,7 @@ import de.alive.api.cytooxien.TranslationDataAccess;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
+import de.alive.preiscxn.impl.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
@@ -32,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,7 +75,9 @@ public abstract class ItemStackMixin {
 
         AtomicReference<PriceText> pcxnPriceText = new AtomicReference<>(PriceText.create());
 
-        int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, list);
+        List<String> lore = new ArrayList<>();
+        list.forEach(text -> lore.add(text.getString()));
+        int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
         list.add(PriceText.space());
         PriceCxnItemStack.ViewMode viewMode = PriceCxn.getMod().getViewMode();
@@ -184,6 +188,6 @@ public abstract class ItemStackMixin {
 
     @Unique
     private PriceCxnItemStackImpl getPriceCxnItemStack() {
-        return PriceCxnItemStackImpl.getInstance((ItemStack) (Object) this, null, true, false);
+        return PriceCxnItemStackImpl.getInstance(ItemStackImpl.getInstance((ItemStack) (Object) this), null, true, false);
     }
 }

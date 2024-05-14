@@ -3,11 +3,7 @@ package de.alive.api.utils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import de.alive.api.interfaces.IItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,14 +19,6 @@ import java.util.Locale;
  */
 public final class StringUtil {
     private StringUtil() {
-    }
-
-    public static String removeLastChar(@Nullable String text) {
-        if (text == null || text.isEmpty()) {
-            return text; // Wenn der Eingabestring leer ist oder null, gibt ihn unverändert zurück.
-        }
-
-        return text.substring(0, text.length() - 1);
     }
 
     public static @NotNull String removeChars(@NotNull String text) {
@@ -85,20 +73,10 @@ public final class StringUtil {
         return new ArrayList<>(Arrays.asList(words));
     }
 
-    public static List<String> getToolTips(@Nullable ItemStack stack) {
+    public static List<String> getToolTips(@Nullable IItemStack stack) {
         if (stack == null) return null;
-        List<String> result = new ArrayList<>();
 
-        List<Text> tooltip = stack.getTooltip(
-                Item.TooltipContext.DEFAULT,
-                MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
-
-        for (Text line : tooltip) {
-            result.add(line.getString());
-        }
-
-        return result;
+        return stack.getTooltip();
     }
 
     public static @Nullable String extractBetweenParts(@NotNull String s, @NotNull String start, @NotNull String end) {

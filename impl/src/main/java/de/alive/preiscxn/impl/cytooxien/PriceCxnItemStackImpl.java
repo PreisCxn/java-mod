@@ -6,27 +6,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.IThemeServerChecker;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.cytooxien.PriceText;
 import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.interfaces.IItemStack;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Unique;
@@ -39,23 +29,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 
 import static de.alive.api.LogPrinter.LOGGER;
 
 public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
-    private static final Cache<Tuple4<ItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
+    private static final Cache<Tuple4<IItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
             = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
-    private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
-    private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
-
     private final @NotNull Map<String, DataAccess> searchData;
 
     private final JsonObject data = new JsonObject();
@@ -66,21 +51,20 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private @Nullable JsonObject nookPrice = null;
     private @Nullable JsonObject pcxnPrice = null;
 
-    private PriceCxnItemStackImpl(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    private PriceCxnItemStackImpl(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
         this.searchData = Objects.requireNonNullElseGet(searchData, HashMap::new);
 
         if (addTooltips)
             this.toolTips = StringUtil.getToolTips(item);
-        this.itemName = item.getItem().getTranslationKey();
-        String displayName = item.getName().getString();
+        this.itemName = item.getItemName();
+        String displayName = item.getDisplayName();
         this.amount = item.getCount();
 
-        if (item.isIn(ItemTags.TRIM_TEMPLATES) || item.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE)) {
+        if (item.isTrimTemplate() || item.isNetheriteUpgradeSmithingTemplate()) {
 
-            Optional<RegistryKey<Item>> key = item.getRegistryEntry().getKey();
-            key.map(itemRegistryKey -> this.itemName += "." + itemRegistryKey.getValue().getPath());
-
+            item.getRegistryKey()
+                    .ifPresent(s -> this.itemName += "." + s);
         }
 
         /*
@@ -124,15 +108,15 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         this.nookPrice = findItemInfo("pricecxn.data.nook_data");
     }
 
-    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
+    public static PriceCxnItemStackImpl getInstance(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
         return getInstance(item, searchData, addComment, true);
     }
 
-    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item, @Nullable Map<String, DataAccess> searchData) {
+    public static PriceCxnItemStackImpl getInstance(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData) {
         return getInstance(item, searchData, true, true);
     }
 
-    public static PriceCxnItemStackImpl getInstance(@NotNull ItemStack item,
+    public static PriceCxnItemStackImpl getInstance(@NotNull IItemStack item,
                                                     @Nullable Map<String, DataAccess> searchData,
                                                     boolean addComment,
                                                     boolean addTooltips) {
@@ -151,90 +135,15 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         }
     }
 
-    private @NotNull JsonObject getCustomData(@NotNull ItemStack item) {
-        ComponentMap nbt = item.getComponents();
-        if (nbt == null) return new JsonObject();
+    private @NotNull JsonObject getCustomData(@NotNull IItemStack item) {
+        JsonObject jsonObject = item.getComponentsAsJson();
+        if (jsonObject == null) return new JsonObject();
 
-        JsonObject jsonObject = componentMapToJson(nbt);
         if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
-            LOGGER.warn("Found no custom_data in item: " + item.getItem().getTranslationKey());
+            LOGGER.warn("Found no custom_data in item: " + item.getTranslationKey());
             return new JsonObject();
         }
         return jsonObject.getAsJsonObject("minecraft:custom_data");
-    }
-
-    private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
-        JsonObject json = new JsonObject();
-
-        for (DataComponentType<?> key : componentMap.getTypes()) {
-            Object component = componentMap.get(key);
-            switch (component) {
-                case null -> {
-                }
-                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
-                case NbtComponent subComponentMap -> {
-                    try {
-                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
-                        json.add(key.toString(), asJsonObject);
-                    } catch (JsonParseException e) {
-                        try {
-                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
-                            json.add(key.toString(), asJsonObject);
-                        } catch (JsonParseException e1) {
-                            json.addProperty(key.toString(), subComponentMap.toString());
-                        }
-                    }
-                }
-                default -> {
-                    Object object = object(component.toString());
-                    if (object instanceof JsonElement element)
-                        json.add(key.toString(), element);
-                    else
-                        json.addProperty(key.toString(), object.toString());
-                }
-            }
-
-        }
-
-        return json;
-    }
-
-    public Object object(String nbtString) {
-        if (nbtString == null)
-            return "";
-
-        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
-
-        JsonObject valueJson;
-
-        //test if only Delete Pattern is needed
-        try {
-            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-        } catch (IllegalStateException e) {
-            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-            //test if JsonArray
-            try {
-                return JsonParser.parseString(nbtString).getAsJsonArray();
-            } catch (IllegalStateException ignored) {
-                //test if JsonKey is missing
-                try {
-                    return JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e2) {
-                    //else add as normal String
-                    return nbtString;
-                }
-            }
-        } catch (JsonParseException e) {
-            //else add as normal String
-            return nbtString;
-        }
-
-        if (valueJson != null) {
-            return valueJson;
-        }
-
-        return nbtString;
     }
 
     private @Nullable String toolTipSearch(@NotNull DataAccess access) {
@@ -382,7 +291,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Override
     public int getAdvancedAmount(@NotNull IServerChecker serverChecker,
                                  @Nullable AtomicReference<PriceText> pcxnPriceText,
-                                 @Nullable List<Text> list) {
+                                 @Nullable List<String> list) {
         int amount = this.getAmount();
 
         amount *= getPbvAmountFactor(serverChecker, pcxnPriceText);
@@ -522,7 +431,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     }
 
     @Unique
-    public int getTransactionAmountFactor(@Nullable List<Text> list) {
+    public int getTransactionAmountFactor(@Nullable List<String> list) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.currentScreen == null)
             return 1;
@@ -535,10 +444,10 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
             return 1;
 
         if (list != null) {
-            for (Text text : list) {
+            for (String text : list) {
                 for (String datum : TranslationDataAccess.TRANSACTION_COUNT.getData().getData()) {
-                    if (text.getString().contains(datum)) {
-                        String amount = StringUtil.removeChars(text.getString());
+                    if (text.contains(datum)) {
+                        String amount = StringUtil.removeChars(text);
                         try {
                             return Integer.parseInt(amount);
                         } catch (NumberFormatException e) {

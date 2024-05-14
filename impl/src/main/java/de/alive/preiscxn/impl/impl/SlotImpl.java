@@ -33,17 +33,17 @@ public final class SlotImpl implements ISlot {
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return PriceCxn.getMod().createItemStack(slot.getStack(), searchData, addComment);
+        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getStack()), searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData) {
-        return PriceCxn.getMod().createItemStack(slot.getStack(), searchData);
+        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getStack()), searchData);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return PriceCxn.getMod().createItemStack(slot.getStack(), searchData, addComment, addTooltips);
+        return PriceCxn.getMod().createItemStack(ItemStackImpl.getInstance(slot.getStack()), searchData, addComment, addTooltips);
     }
 
     @Override

@@ -3,7 +3,6 @@ package de.alive.api.cytooxien;
 import com.google.gson.JsonObject;
 import de.alive.api.networking.DataAccess;
 import de.alive.api.networking.IServerChecker;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +36,7 @@ public interface PriceCxnItemStack {
     /**
      * This includes the stack amount, but also spawn amount.
      */
-    int getAdvancedAmount(IServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText, List<Text> list);
+    int getAdvancedAmount(IServerChecker serverChecker, AtomicReference<PriceText> pcxnPriceText, List<String> list);
 
     @NotNull
     Map<String, DataAccess> getSearchData();
@@ -46,17 +45,7 @@ public interface PriceCxnItemStack {
     JsonObject findItemInfo(String dataKey);
 
     enum ViewMode {
-        SINGLE("cxn_listener.display_prices.amount_type.single"),
-        CURRENT_STACK("cxn_listener.display_prices.current_stack"),;
-
-        private final String translationString;
-
-        ViewMode(String translationString) {
-            this.translationString = translationString;
-        }
-
-        public String getTranslationString() {
-            return translationString;
-        }
+        SINGLE,
+        CURRENT_STACK;
     }
 }

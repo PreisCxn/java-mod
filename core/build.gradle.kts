@@ -9,6 +9,11 @@ dependencies {
     labyApi("core")
     implementation(project(":impl"))
     implementation(project(":api"))
+
+    implementation("javax.json:javax.json-api:1.1.4")
+    implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
+    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    implementation("io.projectreactor:reactor-core:3.6.5")
 }
 
 labyModProcessor {
