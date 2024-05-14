@@ -1,6 +1,7 @@
 package de.alive.preiscxn.networking;
 
 import com.google.gson.JsonObject;
+import de.alive.preiscxn.core.networking.HttpImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

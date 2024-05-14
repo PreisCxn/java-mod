@@ -1,4 +1,4 @@
-package de.alive.inventory.listener;
+package de.alive.preiscxn.inventory.listener;
 
 import com.google.gson.JsonArray;
 import de.alive.api.Mod;
@@ -24,14 +24,12 @@ import static de.alive.api.LogPrinter.printDebug;
 import static de.alive.api.LogPrinter.printTester;
 import static de.alive.api.utils.ItemUpdater.updateItemsAsync;
 
-public enum {{CLASSNAME}}Listener extends InventoryListener implements DataAccess {
-{{ENUM_VALUES}};
+public class AuctionHouseListener extends InventoryListener {
 
     private final List<PriceCxnItemStack> items = new ArrayList<>();
     private final Tuple2<Integer, Integer> itemRange = Tuples.of(10, 35);
 
     private final Map<String, DataAccess> searchData = new HashMap<>();
-
 
     /**
      * This constructor is used to listen to a specific inventory
@@ -39,48 +37,54 @@ public enum {{CLASSNAME}}Listener extends InventoryListener implements DataAcces
      * @param inventoryTitles The titles of the inventories to listen to
      * @param inventorySize   The size of the inventories to listen to (in slots)
      */
-    public {{CLASSNAME}}Listener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
+    public AuctionHouseListener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
         super(mod, inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
 
-{{DATA_ACCESSES}}
+        searchData.put("sellerName", InventoryDataAccess.SELLER_SEARCH);
+        searchData.put("timestamp", TranslationDataAccess.TIMESTAMP_SEARCH);
+        searchData.put("bidPrice", InventoryDataAccess.BID_SEARCH);
+        searchData.put("buyPrice", InventoryDataAccess.AH_BUY_SEARCH);
+        searchData.put("isBid", InventoryDataAccess.HIGHEST_BIDDER_SEARCH); //todo add isBid
+
     }
 
-    public {{CLASSNAME}}Listener(Mod mod, AtomicBoolean... active) {
-        this(mod, {{DATA_ACCESS_TITLE}}, 0, active);
+    public AuctionHouseListener(Mod mod, AtomicBoolean... active) {
+        this(mod, InventoryDataAccess.INV_AUCTION_HOUSE_SEARCH, 0, active);
     }
 
     @Override
     public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("{{CLASSNAME}} open");
+        printDebug("AuctionHouse open");
 
-        this.items.clear();
+        items.clear();
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }
 
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("{{CLASSNAME}} close");
+        printDebug("AuctionHouse close");
 
         JsonArray array = new JsonArray();
 
-        for (PriceCxnItemStack item : items) {
-            array.add(item.getDataWithoutDisplay());
+        if (!items.isEmpty()) {
+            for (PriceCxnItemStack item : items) {
+                array.add(item.getDataWithoutDisplay());
+            }
         }
 
-        if (!array.isEmpty()) {
+        if (!array.isEmpty())
             return sendData("/auctionhouse", array)
                     .doOnSuccess(aVoid -> {
                         if (client.isPlayerNull())
                             return;
-                        printTester("{{CLASSNAME}} data sent: " + array.size() + " items");
+                        printTester("AuctionHouse data sent: " + array.size() + " items");
                     });
-        }
         return Mono.empty();
     }
 
     @Override
     public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("{{CLASSNAME}} updated");
+        printDebug("AuctionHouse updated");
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }
 
