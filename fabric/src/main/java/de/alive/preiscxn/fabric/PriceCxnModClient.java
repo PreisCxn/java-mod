@@ -6,6 +6,7 @@ import de.alive.api.cytooxien.ICxnConnectionManager;
 import de.alive.api.cytooxien.ICxnListener;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.interfaces.IItemStack;
+import de.alive.api.interfaces.IKeyBinding;
 import de.alive.api.interfaces.IMinecraftClient;
 import de.alive.api.interfaces.IPlayer;
 import de.alive.api.keybinds.CustomKeyBinding;
@@ -18,8 +19,9 @@ import de.alive.api.networking.Http;
 import de.alive.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
-import de.alive.preiscxn.impl.impl.ItemStackImpl;
-import de.alive.preiscxn.impl.impl.MinecraftClientImpl;
+import de.alive.preiscxn.fabric.impl.ItemStackImpl;
+import de.alive.preiscxn.fabric.impl.KeyBindingImpl;
+import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.preiscxn.impl.keybinds.SwitchItemViewKeybindExecutor;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
@@ -32,7 +34,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import org.jetbrains.annotations.NotNull;
@@ -53,8 +54,8 @@ import static de.alive.api.LogPrinter.LOGGER;
 import static de.alive.preiscxn.fabric.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
-    private final Map<Class<? extends KeybindExecutor>, KeyBinding> classKeyBindingMap = new HashMap<>();
-    private final Map<KeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
+    private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
+    private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
     private final ModuleLoader projectLoader;
 
     private final CxnListener cxnListener;
@@ -222,7 +223,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public void registerKeybinding(@NotNull CustomKeyBinding customKeyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
-        KeyBinding keyBinding = KeyBindingHelper.registerKeyBinding(customKeyBinding.getKeybinding());
+        IKeyBinding keyBinding = KeyBindingImpl.getInstance(KeyBindingHelper.registerKeyBinding(customKeyBinding.getKeybinding()));
 
         classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
         if (inInventory)
@@ -239,12 +240,12 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public KeyBinding getKeyBinding(Class<? extends KeybindExecutor> keybindExecutorClass) {
+    public IKeyBinding getKeyBinding(Class<? extends KeybindExecutor> keybindExecutorClass) {
         return classKeyBindingMap.get(keybindExecutorClass);
     }
 
     @Override
-    public void forEachKeybindExecutor(BiConsumer<? super KeyBinding, ? super KeybindExecutor> keyBinding) {
+    public void forEachKeybindExecutor(BiConsumer<? super IKeyBinding, ? super KeybindExecutor> keyBinding) {
         keyBindingKeybindExecutorMap.forEach(keyBinding);
     }
 

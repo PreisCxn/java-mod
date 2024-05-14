@@ -1,4 +1,4 @@
-package de.alive.preiscxn.impl.impl;
+package de.alive.preiscxn.v1_20_5.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -9,18 +9,19 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import de.alive.api.PriceCxn;
 import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.interfaces.IItemStack;
 import de.alive.api.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
+import de.alive.preiscxn.core.impl.LabyItemStack;
+import net.labymod.api.component.data.NbtDataComponentContainer;
+import net.labymod.api.models.Implements;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-public final class ItemStackImpl implements IItemStack {
+@Implements(LabyItemStack.class)
+public final class ItemStackImpl implements LabyItemStack {
     private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
     private static final Cache<ItemStack, ItemStackImpl> ITEM_STACK_MAP = CacheBuilder
@@ -70,13 +72,13 @@ public final class ItemStackImpl implements IItemStack {
 
     @Override
     public List<String> getLore() {
-        List<Text> tooltip = stack.getTooltip(Item.TooltipContext.DEFAULT,
-                MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
+        List<Component> tooltip = stack.getTooltipLines(Item.TooltipContext.EMPTY,
+                Minecraft.getInstance().player,
+                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
 
         List<String> lore = new ArrayList<>();
 
-        for (Text text : tooltip) {
+        for (Component text : tooltip) {
             lore.add(text.getString());
         }
 
@@ -85,12 +87,12 @@ public final class ItemStackImpl implements IItemStack {
 
     @Override
     public String getItemName() {
-        return stack.getItem().getTranslationKey();
+        return stack.getItem().getDescriptionId();
     }
 
     @Override
     public String getDisplayName() {
-        return stack.getName().getString();
+        return stack.getDisplayName().getString();
     }
 
     @Override
@@ -100,18 +102,17 @@ public final class ItemStackImpl implements IItemStack {
 
     @Override
     public boolean isTrimTemplate() {
-        return stack.isIn(ItemTags.TRIM_TEMPLATES);
+        return stack.is(ItemTags.TRIM_TEMPLATES);
     }
 
     @Override
     public boolean isNetheriteUpgradeSmithingTemplate() {
-        return stack.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+        return stack.is(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
     }
 
     @Override
     public Optional<String> getRegistryKey() {
-        return stack.getRegistryEntry().getKey()
-                .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
+        return Optional.of(stack.getItemHolder().getRegisteredName());
     }
 
     @Override
@@ -119,19 +120,19 @@ public final class ItemStackImpl implements IItemStack {
         return componentMapToJson(stack.getComponents());
     }
 
-    private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
+    private @NotNull JsonObject componentMapToJson(@NotNull DataComponentMap componentMap) {
         if(componentMap.isEmpty())
             return new JsonObject();
 
         JsonObject json = new JsonObject();
 
-        for (DataComponentType<?> key : componentMap.getTypes()) {
+        for (DataComponentType<?> key : componentMap.keySet()) {
             Object component = componentMap.get(key);
             switch (component) {
                 case null -> {
                 }
-                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
-                case NbtComponent subComponentMap -> {
+                case DataComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
+                case NbtDataComponentContainer subComponentMap -> {
                     try {
                         JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
                         json.add(key.toString(), asJsonObject);
@@ -194,20 +195,5 @@ public final class ItemStackImpl implements IItemStack {
         }
 
         return nbtString;
-    }
-
-    @Override
-    public String getTranslationKey() {
-        return stack.getTranslationKey();
-    }
-
-    @Override
-    public List<String> getTooltip() {
-        List<Text> tooltip = stack.getTooltip(Item.TooltipContext.DEFAULT,
-                MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
-        List<String> lore = new ArrayList<>();
-        tooltip.forEach(text -> lore.add(text.getString()));
-        return lore;
     }
 }

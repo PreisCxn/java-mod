@@ -1,8 +1,8 @@
 package de.alive.preiscxn.fabric.mixin;
 
 import de.alive.api.PriceCxn;
-import de.alive.preiscxn.impl.impl.ItemStackImpl;
-import de.alive.preiscxn.impl.impl.MinecraftClientImpl;
+import de.alive.preiscxn.fabric.impl.ItemStackImpl;
+import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.screen.slot.Slot;

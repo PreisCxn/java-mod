@@ -14,6 +14,7 @@ dependencies {
     implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
     implementation("org.java-websocket:Java-WebSocket:1.5.6")
     implementation("io.projectreactor:reactor-core:3.6.5")
+    implementation("com.google.guava:guava:33.2.0-jre")
 }
 
 labyModProcessor {

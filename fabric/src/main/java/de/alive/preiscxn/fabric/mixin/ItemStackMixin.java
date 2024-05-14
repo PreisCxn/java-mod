@@ -6,14 +6,14 @@ import de.alive.api.cytooxien.Modes;
 import de.alive.api.cytooxien.PriceCxnItemStack;
 import de.alive.api.cytooxien.PriceText;
 import de.alive.api.cytooxien.TranslationDataAccess;
+import de.alive.api.interfaces.IKeyBinding;
 import de.alive.api.networking.IServerChecker;
 import de.alive.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
-import de.alive.preiscxn.impl.impl.ItemStackImpl;
+import de.alive.preiscxn.fabric.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -116,11 +116,10 @@ public abstract class ItemStackMixin {
         }
         if (this.cxnItemStack.getPcxnPrice() != null) {
 
-            KeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
+            IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
             if (this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
-                                      keyBinding
-                                              .getBoundKeyLocalizedText()
+                                      Text.of(keyBinding.getBoundKeyLocalizedText())
                                               .copy()
                                               .setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
                         .setStyle(Style.EMPTY.withColor(Formatting.GRAY));

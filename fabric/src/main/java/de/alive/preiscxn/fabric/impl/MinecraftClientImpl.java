@@ -1,4 +1,4 @@
-package de.alive.preiscxn.impl.impl;
+package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

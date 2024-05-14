@@ -140,7 +140,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         if (jsonObject == null) return new JsonObject();
 
         if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
-            LOGGER.warn("Found no custom_data in item: " + item.getTranslationKey());
+            LOGGER.warn("Found no custom_data in item: " + item.getItemName());
             return new JsonObject();
         }
         return jsonObject.getAsJsonObject("minecraft:custom_data");

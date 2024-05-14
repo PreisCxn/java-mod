@@ -1,34 +1,29 @@
-package de.alive.preiscxn.impl.impl;
+package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import de.alive.api.interfaces.IInventory;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.inventory.Inventory;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.util.concurrent.ExecutionException;
 
 public final class InventoryImpl implements IInventory {
-    private static final Cache<Tuple2<MinecraftClient, Inventory>, InventoryImpl> INVENTORY_MAP
+    private static final Cache<MinecraftClient, InventoryImpl> INVENTORY_MAP
             = CacheBuilder
             .newBuilder()
             .maximumSize(100)
             .build();
     private final MinecraftClient minecraftClient;
-    private final Inventory inventory;
 
-    private InventoryImpl(MinecraftClient minecraftClient, Inventory inventory) {
+    private InventoryImpl(MinecraftClient minecraftClient) {
         this.minecraftClient = minecraftClient;
-        this.inventory = inventory;
     }
 
-    public static InventoryImpl getInstance(MinecraftClient minecraftClient, Inventory inventory) {
+    public static InventoryImpl getInstance(MinecraftClient minecraftClient) {
         try {
-            return INVENTORY_MAP.get(Tuples.of(minecraftClient, inventory), () -> new InventoryImpl(minecraftClient, inventory));
+            return INVENTORY_MAP.get(minecraftClient, () -> new InventoryImpl(minecraftClient));
         } catch (ExecutionException e) {
-            return new InventoryImpl(minecraftClient, inventory);
+            return new InventoryImpl(minecraftClient);
         }
     }
 

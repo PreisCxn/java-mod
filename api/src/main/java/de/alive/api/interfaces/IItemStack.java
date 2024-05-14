@@ -26,8 +26,4 @@ public interface IItemStack {
     Optional<String> getRegistryKey();
 
     JsonObject getComponentsAsJson();
-
-    String getTranslationKey();
-
-    List<String> getTooltip();
 }
