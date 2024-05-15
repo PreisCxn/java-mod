@@ -11,8 +11,6 @@ repositories {
 }
 
 dependencies {
-    //labyApi("api")
-
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")

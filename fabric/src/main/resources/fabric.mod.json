@@ -15,7 +15,7 @@
 	},
 
 	"license": "MIT License",
-	"icon": "assets/preiscxn/PreisCxnLogo.png",
+	"icon": "assets/preiscxn/textures/icon.png",
 
 	"environment": "*",
 	"entrypoints": {

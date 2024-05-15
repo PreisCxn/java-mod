@@ -48,6 +48,14 @@ subprojects {
 		maven("https://libraries.minecraft.net/")
 		maven("https://repo.spongepowered.org/repository/maven-public/")
 	}
+
+	dependencies{
+		maven(mavenCentral(),"javax.json:javax.json-api:1.1.4")
+		maven(mavenCentral(),"org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
+		maven(mavenCentral(),"org.java-websocket:Java-WebSocket:1.5.6")
+		maven(mavenCentral(),"io.projectreactor:reactor-core:3.6.5")
+		maven(mavenCentral(),"com.google.guava:guava:33.2.0-jre")
+	}
 }
 
 fun configureRun(provider: net.labymod.gradle.core.minecraft.provider.VersionProvider, gameVersion: String) {
