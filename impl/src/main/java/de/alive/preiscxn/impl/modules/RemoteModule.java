@@ -23,21 +23,23 @@ public final class RemoteModule implements Module {
     private final String remotePath;
     private final Path jarPath;
     private final String primaryPackage;
+    private final ClassLoader classLoader;
     private boolean isDownloaded = false;
 
-    private RemoteModule(String remotePath, Path jarPath, String primaryPackage) {
+    private RemoteModule(String remotePath, Path jarPath, String primaryPackage, ClassLoader classLoader) {
         this.remotePath = remotePath;
         this.jarPath = jarPath;
         this.primaryPackage = primaryPackage;
+        this.classLoader = classLoader;
     }
 
-    public static Mono<Module> create(String remotePath, Path jarPath, String primaryPackage, boolean useRemote) {
+    public static Mono<Module> create(String remotePath, Path jarPath, String primaryPackage, boolean useRemote, ClassLoader classLoader) {
 
         if (!useRemote)
             return Mono.just(new ClasspathModule(primaryPackage));
 
         PriceCxn.getMod().getLogger().info("Creating remote module with remotePath: {}, jarPath: {}, primaryPackage: {}", remotePath, jarPath, primaryPackage);
-        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage);
+        RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage, classLoader);
 
         return remoteModule
                 .isOutdated()
@@ -145,7 +147,7 @@ public final class RemoteModule implements Module {
                     if (className.startsWith(primaryPackage)) {
                         try {
                             consumer.accept(urlClassLoader.loadClass(className));
-                        } catch (ClassNotFoundException e) {
+                        } catch (ClassNotFoundException | NoClassDefFoundError e) {
                             PriceCxn.getMod().getLogger().error("Error while loading class {}", className);
                         }
                     }

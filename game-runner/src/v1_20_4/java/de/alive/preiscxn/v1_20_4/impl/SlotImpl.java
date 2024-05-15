@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_4;
+package de.alive.preiscxn.v1_20_4.impl;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;

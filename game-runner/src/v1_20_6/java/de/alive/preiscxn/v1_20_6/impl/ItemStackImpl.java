@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_6;
+package de.alive.preiscxn.v1_20_6.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

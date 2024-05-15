@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_4;
+package de.alive.preiscxn.v1_20_4.impl;
 
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;

@@ -26,6 +26,7 @@ import de.alive.preiscxn.fabric.impl.LoggerImpl;
 import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
 import de.alive.preiscxn.fabric.impl.PlayerImpl;
 import de.alive.preiscxn.fabric.impl.PriceTextImpl;
+import de.alive.preiscxn.impl.Version;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
@@ -63,9 +64,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static de.alive.preiscxn.fabric.PriceCxnMod.MOD_NAME;
-
 public class PriceCxnModClient implements ClientModInitializer, Mod {
+    private static final String MOD_NAME = "PriceCxn";
     public final ILogger logger = new LoggerImpl(LoggerFactory.getLogger("PriceCxn"));
 
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
@@ -143,7 +143,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         return RemoteModule.create(remotePath,
                 localPath,
                 primaryPackage,
-                useRemote);
+                useRemote,
+                Thread.currentThread().getContextClassLoader());
     }
 
     @Override
@@ -167,17 +168,24 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public String getVersion() {
-        return PriceCxnMod.MOD_VERSION;
+        return Version.MOD_VERSION;
     }
 
     @Override
     public Style getDefaultStyle() {
-        return PriceCxnMod.DEFAULT_TEXT;
+        return Style.EMPTY.withColor(Formatting.GRAY);
     }
 
     @Override
     public Text getModText() {
-        return PriceCxnMod.MOD_TEXT;
+        return  MutableText
+                .of(new PlainTextContent.Literal(""))
+                .append(MutableText.of(new PlainTextContent.Literal("["))
+                        .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)))
+                .append(Text.translatable("cxn_listener.mod_text")
+                        .setStyle(Style.EMPTY.withColor(Formatting.GOLD)))
+                .append(MutableText.of(new PlainTextContent.Literal("] "))
+                        .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)));
     }
 
     @Override

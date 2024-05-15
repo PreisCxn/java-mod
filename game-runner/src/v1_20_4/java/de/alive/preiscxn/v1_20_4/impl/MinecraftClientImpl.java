@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_6;
+package de.alive.preiscxn.v1_20_4.impl;
 
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;

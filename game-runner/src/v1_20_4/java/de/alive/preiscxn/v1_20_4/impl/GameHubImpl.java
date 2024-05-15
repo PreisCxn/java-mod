@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_4;
+package de.alive.preiscxn.v1_20_4.impl;
 
 import de.alive.preiscxn.core.impl.LabyGameHub;
 import net.labymod.api.models.Implements;

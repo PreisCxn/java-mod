@@ -19,9 +19,6 @@
 
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"de.alive.preiscxn.fabric.PriceCxnMod"
-		],
 		"client": [
 			"de.alive.preiscxn.fabric.PriceCxnModClient"
 		]

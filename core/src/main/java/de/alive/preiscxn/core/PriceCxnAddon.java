@@ -96,6 +96,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
         this.projectLoader.addModule(new MainModule());
         this.tickListener = new TickListener(this::getMinecraftClient);
+        this.registerListener(tickListener);
 
         try {
             cxnListener = new CxnListener();
@@ -144,7 +145,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         return RemoteModule.create(remotePath,
                 localPath,
                 primaryPackage,
-                useRemote);
+                useRemote,
+                Thread.currentThread().getContextClassLoader());
     }
 
     @Override
