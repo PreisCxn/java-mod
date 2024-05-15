@@ -15,7 +15,7 @@
 	},
 
 	"license": "MIT License",
-	"icon": "assets/modid/PreisCxnLogo.png",
+	"icon": "assets/preiscxn/PreisCxnLogo.png",
 
 	"environment": "*",
 	"entrypoints": {
@@ -27,7 +27,7 @@
 		]
 	},
 	"mixins": [
-		"modid.mixins.json"
+		"preiscxn.mixins.json"
 	],
 
 	"depends": {

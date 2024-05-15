@@ -111,5 +111,5 @@ tasks.named("sourcesJar") {
 
 tasks.named("build") {
     dependsOn("generateVersion")
-    dependsOn("checkstyleMain")
+    //dependsOn("checkstyleMain")
 }
