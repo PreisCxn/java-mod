@@ -185,9 +185,9 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         if (labyAPI().minecraft() == null) return;
 
         if (labyAPI().minecraft().chatExecutor() != null)
-            labyAPI().minecraft().chatExecutor().insertText(message, true);
+            labyAPI().minecraft().chatExecutor().displayClientMessage(message, true);
 
-        PriceCxn.getMod().getLogger().debug("[PCXN-TESTER] : {}", message);
+        PriceCxn.getMod().getLogger().info("[PCXN-TESTER] : {}", message);
     }
 
     @Override
@@ -196,8 +196,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         if (labyAPI().minecraft() == null) return;
         if (labyAPI().minecraft().getClientPlayer() == null) return;
 
-        labyAPI().minecraft().chatExecutor().insertText(message, true);
-        if (sysOut) PriceCxn.getMod().getLogger().debug("[PCXN-DEBUG] : {}", message);
+        labyAPI().minecraft().chatExecutor().displayClientMessage(message, overlay);
+        PriceCxn.getMod().getLogger().info("[PCXN-DEBUG] : {}", message);
     }
 
     @Override

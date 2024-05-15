@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -65,6 +66,7 @@ public abstract class TabListener {
 
         return Flux.fromArray(gameHud.getDeclaredPlayerListFields())
                 .doOnNext(field -> field.setAccessible(true))
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .mapNotNull(field -> {
                     try {
                         return field.get(gameHud.getGameHud());

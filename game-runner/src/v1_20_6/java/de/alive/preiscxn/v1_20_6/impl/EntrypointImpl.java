@@ -46,6 +46,6 @@ public class EntrypointImpl implements LabyEntrypoint {
 
     @Override
     public LabyGameHub createGameHub() {
-        return new GameHubImpl().setGameHud(Minecraft.getInstance().gui);
+        return new GameHubImpl();
     }
 }

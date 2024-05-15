@@ -36,7 +36,7 @@ public final class ItemStackImpl implements LabyItemStack {
     public ItemStackImpl() {
     }
 
-    ItemStackImpl setStack(ItemStack stack) {
+    public ItemStackImpl setStack(ItemStack stack) {
         this.stack = stack;
         return this;
     }
