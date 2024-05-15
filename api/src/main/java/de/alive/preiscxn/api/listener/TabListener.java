@@ -1,17 +1,15 @@
 package de.alive.preiscxn.api.listener;
 
 import de.alive.preiscxn.api.PriceCxn;
-import de.alive.preiscxn.api.interfaces.IGameHud;
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.networking.DataAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class TabListener {
@@ -59,27 +57,15 @@ public abstract class TabListener {
     private @NotNull Mono<Boolean> refresh(@Nullable String notInValue) {
         PriceCxn.getMod().getLogger().debug("refresh");
 
-        IGameHud gameHud = PriceCxn.getMod().getGameHud();
-        if (gameHud.isGameHudNull()) return Mono.just(false);
+        VersionedTabGui gameHud = PriceCxn.getMod().getVersionedTabGui();
+        if (gameHud == null) return Mono.just(false);
 
-        if (gameHud.isPlayerListHudNull()) return Mono.just(false);
 
-        return Flux.fromArray(gameHud.getDeclaredPlayerListFields())
-                .doOnNext(field -> field.setAccessible(true))
-                .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .mapNotNull(field -> {
-                    try {
-                        return field.get(gameHud.getGameHud());
-                    } catch (IllegalAccessException e) {
-                        PriceCxn.getMod().getLogger().error("Error while accessing field", e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
+        return Flux.fromIterable(List.of(gameHud.priceCxn$getHeader(), gameHud.priceCxn$getFooter()))
                 .flatMap(value -> Flux.fromIterable(this.searches.getData().getData())
-                        .filter(search -> value.toString().contains(search))
-                        .filter(search -> !(notInValue != null && value.toString().toLowerCase().contains(notInValue.toLowerCase())))
-                        .flatMap(search -> this.handleData(value.toString()).then(Mono.just(search)))
+                        .filter(value::contains)
+                        .filter(search -> !(notInValue != null && value.toLowerCase().contains(notInValue.toLowerCase())))
+                        .flatMap(search -> this.handleData(value).then(Mono.just(search)))
                 ).any(string -> true);
     }
 

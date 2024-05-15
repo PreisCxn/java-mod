@@ -12,6 +12,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -368,6 +369,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public IGameHud getGameHud() {
         return new GameHudImpl(MinecraftClient.getInstance().inGameHud);
+    }
+
+    @Override
+    public VersionedTabGui getVersionedTabGui() {
+        return (VersionedTabGui) MinecraftClient.getInstance().inGameHud.getPlayerListHud();
     }
 
     @Override

@@ -10,6 +10,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.ModuleLoader;
 import de.alive.preiscxn.api.networking.DataAccess;
@@ -63,6 +64,7 @@ public interface Mod {
     ILogger getLogger();
 
     IGameHud getGameHud();
+    VersionedTabGui getVersionedTabGui();
 
     void openUrl(String url);
 

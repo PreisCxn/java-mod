@@ -1,5 +1,6 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
 import de.alive.preiscxn.core.impl.LabyGameHub;
@@ -10,6 +11,7 @@ import de.alive.preiscxn.core.impl.LabyScreenHandler;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.PlayerTabOverlay;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -47,5 +49,10 @@ public class EntrypointImpl implements LabyEntrypoint {
     @Override
     public LabyGameHub createGameHub() {
         return new GameHubImpl();
+    }
+
+    @Override
+    public VersionedTabGui createVersionedTabGui() {
+        return (VersionedTabGui) Minecraft.getInstance().gui.getTabList();
     }
 }

@@ -12,6 +12,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -341,6 +342,11 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public IGameHud getGameHud() {
         return getLabyEntrypoint().createGameHub();
+    }
+
+    @Override
+    public VersionedTabGui getVersionedTabGui() {
+        return getLabyEntrypoint().createVersionedTabGui();
     }
 
     @Override

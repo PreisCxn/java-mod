@@ -1,5 +1,6 @@
 package de.alive.preiscxn.core.impl;
 
+import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import net.labymod.api.reference.annotation.Referenceable;
 import org.jetbrains.annotations.NotNull;
@@ -11,4 +12,5 @@ public interface LabyEntrypoint {
     LabyMinecraftClient createMinecraftClient();
     LabyScreenHandler createScreenHandler();
     LabyGameHub createGameHub();
+    VersionedTabGui createVersionedTabGui();
 }
