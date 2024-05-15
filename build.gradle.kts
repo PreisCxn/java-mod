@@ -50,13 +50,13 @@ subprojects {
 	}
 
 	dependencies{
-		maven(mavenCentral(),"javax.json:javax.json-api:1.1.4")
-		maven(mavenCentral(),"org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
-		maven(mavenCentral(),"org.java-websocket:Java-WebSocket:1.5.6")
-		maven(mavenCentral(),"io.projectreactor:reactor-core:3.6.5")
-		maven(mavenCentral(),"com.google.guava:guava:33.2.0-jre")
-		maven(mavenCentral(),"org.jetbrains:annotations:24.1.0")
-		maven(mavenCentral(),"com.google.code.gson:gson:2.8.9")
+		implementation("javax.json:javax.json-api:1.1.4")
+		implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
+		implementation("org.java-websocket:Java-WebSocket:1.5.6")
+		implementation("io.projectreactor:reactor-core:3.6.5")
+		implementation("com.google.guava:guava:33.2.0-jre")
+		implementation("org.jetbrains:annotations:24.1.0")
+		implementation("com.google.code.gson:gson:2.8.9")
 	}
 }
 
