@@ -1,5 +1,6 @@
 package de.alive.preiscxn.impl.modules;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.module.Module;
 
 import java.net.URI;
@@ -11,7 +12,7 @@ import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class ClasspathModule implements Module {
 
@@ -33,7 +34,7 @@ public class ClasspathModule implements Module {
                 try {
                     path = Path.of(uri);
                 } catch (FileSystemNotFoundException e) {
-                    LOGGER.error("Error while loading module with uri: {}", uri);
+                    PriceCxn.getMod().getLogger().error("Error while loading module with uri: {}", uri);
                     continue;
                 }
                 try (Stream<Path> pathStream = Files.walk(path)) {
@@ -52,16 +53,16 @@ public class ClasspathModule implements Module {
                                 try {
                                     consumer.accept(Thread.currentThread().getContextClassLoader().loadClass(className));
                                 } catch (ClassNotFoundException e) {
-                                    LOGGER.error("Error while loading class", e);
+                                    PriceCxn.getMod().getLogger().error("Error while loading class", e);
                                 } catch (RuntimeException e) {
-                                    LOGGER.info("Got RuntimeException while loading class {}.", className, e);
+                                    PriceCxn.getMod().getLogger().info("Got RuntimeException while loading class {}.", className, e);
                                 }
                             });
 
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error while loading module", e);
+            PriceCxn.getMod().getLogger().error("Error while loading module", e);
         }
 
     }

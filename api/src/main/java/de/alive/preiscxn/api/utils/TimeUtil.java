@@ -1,10 +1,11 @@
 package de.alive.preiscxn.api.utils;
 
-import de.alive.preiscxn.api.LogPrinter;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
 import de.alive.preiscxn.api.networking.DataAccess;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +58,7 @@ public final class TimeUtil {
 
     }
 
-    public static @NotNull Optional<Pair<Long, TimeUnit>> getTimestampDifference(long timestamp) {
+    public static @NotNull Optional<Tuple2<Long, TimeUnit>> getTimestampDifference(long timestamp) {
         long currentTimestamp = System.currentTimeMillis(); // Aktueller Unix-Timestamp in Millisekunden
 
         long difference = currentTimestamp - timestamp;
@@ -68,13 +69,13 @@ public final class TimeUtil {
 
         if (difference >= TimeUnit.DAYS.getMilliseconds()) {
             long days = difference / TimeUnit.DAYS.getMilliseconds();
-            return Optional.of(new Pair<>(days, TimeUnit.DAYS));
+            return Optional.of(Tuples.of(days, TimeUnit.DAYS));
         } else if (difference >= TimeUnit.HOURS.getMilliseconds()) {
             long hours = difference / TimeUnit.HOURS.getMilliseconds();
-            return Optional.of(new Pair<>(hours, TimeUnit.HOURS));
+            return Optional.of(Tuples.of(hours, TimeUnit.HOURS));
         } else if (difference >= TimeUnit.MINUTES.getMilliseconds()) {
             long minutes = difference / TimeUnit.MINUTES.getMilliseconds();
-            return Optional.of(new Pair<>(minutes, TimeUnit.MINUTES));
+            return Optional.of(Tuples.of(minutes, TimeUnit.MINUTES));
         }
 
         return Optional.empty();
@@ -87,9 +88,9 @@ public final class TimeUtil {
         Optional<Integer> hours = getTime(timerString, HOUR_SEARCH);
         Optional<Integer> minutes = getTime(timerString, MINUTE_SEARCH);
 
-        LogPrinter.LOGGER.debug("timerString: {}", timerString);
-        LogPrinter.LOGGER.debug("hours: {}", hours.orElse(-1));
-        LogPrinter.LOGGER.debug("minutes: {}", minutes.orElse(-1));
+        PriceCxn.getMod().getLogger().debug("timerString: {}", timerString);
+        PriceCxn.getMod().getLogger().debug("hours: {}", hours.orElse(-1));
+        PriceCxn.getMod().getLogger().debug("minutes: {}", minutes.orElse(-1));
 
         if (minutes.isEmpty() && hours.isEmpty())
             return Optional.empty();

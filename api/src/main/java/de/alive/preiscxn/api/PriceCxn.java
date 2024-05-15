@@ -2,7 +2,7 @@ package de.alive.preiscxn.api;
 
 import java.util.Objects;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public final class PriceCxn {
     public static final String RELEASE_CHANNEL;
@@ -12,7 +12,6 @@ public final class PriceCxn {
                           || System.getenv("PCXN_RELEASE_CHANNEL") == null
                 ? null
                 : System.getenv("PCXN_RELEASE_CHANNEL").toLowerCase();
-        LOGGER.info("Release channel: {}", RELEASE_CHANNEL);
     }
 
     private PriceCxn() {

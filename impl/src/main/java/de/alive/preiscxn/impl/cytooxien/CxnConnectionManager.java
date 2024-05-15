@@ -8,18 +8,13 @@ import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
 import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.networking.NetworkingState;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketCompletion;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 /**
  * This class manages the connection to the server and handles the state of the connection.
@@ -58,7 +53,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     @Override
-    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(Refresh refresh) {
+    public @NotNull Mono<Tuple2<Boolean, ActionNotification>> checkConnectionAsync(Refresh refresh) {
         return checkConnection(refresh);
     }
     /**
@@ -69,7 +64,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
     @Override
-    public @NotNull Mono<Pair<Boolean, ActionNotification>> checkConnection(Refresh refresh) {
+    public @NotNull Mono<Tuple2<Boolean, ActionNotification>> checkConnection(Refresh refresh) {
         boolean activeCache = this.active.get();
         Boolean isRightVersionBackup = isRightVersion;
         NetworkingState stateBackup = this.state;
@@ -96,7 +91,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> processConnectionStatus(Refresh refresh,
+    private @NotNull Mono<Tuple2<Boolean, ActionNotification>> processConnectionStatus(Refresh refresh,
                                                                                      boolean isConnected,
                                                                                      boolean isMinVersion,
                                                                                      String serverMinVersion,
@@ -119,10 +114,10 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
+    private @NotNull Mono<Tuple2<Boolean, ActionNotification>> handleServerNotReachable(boolean activeCache) {
         this.deactivate();
-        LOGGER.info("Server nicht erreichbar");
-        return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
+        PriceCxn.getMod().getLogger().info("Server nicht erreichbar");
+        return Mono.just(Tuples.of(activeCache, ActionNotification.SERVER_OFFLINE));
     }
     /**
      * Handles the case when the server version is incorrect.
@@ -132,12 +127,12 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, @Nullable Boolean isRightVersionBackup) {
+    private @NotNull Mono<Tuple2<Boolean, ActionNotification>> handleIncorrectVersion(String serverMinVersion, @Nullable Boolean isRightVersionBackup) {
         this.deactivate();
         ActionNotification.WRONG_VERSION.setTextVariables(serverMinVersion);
-        LOGGER.info("{} {}", isRightVersionBackup, serverMinVersion);
+        PriceCxn.getMod().getLogger().info("{} {}", isRightVersionBackup, serverMinVersion);
         this.isRightVersion = false;
-        return Mono.just(new Pair<>(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
+        return Mono.just(Tuples.of(isRightVersionBackup == null || isRightVersionBackup, ActionNotification.WRONG_VERSION));
     }
     /**
      * Handles the case when the server is online.
@@ -148,18 +143,18 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleServerOnline(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
+    private @NotNull Mono<Tuple2<Boolean, ActionNotification>> handleServerOnline(Refresh refresh, boolean activeCache, NetworkingState stateBackup) {
         NetworkingState serverCheckerState = serverChecker.getState();
         if (serverCheckerState == NetworkingState.ONLINE) {
-            LOGGER.info("Server im Online-Modus");
+            PriceCxn.getMod().getLogger().info("Server im Online-Modus");
             return this.activate(refresh)
-                    .then(Mono.just(new Pair<>(!activeCache, ActionNotification.MOD_STARTED)));
+                    .then(Mono.just(Tuples.of(!activeCache, ActionNotification.MOD_STARTED)));
         } else if (serverCheckerState == NetworkingState.MAINTENANCE) {
             return handleMaintenance(refresh, activeCache, stateBackup);
         } else {
-            LOGGER.info("Server im Offline-Modus");
+            PriceCxn.getMod().getLogger().info("Server im Offline-Modus");
             this.deactivate();
-            return Mono.just(new Pair<>(activeCache, ActionNotification.SERVER_OFFLINE));
+            return Mono.just(Tuples.of(activeCache, ActionNotification.SERVER_OFFLINE));
         }
     }
     /**
@@ -171,20 +166,20 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      *
      * @return A Mono object containing a Pair of a Boolean and an ActionNotification.
      */
-    private @NotNull Mono<Pair<Boolean, ActionNotification>> handleMaintenance(Refresh refresh,
+    private @NotNull Mono<Tuple2<Boolean, ActionNotification>> handleMaintenance(Refresh refresh,
                                                                                boolean activeCache,
                                                                                NetworkingState stateBackup) {
         return isSpecialUser()
                 .flatMap(isSpecialUser -> {
                     if (isSpecialUser) {
-                        LOGGER.info("Benutzer hat Berechtigung");
+                        PriceCxn.getMod().getLogger().info("Benutzer hat Berechtigung");
                         return this.activate(refresh).then(
-                                Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE
+                                Mono.just(Tuples.of(stateBackup != NetworkingState.MAINTENANCE
                                                      || !activeCache, ActionNotification.SERVER_MAINTEANCE_WITH_PERMISSON)));
                     } else {
-                        LOGGER.info("Benutzer hat keine Berechtigung");
+                        PriceCxn.getMod().getLogger().info("Benutzer hat keine Berechtigung");
                         this.deactivate();
-                        return Mono.just(new Pair<>(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
+                        return Mono.just(Tuples.of(stateBackup != NetworkingState.MAINTENANCE, ActionNotification.SERVER_MAINTENANCE));
                     }
                 });
     }
@@ -209,13 +204,13 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      */
     @Override
     public @NotNull Mono<Boolean> isSpecialUser() {
-        if (MinecraftClient.getInstance().player == null)
+        if (PriceCxn.getMod().getPlayer() == null)
             return Mono.just(false);
 
         return new WebSocketCompletion(
                 serverChecker.getWebsocket(),
                 "isSpecialUser",
-                MinecraftClient.getInstance().player.getUuidAsString()).getMono()
+                PriceCxn.getMod().getPlayer().getUUIDasString()).getMono()
                 .map(s -> s.equals("true"))
                 .onErrorReturn(false);
     }
@@ -241,7 +236,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
                     isRightVersion = true;
                 })
                 .onErrorResume(ex -> {
-                    LOGGER.error("Error while activating mod", ex);
+                    PriceCxn.getMod().getLogger().error("Error while activating mod", ex);
                     deactivate();
                     return Mono.error(ex);
                 })
@@ -287,23 +282,29 @@ public class CxnConnectionManager implements ICxnConnectionManager {
     public static void sendConnectionInformation(boolean shouldSend, @NotNull ActionNotification message, boolean force) {
 
         if (force || shouldSend) {
-            if (MinecraftClient.getInstance().player != null) {
+            if (PriceCxn.getMod().getPlayer() != null) {
 
-                MutableText msg;
+                Object msg;
                 if (message.hasTextVariables()) {
 
-                    msg = ((Text) PriceCxn.getMod().getModText()).copy()
-                            .append(Text.translatable(message.getTranslationKey(), (Object[]) message.getTextVariables()))
-                            .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()));
+                    PriceCxn.getMod().getMinecraftClient()
+                            .sendStyledTranslatableMessage(
+                                    message.getTranslationKey(),
+                                    false,
+                                    PriceCxn.getMod().getDefaultStyle(),
+                                    message.getTextVariables()
+                            );
 
                 } else {
 
-                    msg = ((Text) PriceCxn.getMod().getModText()).copy()
-                            .append(Text.translatable(message.getTranslationKey()))
-                            .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()));
+                    PriceCxn.getMod().getMinecraftClient()
+                            .sendStyledTranslatableMessage(
+                                    message.getTranslationKey(),
+                                    false,
+                                    PriceCxn.getMod().getDefaultStyle()
+                            );
 
                 }
-                MinecraftClient.getInstance().player.sendMessage(msg);
             }
         }
 

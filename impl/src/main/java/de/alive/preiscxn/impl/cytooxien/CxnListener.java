@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class CxnListener extends ServerListener implements ICxnListener {
 
@@ -47,7 +46,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
 
         //checking connection and activating mod
         connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.NONE)
-                .doOnSuccess(a -> LOGGER.info("Mod active? {}", connectionManager.isActive()))
+                .doOnSuccess(a -> PriceCxn.getMod().getLogger().info("Mod active? {}", connectionManager.isActive()))
                 .subscribe();
 
     }
@@ -56,17 +55,17 @@ public class CxnListener extends ServerListener implements ICxnListener {
         Set<Class<? extends InventoryListener>> classes = cxnListenerModuleLoader
                 .loadInterfaces(InventoryListener.class);
 
-        LOGGER.info("Found {} listeners", classes.size());
+        PriceCxn.getMod().getLogger().info("Found {} listeners", classes.size());
 
         for (Class<? extends InventoryListener> clazz : classes) {
-            LOGGER.info("Found listener: {}", clazz.getName());
+            PriceCxn.getMod().getLogger().info("Found listener: {}", clazz.getName());
             try {
                 InventoryListener inventoryListener = clazz.getConstructor(Mod.class, AtomicBoolean[].class)
                         .newInstance(PriceCxn.getMod(), new AtomicBoolean[]{this.isOnServer(), listenerActive});
 
                 init(inventoryListener);
             } catch (Exception e) {
-                LOGGER.error("Could not instantiate listener", e);
+                PriceCxn.getMod().getLogger().error("Could not instantiate listener", e);
             }
         }
     }
@@ -90,7 +89,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
 
         return connectionManager.checkConnectionAsync(ICxnConnectionManager.Refresh.THEME)
                 .flatMap(messageInformation -> {
-                    CxnConnectionManager.sendConnectionInformation(messageInformation.getLeft(), messageInformation.getRight());
+                    CxnConnectionManager.sendConnectionInformation(messageInformation.getT1(), messageInformation.getT2());
                     if (activeBackup)
                         return dataHandler.refreshData(false);
                     return Mono.empty();
@@ -104,8 +103,8 @@ public class CxnListener extends ServerListener implements ICxnListener {
                 .doOnSuccess(messageInformation ->
                         CxnConnectionManager
                                 .sendConnectionInformation(
-                                        messageInformation.getLeft(),
-                                        messageInformation.getRight(),
+                                        messageInformation.getT1(),
+                                        messageInformation.getT2(),
                                         true))
                 .then();
 
@@ -113,7 +112,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
 
     @Override
     public void onServerLeave() {
-        LOGGER.debug("Cytooxien left : {}", this.isOnServer().get());
+        PriceCxn.getMod().getLogger().debug("Cytooxien left : {}", this.isOnServer().get());
         connectionManager.deactivate();
     }
 

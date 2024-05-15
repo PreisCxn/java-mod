@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class CdnFileHandlerImpl implements CdnFileHandler {
 
@@ -95,7 +95,7 @@ public class CdnFileHandlerImpl implements CdnFileHandler {
                 .mapNotNull(s -> {
                     JsonElement jsonElement = JsonParser.parseString(s);
                     if (jsonElement.isJsonNull()) {
-                        LOGGER.error("Hash is null from url: {} and return: '{}'", BASE_URL + finalPath, s);
+                        PriceCxn.getMod().getLogger().error("Hash is null from url: {} and return: '{}'", BASE_URL + finalPath, s);
                         return null;
                     }
                     return jsonElement.getAsString();

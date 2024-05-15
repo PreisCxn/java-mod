@@ -1,4 +1,12 @@
 {
+  "preiscxn": {
+    "settings": {
+      "name": "PreisCxn",
+      "enabled": {
+        "name": "Eingeschaltet"
+      }
+    }
+  },
   "cxn_listener.mod_text": "PreisCxn",
 
   "cxn_listener.test": "Test",

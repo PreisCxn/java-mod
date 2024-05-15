@@ -1,29 +1,18 @@
 package de.alive.preiscxn.fabric.impl;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import net.minecraft.client.option.KeyBinding;
 
-import java.util.concurrent.ExecutionException;
-
 public class KeyBindingImpl implements IKeyBinding {
-    private static final Cache<KeyBinding, KeyBindingImpl> CACHE = CacheBuilder
-            .newBuilder()
-            .maximumSize(100)
-            .build();
     private final KeyBinding keyBinding;
+    private final KeybindExecutor keybindExecutor;
+    private final boolean inInventory;
 
-    public KeyBindingImpl(KeyBinding keyBinding) {
+    public KeyBindingImpl(KeyBinding keyBinding, KeybindExecutor keybindExecutor, boolean inInventory) {
         this.keyBinding = keyBinding;
-    }
-
-    public static KeyBindingImpl getInstance(KeyBinding keyBinding) {
-        try {
-            return CACHE.get(keyBinding, () -> new KeyBindingImpl(keyBinding));
-        } catch (ExecutionException e) {
-            return new KeyBindingImpl(keyBinding);
-        }
+        this.keybindExecutor = keybindExecutor;
+        this.inInventory = inInventory;
     }
 
     @Override
@@ -44,5 +33,15 @@ public class KeyBindingImpl implements IKeyBinding {
     @Override
     public boolean matchesKey(int keyCode, int scanCode) {
         return keyBinding.matchesKey(keyCode, scanCode);
+    }
+
+    @Override
+    public KeybindExecutor getKeybindExecutor() {
+        return keybindExecutor;
+    }
+
+    @Override
+    public boolean isInInventory() {
+        return inInventory;
     }
 }

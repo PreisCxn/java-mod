@@ -1,5 +1,6 @@
 package de.alive.preiscxn.inventoryscanner.keybinds;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class ScanInventoryKeybind implements KeybindExecutor {
     @Override
@@ -32,7 +33,7 @@ public class ScanInventoryKeybind implements KeybindExecutor {
     }
 
     private void scanInventory(IInventory inventory, IItemStack itemStack) {
-        LOGGER.info("Scanning inventory");
+        PriceCxn.getMod().getLogger().info("Scanning inventory");
 
         String template = getTemplate();
 
@@ -92,7 +93,7 @@ public class ScanInventoryKeybind implements KeybindExecutor {
 
             Files.write(path, template.getBytes());
         } catch (IOException e) {
-            LOGGER.error("Failed to write file", e);
+            PriceCxn.getMod().getLogger().error("Failed to write file", e);
         }
 
     }

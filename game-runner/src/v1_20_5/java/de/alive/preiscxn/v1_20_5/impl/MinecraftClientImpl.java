@@ -6,6 +6,7 @@ import de.alive.preiscxn.core.impl.LabyMinecraftClient;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.network.chat.Component;
 
 @Implements(LabyMinecraftClient.class)
 public final class MinecraftClientImpl implements LabyMinecraftClient {
@@ -57,5 +58,34 @@ public final class MinecraftClientImpl implements LabyMinecraftClient {
 
     public IInventory getInventory() {
         return minecraftClient.player != null ? new InventoryImpl().setMinecraftClient(minecraftClient) : null;
+    }
+
+    @Override
+    public boolean isCurrentServerEntryNull() {
+        return minecraftClient.getCurrentServer() == null;
+    }
+
+    @Override
+    public String getCurrentServerAddress() {
+        return minecraftClient.getCurrentServer() == null ? "" : minecraftClient.getCurrentServer().ip;
+    }
+
+    @Override
+    public void sendTranslatableMessage(String translatable, boolean overlay, boolean italic, String... args) {
+        if (minecraftClient.player == null)
+            return;
+
+        Component[] components = new Component[args.length];
+        for (int i = 0; i < args.length; i++) {
+            components[i] = Component.literal(args[i]);
+        }
+        Component text = Component.translatable(translatable, (Object[]) components);
+        if(italic)
+            text = text.copy().withStyle(style -> style.withItalic(true));
+
+        minecraftClient.player.displayClientMessage(
+                text,
+                overlay
+        );
     }
 }

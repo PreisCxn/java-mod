@@ -2,6 +2,7 @@ package de.alive.preiscxn.impl.cytooxien;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
 import de.alive.preiscxn.api.utils.TimeUtil;
@@ -19,7 +20,7 @@ public class StorageItemStack {
     private static final int REFRESH_AFTER_SECONDS = 10;
     private long lastUpdate = 0;
     private boolean setup = false;
-    private final PriceText priceText = PriceText.create(true);
+    private final PriceText<?> priceText = PriceCxn.getMod().createPriceText(true);
     private Type type;
     private IWebSocketConnector connector;
 
@@ -57,12 +58,12 @@ public class StorageItemStack {
         }
 
         return searchCompletion.then().doOnSuccess(v -> type.getPrice(storageSearchResult).ifPresentOrElse(price -> {
-            priceText.withPriceAdder(price);
-            priceText.finishSearching();
+            priceText.withPriceAdder(price)
+                    .finishSearching();
 
         }, () -> {
-            priceText.withPriceAdder(0);
-            priceText.setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
+            priceText.withPriceAdder(0)
+                    .setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
         }));
     }
 

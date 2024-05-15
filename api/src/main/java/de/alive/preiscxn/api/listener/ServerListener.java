@@ -1,7 +1,7 @@
 package de.alive.preiscxn.api.listener;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.utils.StringUtil;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
@@ -32,12 +32,11 @@ public abstract class ServerListener {
     }
 
     private void init() {
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (client == null) return;
-            if (client.getCurrentServerEntry() == null) return;
+        PriceCxn.getMod().runOnJoin(client -> {
+            if (client.isCurrentServerEntryNull()) return;
             if (onServer.get()) return;
 
-            String lowerCasedAddress = client.getCurrentServerEntry().address.toLowerCase();
+            String lowerCasedAddress = client.getCurrentServerAddress().toLowerCase();
             Flux.fromIterable(ips)
                     .filter(lowerCasedAddress::contains)
                     .filter(ip -> ignoredIps.stream().noneMatch(lowerCasedAddress::contains))
@@ -47,7 +46,7 @@ public abstract class ServerListener {
                     .subscribe();
 
         });
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+        PriceCxn.getMod().runOnDisconnect(client -> {
             boolean doMethod = this.onServer.get();
             this.onServer.set(false);
             if (doMethod) this.onServerLeave();

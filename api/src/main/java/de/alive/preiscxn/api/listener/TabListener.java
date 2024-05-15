@@ -1,10 +1,8 @@
 package de.alive.preiscxn.api.listener;
 
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.interfaces.IGameHud;
 import de.alive.preiscxn.api.networking.DataAccess;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.gui.hud.PlayerListHud;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
@@ -14,8 +12,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public abstract class TabListener {
 
@@ -30,9 +26,9 @@ public abstract class TabListener {
     }
 
     private void init() {
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+        PriceCxn.getMod().runOnJoin((client) -> {
             if (client == null) return;
-            if (client.getCurrentServerEntry() == null) return;
+            if (client.isCurrentServerEntryNull()) return;
             if (!refreshAfterJoinEvent()) return;
 
             refreshAsync(this.notInValue, refreshesAfterJoinEvent)
@@ -60,21 +56,20 @@ public abstract class TabListener {
     }
 
     private @NotNull Mono<Boolean> refresh(@Nullable String notInValue) {
-        LOGGER.debug("refresh");
+        PriceCxn.getMod().getLogger().debug("refresh");
 
-        InGameHud gameHud = MinecraftClient.getInstance().inGameHud;
-        if (gameHud == null) return Mono.just(false);
+        IGameHud gameHud = PriceCxn.getMod().getGameHud();
+        if (gameHud.isGameHudNull()) return Mono.just(false);
 
-        PlayerListHud playerListHud = gameHud.getPlayerListHud();
-        if (playerListHud == null) return Mono.just(false);
+        if (gameHud.isPlayerListHudNull()) return Mono.just(false);
 
-        return Flux.fromArray(playerListHud.getClass().getDeclaredFields())
+        return Flux.fromArray(gameHud.getDeclaredPlayerListFields())
                 .doOnNext(field -> field.setAccessible(true))
                 .mapNotNull(field -> {
                     try {
-                        return field.get(playerListHud);
+                        return field.get(gameHud.getGameHud());
                     } catch (IllegalAccessException e) {
-                        LOGGER.error("Error while accessing field", e);
+                        PriceCxn.getMod().getLogger().error("Error while accessing field", e);
                         return null;
                     }
                 })

@@ -3,6 +3,7 @@ package de.alive.preiscxn.listener.inventory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
@@ -20,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
-import static de.alive.preiscxn.api.LogPrinter.printDebug;
-import static de.alive.preiscxn.api.LogPrinter.printTester;
 import static de.alive.preiscxn.api.utils.ItemUpdater.updateItemsAsync;
 
 public class TomNookListener extends InventoryListener {
@@ -51,7 +49,7 @@ public class TomNookListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("TomNook open");
+        PriceCxn.getMod().printDebug("TomNook open");
 
         items.clear();
         this.invBuyPrice = getBuyPriceFromInvName(client);
@@ -60,7 +58,7 @@ public class TomNookListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("TomNook close");
+        PriceCxn.getMod().printDebug("TomNook close");
 
         JsonArray array = new JsonArray();
 
@@ -74,11 +72,11 @@ public class TomNookListener extends InventoryListener {
             }
         }
 
-        LOGGER.debug("Nook: " + array.size() + " items");
-        LOGGER.debug(array.toString());
+        PriceCxn.getMod().getLogger().debug("Nook: " + array.size() + " items");
+        PriceCxn.getMod().getLogger().debug(array.toString());
 
         if (!array.isEmpty())
-            return sendData("/tomnook", array).doOnSuccess(aVoid -> printTester("Nook data sent"));
+            return sendData("/tomnook", array).doOnSuccess(aVoid -> PriceCxn.getMod().printTester("Nook data sent"));
 
         return Mono.empty();
     }
@@ -108,7 +106,7 @@ public class TomNookListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("TomNook updated");
+        PriceCxn.getMod().printDebug("TomNook updated");
         this.invBuyPrice = getBuyPriceFromInvName(client);
         return updateItemsAsync(this.items, handler, this.itemRange, null);
     }

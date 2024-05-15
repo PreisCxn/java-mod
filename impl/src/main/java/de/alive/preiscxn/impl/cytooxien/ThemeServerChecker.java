@@ -7,18 +7,13 @@ import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
 import de.alive.preiscxn.api.listener.ServerListener;
 import de.alive.preiscxn.api.listener.TabListener;
 import de.alive.preiscxn.api.networking.DataAccess;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.preiscxn.api.LogPrinter.DEBUG_MODE;
-import static de.alive.preiscxn.api.LogPrinter.printDebug;
+import static de.alive.preiscxn.api.Mod.DEBUG_MODE;
 
 /**
  * This class is used to check the theme server for the current mode.
@@ -62,14 +57,16 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
         if (serverListener != null)
             voidMono = voidMono.then(serverListener.onTabChange());
 
-        printDebug("New Mode: " + this.mode);
+        PriceCxn.getMod().printDebug("New Mode: " + this.mode);
 
-        if (DEBUG_MODE && MinecraftClient.getInstance().player != null)
-            MinecraftClient.getInstance()
-                    .player
-                    .sendMessage(
-                            Text.translatable("cxn_listener.theme_checker.changed",
-                            this.mode.toString()).setStyle(((Style) PriceCxn.getMod().getDefaultStyle())).formatted(Formatting.ITALIC), true);
+
+        if (DEBUG_MODE && !PriceCxn.getMod().getMinecraftClient().isPlayerNull())
+            PriceCxn.getMod().getMinecraftClient()
+                    .sendTranslatableMessage(
+                            "cxn_listener.theme_checker.changed",
+                            true,
+                            true,
+                            this.mode.toString());
 
         return voidMono;
     }

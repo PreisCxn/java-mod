@@ -14,4 +14,13 @@ public interface IMinecraftClient {
     IScreenHandler getScreenHandler();
 
     IInventory getInventory();
+
+    boolean isCurrentServerEntryNull();
+
+    String getCurrentServerAddress();
+
+    void sendTranslatableMessage(String translatable, boolean overlay, boolean italic, String... args);
+    void sendStyledTranslatableMessage(String translatable, boolean overlay, Object style, String... args);
+
+    String getLanguage();
 }

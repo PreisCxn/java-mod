@@ -2,6 +2,7 @@ package de.alive.preiscxn.impl.networking.sockets;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
 import de.alive.preiscxn.api.networking.sockets.SocketMessageListener;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class WebSocketCompletion {
     public static final String QUERY_STRING = "pcxn?";
@@ -50,7 +51,7 @@ public class WebSocketCompletion {
         this.connector.addMessageListener(listener);
         String queryString = QUERY_STRING + query + (data == null || data.length < 1 ? "" : "&" + Arrays.toString(data).replace(" ", ""));
 
-        LOGGER.debug(queryString);
+        PriceCxn.getMod().getLogger().debug(queryString);
         connector.sendMessage(queryString);
 
         timeoutExecutor.schedule(() -> {

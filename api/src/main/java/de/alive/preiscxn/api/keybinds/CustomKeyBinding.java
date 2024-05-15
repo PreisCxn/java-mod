@@ -1,14 +1,7 @@
 package de.alive.preiscxn.api.keybinds;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-
 @SuppressWarnings("unused")
-public class CustomKeyBinding {
-    /**
-     * Printable keys.
-     */
+public interface CustomKeyBinding {
     public static final int
             GLFW_KEY_SPACE = 32,
             GLFW_KEY_APOSTROPHE = 39,
@@ -60,34 +53,11 @@ public class CustomKeyBinding {
             GLFW_KEY_GRAVE_ACCENT = 96,
             GLFW_KEY_WORLD_1 = 161,
             GLFW_KEY_WORLD_2 = 162;
-    private final String translationKey;
-    private final int code;
-    private final String category;
 
-    public CustomKeyBinding(String translationKey, int code, String category) {
-        this.translationKey = translationKey;
-        this.code = code;
-        this.category = category;
-    }
+    int code();
+    String category();
+    String translationKey();
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getTranslationKey() {
-        return translationKey;
-    }
-
-    public KeyBinding getKeybinding() {
-        return new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category);
-    }
-
-    public KeyBinding registerKeybinding() {
-        return KeyBindingHelper.registerKeyBinding(getKeybinding());
-    }
-
+    Object getKeybinding();
+    Object registerKeybinding();
 }

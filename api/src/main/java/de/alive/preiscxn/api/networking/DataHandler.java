@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class DataHandler {
 
@@ -78,15 +78,15 @@ public class DataHandler {
      * @return A CompletableFuture which returns null if the refresh was successful
      */
     public @NotNull Mono<Void> refresh(boolean isForced) {
-        LOGGER.debug("refreshData 1");
+        PriceCxn.getMod().getLogger().debug("refreshData 1");
 
         // If the data is already up-to-date and the refresh is not forced, we can return the CompletableFuture
         if (!isForced && (lastUpdate == 0 || System.currentTimeMillis() - this.lastUpdate < this.refreshInterval)) {
-            LOGGER.debug("Data is already up-to-date");
+            PriceCxn.getMod().getLogger().debug("Data is already up-to-date");
             return Mono.empty();
         }
 
-        LOGGER.debug("refreshData 2");
+        PriceCxn.getMod().getLogger().debug("refreshData 2");
 
         // Check the server connection asynchronously
         return this.serverChecker.isConnected()
@@ -97,7 +97,7 @@ public class DataHandler {
                     this.data = data;
                     this.lastUpdate = System.currentTimeMillis();
                 })
-                .doOnError(ex -> LOGGER.error("Failed to refresh data", ex))
+                .doOnError(ex -> PriceCxn.getMod().getLogger().error("Failed to refresh data", ex))
                 .then();
     }
 

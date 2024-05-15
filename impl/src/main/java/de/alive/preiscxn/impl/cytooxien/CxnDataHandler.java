@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class CxnDataHandler implements ICxnDataHandler {
 
@@ -38,7 +38,7 @@ public class CxnDataHandler implements ICxnDataHandler {
 
     @Override
     public @NotNull Mono<Void> initData() {
-        LOGGER.debug("initData");
+        PriceCxn.getMod().getLogger().debug("initData");
 
         if (!this.data.containsKey("pricecxn.data.mod_users")) {
             data.put("pricecxn.data.mod_users", new DataHandler(serverChecker, "/datahandler/mod_users", DataHandler.MODUSER_REFRESH_INTERVAL));
@@ -126,7 +126,7 @@ public class CxnDataHandler implements ICxnDataHandler {
 
             return stringList;
         } catch (Exception e) {
-            LOGGER.error("Error while getting mod users", e);
+            PriceCxn.getMod().getLogger().error("Error while getting mod users", e);
             return null;
         }
     }
@@ -144,12 +144,12 @@ public class CxnDataHandler implements ICxnDataHandler {
                     DataAccess[] values = (DataAccess[]) aClass.getMethod("values").invoke(null);
                     dataList.addAll(Arrays.asList(values));
                 } catch (Exception e) {
-                    LOGGER.error("Error while loading enum values", e);
+                    PriceCxn.getMod().getLogger().error("Error while loading enum values", e);
                     return;
                 }
             }
         }
-        LOGGER.info("Loaded {} DataAccess", dataList.size());
+        PriceCxn.getMod().getLogger().info("Loaded {} DataAccess", dataList.size());
 
         data.put("cxnprice.translation",
                 new DataHandler(serverChecker,

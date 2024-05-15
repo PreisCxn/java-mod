@@ -1,5 +1,6 @@
 package de.alive.preiscxn.impl.networking.sockets;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
 import de.alive.preiscxn.api.networking.sockets.SocketCloseListener;
 import de.alive.preiscxn.api.networking.sockets.SocketMessageListener;
@@ -26,7 +27,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 @ClientEndpoint
 public class WebSocketConnector implements IWebSocketConnector {
@@ -61,7 +62,7 @@ public class WebSocketConnector implements IWebSocketConnector {
                     try {
                         session.getBasicRemote().sendPing(ByteBuffer.wrap(new byte[0]));
                     } catch (IOException e) {
-                        LOGGER.error("Failed to send ping", e);
+                        PriceCxn.getMod().getLogger().error("Failed to send ping", e);
                     }
                     return null;
                 }).subscribeOn(Schedulers.boundedElastic()))
@@ -70,7 +71,7 @@ public class WebSocketConnector implements IWebSocketConnector {
 
     @OnMessage
     public void onMessage(String message) {
-        LOGGER.debug("WebSocket message: " + message);
+        PriceCxn.getMod().getLogger().debug("WebSocket message: " + message);
         synchronized (messageListeners) {
             for (SocketMessageListener listener : messageListeners) {
                 listener.onMessage(message);
@@ -92,12 +93,12 @@ public class WebSocketConnector implements IWebSocketConnector {
                 disposable.dispose();
             }
         }
-        LOGGER.debug("WebSocket connection closed");
+        PriceCxn.getMod().getLogger().debug("WebSocket connection closed");
     }
 
     @OnError
     public void onError(Throwable throwable) {
-        LOGGER.error("WebSocket error", throwable);
+        PriceCxn.getMod().getLogger().error("WebSocket error", throwable);
     }
 
     public @NotNull Mono<Session> establishWebSocketConnection() {
@@ -107,7 +108,7 @@ public class WebSocketConnector implements IWebSocketConnector {
                         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
                         return container.connectToServer(this, this.uri);
                     } catch (Exception e) {
-                        LOGGER.error("Failed to connect to WebSocket server", e);
+                        PriceCxn.getMod().getLogger().error("Failed to connect to WebSocket server", e);
                         return null;
                     }
                 }).subscribeOn(Schedulers.boundedElastic()));
@@ -117,7 +118,7 @@ public class WebSocketConnector implements IWebSocketConnector {
         try {
             session.getBasicRemote().sendText(message);
         } catch (IOException e) {
-            LOGGER.error("Failed to send message", e);
+            PriceCxn.getMod().getLogger().error("Failed to send message", e);
         }
     }
 
@@ -125,7 +126,7 @@ public class WebSocketConnector implements IWebSocketConnector {
         try {
             session.close();
         } catch (IOException e) {
-            LOGGER.error("Failed to close WebSocket", e);
+            PriceCxn.getMod().getLogger().error("Failed to close WebSocket", e);
         }
     }
 

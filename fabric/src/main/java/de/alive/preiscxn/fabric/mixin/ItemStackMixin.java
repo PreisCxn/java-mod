@@ -22,7 +22,6 @@ import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,13 +31,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
@@ -73,13 +71,13 @@ public abstract class ItemStackMixin {
             && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
             return;
 
-        AtomicReference<PriceText> pcxnPriceText = new AtomicReference<>(PriceText.create());
+        AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
 
         List<String> lore = new ArrayList<>();
         list.forEach(text -> lore.add(text.getString()));
         int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
-        list.add(PriceText.space());
+        list.add((Text) PriceCxn.getMod().space());
         PriceCxnItemStack.ViewMode viewMode = PriceCxn.getMod().getViewMode();
 
         list.add(
@@ -92,9 +90,9 @@ public abstract class ItemStackMixin {
                         .append(MutableText.of(new PlainTextContent.Literal(" ---"))
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
-        LOGGER.debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
+        PriceCxn.getMod().getLogger().debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
         if (this.cxnItemStack.getPcxnPrice() != null) {
-            list.add(pcxnPriceText.get()
+            list.add((Text) pcxnPriceText.get()
                     .withPrices(this.cxnItemStack
                             .getPcxnPrice()
                             .get("lower_price")
@@ -107,7 +105,7 @@ public abstract class ItemStackMixin {
         }
 
         if (this.cxnItemStack.getNookPrice() != null) {
-            list.add(PriceText.create()
+            list.add((Text) PriceCxn.getMod().createPriceText()
                              .withIdentifierText("Tom Block:")
                              .withPrices(this.cxnItemStack.getNookPrice().get("price").getAsDouble())
                              .withPriceMultiplier(amount)
@@ -127,15 +125,15 @@ public abstract class ItemStackMixin {
                 list.add(text);
             }
 
-            list.add(PriceText.space());
+            list.add((Text) PriceCxn.getMod().space());
 
-            Optional<Pair<Long, TimeUtil.TimeUnit>> lastUpdate
+            Optional<Tuple2<Long, TimeUtil.TimeUnit>> lastUpdate
                     = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().get("timestamp").getAsString()));
 
             lastUpdate.ifPresent(s -> {
 
-                Long time = s.getLeft();
-                String unitTranslatable = s.getRight().getTranslatable(time);
+                Long time = s.getT1();
+                String unitTranslatable = s.getT2().getTranslatable(time);
 
                 list.add(Text.translatable("cxn_listener.display_prices.updated", time.toString(), Text.translatable(unitTranslatable))
                         .setStyle(((Style) PriceCxn.getMod().getDefaultStyle()).withFormatting()));

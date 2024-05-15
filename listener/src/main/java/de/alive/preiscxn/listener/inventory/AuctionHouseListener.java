@@ -2,6 +2,7 @@ package de.alive.preiscxn.listener.inventory;
 
 import com.google.gson.JsonArray;
 import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
@@ -20,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.preiscxn.api.LogPrinter.printDebug;
-import static de.alive.preiscxn.api.LogPrinter.printTester;
 import static de.alive.preiscxn.api.utils.ItemUpdater.updateItemsAsync;
 
 public class AuctionHouseListener extends InventoryListener {
@@ -54,7 +53,7 @@ public class AuctionHouseListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("AuctionHouse open");
+        PriceCxn.getMod().printDebug("AuctionHouse open");
 
         items.clear();
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
@@ -62,7 +61,7 @@ public class AuctionHouseListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("AuctionHouse close");
+        PriceCxn.getMod().printDebug("AuctionHouse close");
 
         JsonArray array = new JsonArray();
 
@@ -77,14 +76,14 @@ public class AuctionHouseListener extends InventoryListener {
                     .doOnSuccess(aVoid -> {
                         if (client.isPlayerNull())
                             return;
-                        printTester("AuctionHouse data sent: " + array.size() + " items");
+                        PriceCxn.getMod().printTester("AuctionHouse data sent: " + array.size() + " items");
                     });
         return Mono.empty();
     }
 
     @Override
     public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("AuctionHouse updated");
+        PriceCxn.getMod().printDebug("AuctionHouse updated");
         return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
     }
 

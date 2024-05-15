@@ -5,11 +5,13 @@ import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
 import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.interfaces.IGameHud;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
-import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -17,9 +19,13 @@ import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
+import de.alive.preiscxn.fabric.impl.GameHudImpl;
 import de.alive.preiscxn.fabric.impl.ItemStackImpl;
 import de.alive.preiscxn.fabric.impl.KeyBindingImpl;
+import de.alive.preiscxn.fabric.impl.LoggerImpl;
 import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
+import de.alive.preiscxn.fabric.impl.PlayerImpl;
+import de.alive.preiscxn.fabric.impl.PriceTextImpl;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
@@ -33,12 +39,19 @@ import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
@@ -50,10 +63,11 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 import static de.alive.preiscxn.fabric.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
+    public final ILogger logger = new LoggerImpl(LoggerFactory.getLogger("PriceCxn"));
+
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
     private final ModuleLoader projectLoader;
@@ -76,7 +90,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException(e);
         }
 
-        LOGGER.info("PriceCxn client created");
+        PriceCxn.getMod().getLogger().info("PriceCxn client created");
 
         this.projectLoader = new ModuleLoaderImpl();
 
@@ -97,19 +111,19 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                 Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
                 "de.alive.preiscxn.listener")
                 .doOnNext(module1 -> {
-                    LOGGER.info("Adding module: {}", module1);
+                    PriceCxn.getMod().getLogger().info("Adding module: {}", module1);
                     this.projectLoader.addModule(module1);
                     this.cxnListener.loadModules(this.projectLoader);
 
                     Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
                     classes1.forEach(aClass -> {
-                        LOGGER.info("Loading module: {}", aClass);
+                        PriceCxn.getMod().getLogger().info("Loading module: {}", aClass);
                         try {
                             aClass.getConstructor().newInstance().loadModule();
-                            LOGGER.info("Loaded module: {}", aClass);
+                            PriceCxn.getMod().getLogger().info("Loaded module: {}", aClass);
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                                  | NoSuchMethodException e) {
-                            LOGGER.error("Failed to load module: {}", aClass, e);
+                            PriceCxn.getMod().getLogger().error("Failed to load module: {}", aClass, e);
                         }
                     });
                 }).subscribe();
@@ -124,7 +138,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             useRemote = true;
         }
 
-        LOGGER.info("Registering remote module: {} ({}), local path: {}, primary package: {}, use remote: {}",
+        PriceCxn.getMod().getLogger().info("Registering remote module: {} ({}), local path: {}, primary package: {}, use remote: {}",
                 classPath, remotePath, localPath, primaryPackage, useRemote);
         return RemoteModule.create(remotePath,
                 localPath,
@@ -134,18 +148,20 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("PriceCxn client initialized");
+        PriceCxn.getMod().getLogger().info("PriceCxn client initialized");
 
-        registerKeybinding(new CustomKeyBinding(
-                "cxn_listener.keys.open_in_browser",
+        registerKeybinding(
                 GLFW.GLFW_KEY_H,
-                "cxn_listener.mod_text"
-        ), new OpenBrowserKeybindExecutor(), true);
-        registerKeybinding(new CustomKeyBinding(
-                "cxn_listener.keys.cycle_amount",
+                "cxn_listener.keys.open_in_browser",
+                "cxn_listener.mod_text",
+                new OpenBrowserKeybindExecutor(),
+                true);
+        registerKeybinding(
                 GLFW.GLFW_KEY_RIGHT_BRACKET,
-                "cxn_listener.mod_text"
-        ), new SwitchItemViewKeybindExecutor(), true);
+                "cxn_listener.keys.cycle_amount",
+                "cxn_listener.mod_text",
+                new SwitchItemViewKeybindExecutor(),
+                true);
 
     }
 
@@ -162,6 +178,56 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public Text getModText() {
         return PriceCxnMod.MOD_TEXT;
+    }
+
+    @Override
+    public void printTester(String message) {
+        if (!DEBUG_MODE && !TESTER_MODE) return;
+        if (MinecraftClient.getInstance() == null) return;
+        if (MinecraftClient.getInstance().player == null) return;
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        MutableText text = MutableText.of(new PlainTextContent.Literal(message));
+        client.player.sendMessage(text, true);
+        PriceCxn.getMod().getLogger().debug("[PCXN-TESTER] : {}", message);
+    }
+
+    @Override
+    public void printDebug(String message, boolean overlay, boolean sysOut) {
+        if (!DEBUG_MODE && !TESTER_MODE) return;
+        if (MinecraftClient.getInstance() == null) return;
+        if (MinecraftClient.getInstance().player == null) return;
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        MutableText text = MutableText.of(new PlainTextContent.Literal(message)).setStyle(Style.EMPTY.withColor(Formatting.RED).withItalic(true));
+        if (client.player != null)
+            client.player.sendMessage(text, overlay);
+        if (sysOut) PriceCxn.getMod().getLogger().debug("[PCXN-DEBUG] : {}", message);
+    }
+
+    @Override
+    public void printDebug(String message, boolean overlay) {
+        printDebug(message, overlay, false);
+    }
+
+    @Override
+    public void printDebug(String message) {
+        printDebug(message, true, false);
+    }
+
+    @Override
+    public PriceText<?> createPriceText() {
+        return new PriceTextImpl(false);
+    }
+
+    @Override
+    public PriceText<?> createPriceText(boolean b) {
+        return new PriceTextImpl(b);
+    }
+
+    @Override
+    public PriceText<?> space() {
+        return new PriceTextImpl(false).withIdentifierText(" ");
     }
 
     @Override
@@ -189,17 +255,30 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IPlayer getPlayer() {
-        return () -> {
-            if (MinecraftClient.getInstance().player != null) {
-                return MinecraftClient.getInstance().player.getName().getString();
-            }
-            return "";
-        };
+        return new PlayerImpl();
     }
 
     @Override
     public void runOnEndClientTick(Consumer<IMinecraftClient> consumer) {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client != null) {
+                consumer.accept(MinecraftClientImpl.getInstance(client));
+            }
+        });
+    }
+
+    @Override
+    public void runOnJoin(Consumer<IMinecraftClient> consumer) {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            if (client != null) {
+                consumer.accept(MinecraftClientImpl.getInstance(client));
+            }
+        });
+    }
+
+    @Override
+    public void runOnDisconnect(Consumer<IMinecraftClient> consumer) {
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             if (client != null) {
                 consumer.accept(MinecraftClientImpl.getInstance(client));
             }
@@ -222,8 +301,12 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public void registerKeybinding(@NotNull CustomKeyBinding customKeyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
-        IKeyBinding keyBinding = KeyBindingImpl.getInstance(KeyBindingHelper.registerKeyBinding(customKeyBinding.getKeybinding()));
+    public void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+        IKeyBinding keyBinding = new KeyBindingImpl(
+                KeyBindingHelper.registerKeyBinding(
+                        new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category)),
+                keybindExecutor,
+                inInventory);
 
         classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
         if (inInventory)
@@ -267,6 +350,26 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public ICxnConnectionManager getConnectionManager() {
         return cxnListener.getConnectionManager();
+    }
+
+    @Override
+    public ILogger getLogger() {
+        return logger;
+    }
+
+    @Override
+    public IGameHud getGameHud() {
+        return new GameHudImpl(MinecraftClient.getInstance().inGameHud);
+    }
+
+    @Override
+    public void openUrl(String url) {
+
+    }
+
+    @Override
+    public void printChat(Object message) {
+
     }
 
 }

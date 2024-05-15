@@ -5,11 +5,13 @@ import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
 import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.interfaces.IGameHud;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
-import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -21,6 +23,7 @@ import de.alive.preiscxn.core.events.TickListener;
 import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
 import de.alive.preiscxn.core.impl.LabyPlayer;
+import de.alive.preiscxn.core.impl.LoggerImpl;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
@@ -47,8 +50,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
-
 @AddonMain
 public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements Mod {
     public static final Style DEFAULT_STYLE = Style.EMPTY.color(NamedTextColor.GRAY);
@@ -70,13 +71,16 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     private final Http http;
     private final TickListener tickListener;
     private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
+    private final ILogger logger = new LoggerImpl(logger());
 
     public PriceCxnAddon() {
-        LOGGER.info("Creating PriceCxn client");
+        this.logger().info("Creating PriceCxn client");
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
+
         try {
-            Field mod = PriceCxn.class.getDeclaredField("mod");
+            Field mod = PriceCxn.class
+                    .getDeclaredField("mod");
             mod.setAccessible(true);
             mod.set(null, this);
             mod.setAccessible(false);
@@ -84,11 +88,12 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
             throw new RuntimeException(e);
         }
 
-        LOGGER.info("PriceCxn client created");
+        PriceCxn.getMod().getLogger().info("PriceCxn client created");
 
         this.projectLoader = new ModuleLoaderImpl();
 
         this.projectLoader.addModule(new MainModule());
+        this.tickListener = new TickListener(this::getMinecraftClient);
 
         try {
             cxnListener = new CxnListener();
@@ -99,27 +104,25 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api"));
         this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory"));
 
-        this.tickListener = new TickListener(this.getMinecraftClient());
-
         registerRemoteModule(
                 "de.alive.inventory.listener.AuctionHouseListener",
                 "Listener.jar",
                 Path.of("./downloads/" + "MOD_NAME" + "_modules/cxn.listener.jar"),
                 "de.alive.inventory")
                 .doOnNext(module1 -> {
-                    LOGGER.info("Adding module: {}", module1);
+                    PriceCxn.getMod().getLogger().info("Adding module: {}", module1);
                     this.projectLoader.addModule(module1);
                     this.cxnListener.loadModules(this.projectLoader);
 
                     Set<Class<? extends PriceCxnModule>> classes1 = this.projectLoader.loadInterfaces(PriceCxnModule.class);
                     classes1.forEach(aClass -> {
-                        LOGGER.info("Loading module: {}", aClass);
+                        PriceCxn.getMod().getLogger().info("Loading module: {}", aClass);
                         try {
                             aClass.getConstructor().newInstance().loadModule();
-                            LOGGER.info("Loaded module: {}", aClass);
+                            PriceCxn.getMod().getLogger().info("Loaded module: {}", aClass);
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
                                  | NoSuchMethodException e) {
-                            LOGGER.error("Failed to load module: {}", aClass, e);
+                            PriceCxn.getMod().getLogger().error("Failed to load module: {}", aClass, e);
                         }
                     });
                 }).subscribe();
@@ -134,7 +137,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
             useRemote = true;
         }
 
-        LOGGER.info("Registering remote module: {} ({}), local path: {}, primary package: {}, use remote: {}",
+        PriceCxn.getMod().getLogger().info("Registering remote module: {} ({}), local path: {}, primary package: {}, use remote: {}",
                 classPath, remotePath, localPath, primaryPackage, useRemote);
         return RemoteModule.create(remotePath,
                 localPath,
@@ -156,7 +159,6 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         return PriceCxnConfiguration.class;
     }
 
-
     @Override
     public String getVersion() {
         return PriceCxn.getMod().getVersion();
@@ -170,6 +172,53 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public Component getModText() {
         return MOD_TEXT;
+    }
+
+    @Override
+    public void printTester(String message) {
+        if (!DEBUG_MODE && !TESTER_MODE) return;
+
+        if (labyAPI().minecraft() == null) return;
+
+        if (labyAPI().minecraft().chatExecutor() != null)
+            labyAPI().minecraft().chatExecutor().insertText(message, true);
+
+        PriceCxn.getMod().getLogger().debug("[PCXN-TESTER] : {}", message);
+    }
+
+    @Override
+    public void printDebug(String message, boolean overlay, boolean sysOut) {
+        if (!DEBUG_MODE && !TESTER_MODE) return;
+        if (labyAPI().minecraft() == null) return;
+        if (labyAPI().minecraft().getClientPlayer() == null) return;
+
+        labyAPI().minecraft().chatExecutor().insertText(message, true);
+        if (sysOut) PriceCxn.getMod().getLogger().debug("[PCXN-DEBUG] : {}", message);
+    }
+
+    @Override
+    public void printDebug(String message, boolean overlay) {
+        printDebug(message, overlay, false);
+    }
+
+    @Override
+    public void printDebug(String message) {
+        printDebug(message, true, false);
+    }
+
+    @Override
+    public PriceText<?> createPriceText() {
+        return null;
+    }
+
+    @Override
+    public PriceText<?> createPriceText(boolean b) {
+        return null;
+    }
+
+    @Override
+    public PriceText<?> space() {
+        return null;
     }
 
     @Override
@@ -202,7 +251,17 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public void runOnEndClientTick(Consumer<IMinecraftClient> consumer) {
-        this.tickListener.add(consumer);
+        this.tickListener.addTickConsumer(consumer);
+    }
+
+    @Override
+    public void runOnJoin(Consumer<IMinecraftClient> consumer) {
+        this.tickListener.addJoinConsumer(consumer);
+    }
+
+    @Override
+    public void runOnDisconnect(Consumer<IMinecraftClient> consumer) {
+        this.tickListener.addDisconnectConsumer(consumer);
     }
 
     @Override
@@ -221,15 +280,15 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     }
 
     @Override
-    public void registerKeybinding(@NotNull CustomKeyBinding customKeyBinding, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+    public void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
         IKeyBinding keyBinding = getLabyEntrypoint()
-                .createKeyBinding(customKeyBinding);
+                .createKeyBinding(code, translationKey, category, keybindExecutor, inInventory);
 
         classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
-        if (inInventory)
+        if (keyBinding.isInInventory())
             keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
 
-        tickListener.add(client -> {
+        tickListener.addTickConsumer(client -> {
             if (keyBinding.wasPressed() && !client.isPlayerNull()) {
 
                 keybindExecutor.onKeybindPressed(
@@ -268,6 +327,26 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public ICxnConnectionManager getConnectionManager() {
         return cxnListener.getConnectionManager();
+    }
+
+    @Override
+    public ILogger getLogger() {
+        return this.logger;
+    }
+
+    @Override
+    public IGameHud getGameHud() {
+        return getLabyEntrypoint().createGameHub();
+    }
+
+    @Override
+    public void openUrl(String url) {
+
+    }
+
+    @Override
+    public void printChat(Object message) {
+
     }
 
     private LabyEntrypoint getLabyEntrypoint() {

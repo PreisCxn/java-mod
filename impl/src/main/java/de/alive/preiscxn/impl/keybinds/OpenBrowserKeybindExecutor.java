@@ -6,7 +6,6 @@ import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -31,7 +30,7 @@ public class OpenBrowserKeybindExecutor implements KeybindExecutor {
                                 null
                         );
 
-                Util.getOperatingSystem().open(URL_PREFIX + itemInfoUrl + amount);
+                PriceCxn.getMod().openUrl(URL_PREFIX + itemInfoUrl + amount);
             }
         }
 

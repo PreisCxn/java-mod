@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
@@ -20,8 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.preiscxn.api.LogPrinter.printDebug;
-import static de.alive.preiscxn.api.LogPrinter.printTester;
 import static de.alive.preiscxn.api.utils.ItemUpdater.updateItem;
 
 public class ItemShopListener extends InventoryListener {
@@ -57,7 +56,7 @@ public class ItemShopListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("ItemShop open");
+        PriceCxn.getMod().printDebug("ItemShop open");
 
         itemStack = null;
         buyItem = null;
@@ -68,7 +67,7 @@ public class ItemShopListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("ItemShop close");
+        PriceCxn.getMod().printDebug("ItemShop close");
         if (sellItem == null && buyItem == null || itemStack == null) return Mono.empty();
 
         JsonObject object = itemStack.getData();
@@ -83,12 +82,12 @@ public class ItemShopListener extends InventoryListener {
         object.add("sellPrice", sellItem.getData().get("sellPrice"));
         object.add("buyPrice", buyItem.getData().get("buyPrice"));
 
-        return sendData("/itemshop", object).doOnSuccess(aVoid -> printTester("ItemShop data sent"));
+        return sendData("/itemshop", object).doOnSuccess(aVoid -> PriceCxn.getMod().printTester("ItemShop data sent"));
     }
 
     @Override
     public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("ItemShop updated");
+        PriceCxn.getMod().printDebug("ItemShop updated");
         return updateItemStacks(handler);
     }
 

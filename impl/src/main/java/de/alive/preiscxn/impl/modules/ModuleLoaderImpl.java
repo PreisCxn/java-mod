@@ -1,5 +1,6 @@
 package de.alive.preiscxn.impl.modules;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
 
@@ -8,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class ModuleLoaderImpl implements ModuleLoader {
 
@@ -24,7 +25,7 @@ public class ModuleLoaderImpl implements ModuleLoader {
 
     @Override
     public <I> Set<Class<? extends I>> loadInterfaces(Class<I> interfaceClass) {
-        LOGGER.info("Loading interfaces for {}", interfaceClass.getName());
+        PriceCxn.getMod().getLogger().info("Loading interfaces for {}", interfaceClass.getName());
 
         Set<Class<? extends I>> set = new HashSet<>();
         for (Module module : modules) {

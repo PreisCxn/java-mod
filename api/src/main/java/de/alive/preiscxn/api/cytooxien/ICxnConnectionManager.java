@@ -1,16 +1,16 @@
 package de.alive.preiscxn.api.cytooxien;
 
-import net.minecraft.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 public interface ICxnConnectionManager {
 
     @NotNull
-    Mono<Pair<Boolean, ActionNotification>> checkConnectionAsync(ICxnConnectionManager.Refresh refresh);
+    Mono<Tuple2<Boolean, ActionNotification>> checkConnectionAsync(ICxnConnectionManager.Refresh refresh);
 
     @NotNull
-    Mono<Pair<Boolean, ActionNotification>> checkConnection(ICxnConnectionManager.Refresh refresh);
+    Mono<Tuple2<Boolean, ActionNotification>> checkConnection(ICxnConnectionManager.Refresh refresh);
 
     @NotNull
     Mono<Boolean> isMinVersion();

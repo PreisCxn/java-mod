@@ -22,8 +22,8 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.6'
     implementation 'io.projectreactor:reactor-core:3.6.5'
 
-    implementation project(path: ":api", configuration: "namedElements")
-    implementation project(path: ":impl", configuration: "namedElements")
+    implementation project(path: ":api")
+    implementation project(path: ":impl")
     implementation project(path: ":inventoryscanner")
     implementation project(path: ":listener")
 
@@ -32,8 +32,8 @@ dependencies {
     include 'org.java-websocket:Java-WebSocket:1.5.6'
     include 'io.projectreactor:reactor-core:3.6.5'
 
-    include project(path: ":impl", configuration: "namedElements")
-    include project(path: ":api", configuration: "namedElements")
+    include project(path: ":impl")
+    include project(path: ":api")
 
 
     testImplementation platform('org.junit:junit-bom:5.10.0')

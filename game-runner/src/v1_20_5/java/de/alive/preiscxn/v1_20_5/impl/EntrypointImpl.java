@@ -1,7 +1,8 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
+import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
+import de.alive.preiscxn.core.impl.LabyGameHub;
 import de.alive.preiscxn.core.impl.LabyInventory;
 import de.alive.preiscxn.core.impl.LabyKeyBinding;
 import de.alive.preiscxn.core.impl.LabyMinecraftClient;
@@ -9,6 +10,7 @@ import de.alive.preiscxn.core.impl.LabyScreenHandler;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -21,10 +23,12 @@ public class EntrypointImpl implements LabyEntrypoint {
     }
 
     @Override
-    public LabyKeyBinding createKeyBinding(CustomKeyBinding customKeyBinding) {
-        return new KeyBindingImpl().setKeyBinding(new KeyMapping(customKeyBinding.getTranslationKey(),
-                customKeyBinding.getCode(),
-                customKeyBinding.getCategory()));
+    public LabyKeyBinding createKeyBinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+        return new KeyBindingImpl().setKeyBinding(new KeyMapping(translationKey,
+                code,
+                category),
+                keybindExecutor,
+                inInventory);
     }
 
     @Override
@@ -38,5 +42,10 @@ public class EntrypointImpl implements LabyEntrypoint {
             return null;
 
         return new ScreenHandlerImpl().setScreenHandler(Minecraft.getInstance().player.containerMenu);
+    }
+
+    @Override
+    public LabyGameHub createGameHub() {
+        return new GameHubImpl().setGameHud(Minecraft.getInstance().gui);
     }
 }

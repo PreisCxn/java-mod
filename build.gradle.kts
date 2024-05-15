@@ -55,6 +55,8 @@ subprojects {
 		maven(mavenCentral(),"org.java-websocket:Java-WebSocket:1.5.6")
 		maven(mavenCentral(),"io.projectreactor:reactor-core:3.6.5")
 		maven(mavenCentral(),"com.google.guava:guava:33.2.0-jre")
+		maven(mavenCentral(),"org.jetbrains:annotations:24.1.0")
+		maven(mavenCentral(),"com.google.code.gson:gson:2.8.9")
 	}
 }
 

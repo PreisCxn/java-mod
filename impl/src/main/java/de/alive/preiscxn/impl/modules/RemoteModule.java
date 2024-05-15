@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public final class RemoteModule implements Module {
     private final String remotePath;
@@ -36,7 +36,7 @@ public final class RemoteModule implements Module {
         if (!useRemote)
             return Mono.just(new ClasspathModule(primaryPackage));
 
-        LOGGER.info("Creating remote module with remotePath: {}, jarPath: {}, primaryPackage: {}", remotePath, jarPath, primaryPackage);
+        PriceCxn.getMod().getLogger().info("Creating remote module with remotePath: {}, jarPath: {}, primaryPackage: {}", remotePath, jarPath, primaryPackage);
         RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage);
 
         return remoteModule
@@ -58,7 +58,7 @@ public final class RemoteModule implements Module {
 
         return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, null)
                 .switchIfEmpty(Mono.error(new RuntimeException("Could not download module from " + remotePath)))
-                .doOnNext(bytes -> LOGGER.info("Downloaded module from {} with length: {}", remotePath, bytes.length))
+                .doOnNext(bytes -> PriceCxn.getMod().getLogger().info("Downloaded module from {} with length: {}", remotePath, bytes.length))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(content -> {
                     try {
@@ -72,7 +72,7 @@ public final class RemoteModule implements Module {
                         throw new RuntimeException("Could not write file", e);
                     }
                 })
-                .doOnError(throwable -> LOGGER.error("Error while downloading module", throwable))
+                .doOnError(throwable -> PriceCxn.getMod().getLogger().error("Error while downloading module", throwable))
                 .then();
     }
 
@@ -85,16 +85,16 @@ public final class RemoteModule implements Module {
 
         return Mono
                 .zip(calculateFileHash(jarPath)
-                                .doOnNext(s -> LOGGER.info("Calculated hash for {}: {}...", jarPath, s.substring(0, 10))),
+                                .doOnNext(s -> PriceCxn.getMod().getLogger().info("Calculated hash for {}: {}...", jarPath, s.substring(0, 10))),
                         getUrlHash()
-                                .doOnNext(s -> LOGGER.info("Got hash from remote: {}...", s.substring(0, 10))))
+                                .doOnNext(s -> PriceCxn.getMod().getLogger().info("Got hash from remote: {}...", s.substring(0, 10))))
                 .map(tuple -> !tuple.getT1().equals(tuple.getT2()))
                 .switchIfEmpty(Mono.just(true));
     }
 
     private Mono<String> calculateFileHash(Path filePath) {
         return Mono.fromCallable(() -> {
-            LOGGER.info("Calculating hash for {}", filePath);
+            PriceCxn.getMod().getLogger().info("Calculating hash for {}", filePath);
             try {
                 MessageDigest md = MessageDigest.getInstance("SHA-256");
                 md.update(Files.readAllBytes(filePath));
@@ -129,10 +129,10 @@ public final class RemoteModule implements Module {
     @Override
     public void forEach(Consumer<Class<?>> consumer) {
         if (!isDownloaded) {
-            LOGGER.error("Module not downloaded");
+            PriceCxn.getMod().getLogger().error("Module not downloaded");
             return;
         }
-        LOGGER.info("Loading module from {}", jarPath);
+        PriceCxn.getMod().getLogger().info("Loading module from {}", jarPath);
         try (JarFile jarFile = new JarFile(jarPath.toFile());
              URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{jarPath.toUri().toURL()}, Thread.currentThread().getContextClassLoader())) {
             Enumeration<JarEntry> entries = jarFile.entries();
@@ -146,13 +146,13 @@ public final class RemoteModule implements Module {
                         try {
                             consumer.accept(urlClassLoader.loadClass(className));
                         } catch (ClassNotFoundException e) {
-                            LOGGER.error("Error while loading class {}", className);
+                            PriceCxn.getMod().getLogger().error("Error while loading class {}", className);
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Error while loading module", e);
+            PriceCxn.getMod().getLogger().error("Error while loading module", e);
         }
     }
 }

@@ -13,13 +13,13 @@ import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
 import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.StringUtil;
-import net.minecraft.client.MinecraftClient;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Unique;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
@@ -77,11 +77,11 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         data.addProperty(ITEM_NAME_KEY, itemName);
         data.addProperty(AMOUNT_KEY, amount);
         data.addProperty(DISPLAY_NAME_KEY, displayName);
-        data.addProperty(MC_CLIENT_LANG_KEY, MinecraftClient.getInstance().getLanguageManager().getLanguage());
+        data.addProperty(MC_CLIENT_LANG_KEY, PriceCxn.getMod().getMinecraftClient().getLanguage());
         if (addComment)
             data.add(COMMENT_KEY, getCustomData(item));
 
-        LOGGER.debug(itemName);
+        PriceCxn.getMod().getLogger().debug(itemName);
 
         /*
         zusätzlich suche nach den keys in searchData:
@@ -140,7 +140,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         if (jsonObject == null) return new JsonObject();
 
         if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
-            LOGGER.warn("Found no custom_data in item: " + item.getItemName());
+            PriceCxn.getMod().getLogger().warn("Found no custom_data in item: " + item.getItemName());
             return new JsonObject();
         }
         return jsonObject.getAsJsonObject("minecraft:custom_data");
@@ -290,7 +290,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     @Override
     public int getAdvancedAmount(@NotNull IServerChecker serverChecker,
-                                 @Nullable AtomicReference<PriceText> pcxnPriceText,
+                                 @Nullable AtomicReference<PriceText<?>> pcxnPriceText,
                                  @Nullable List<String> list) {
         int amount = this.getAmount();
 
@@ -389,7 +389,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     }
 
     @Unique
-    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText> pcxnPriceText) {
+    public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText<?>> pcxnPriceText) {
         if (pcxnPrice == null
                 || !pcxnPrice.has("pbv_search_key")
                 || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
@@ -410,7 +410,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         try {
             pbvAmount = Integer.parseInt(pbvSearchResult);
         } catch (NumberFormatException e) {
-            LOGGER.error("fehler beim konvertieren des pbv Daten im Item: ", e);
+            PriceCxn.getMod().getLogger().error("fehler beim konvertieren des pbv Daten im Item: ", e);
             return 1;
         }
 
@@ -430,13 +430,12 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         return 1;
     }
 
-    @Unique
     public int getTransactionAmountFactor(@Nullable List<String> list) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.currentScreen == null)
+        IMinecraftClient client = PriceCxn.getMod().getMinecraftClient();
+        if (client.isCurrentScreenNull())
             return 1;
 
-        String inventoryTitle = client.currentScreen.getTitle().getString();
+        String inventoryTitle = client.getInventory().getTitle();;
         if (inventoryTitle == null)
             return 1;
 
@@ -451,7 +450,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
                         try {
                             return Integer.parseInt(amount);
                         } catch (NumberFormatException e) {
-                            LOGGER.error("fehler beim konvertieren des transaction amount: ", e);
+                            PriceCxn.getMod().getLogger().error("fehler beim konvertieren des transaction amount: ", e);
                         }
                         break;
                     }

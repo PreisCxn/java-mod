@@ -1,5 +1,6 @@
 package de.alive.preiscxn.fabric;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.impl.Version;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.text.MutableText;
@@ -8,7 +9,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
+
 
 public class PriceCxnMod implements ModInitializer {
     // This logger is used to write text to the console and the log file.
@@ -29,7 +30,7 @@ public class PriceCxnMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("PriceCxn initialized");
+        PriceCxn.getMod().getLogger().info("PriceCxn initialized");
     }
 
 }

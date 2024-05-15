@@ -2,11 +2,14 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 
 import java.util.concurrent.ExecutionException;
 
@@ -66,5 +69,48 @@ public final class MinecraftClientImpl implements IMinecraftClient {
 
     public IInventory getInventory() {
         return minecraftClient.player != null ? InventoryImpl.getInstance(minecraftClient) : null;
+    }
+
+    @Override
+    public boolean isCurrentServerEntryNull() {
+        return minecraftClient.getCurrentServerEntry() == null;
+    }
+
+    @Override
+    public String getCurrentServerAddress() {
+        return minecraftClient.getCurrentServerEntry() == null ? "" : minecraftClient.getCurrentServerEntry().address;
+    }
+
+    @Override
+    public void sendTranslatableMessage(String translatable, boolean overlay, boolean italic, String... args) {
+        if (minecraftClient.player == null)
+            return;
+        Text text = Text.translatable(translatable, (Object[]) args);
+        if(italic)
+            text = text.copy().styled(style -> style.withItalic(true));
+
+        minecraftClient.player.sendMessage(
+                text,
+                overlay
+        );
+    }
+
+    @Override
+    public void sendStyledTranslatableMessage(String translatable, boolean overlay, Object style, String... args) {
+        if (minecraftClient.player == null)
+            return;
+
+        minecraftClient.player.sendMessage(
+                ((Text)PriceCxn.getMod().getModText()).copy()
+                        .append(Text.translatable(translatable, (Object[]) args))
+                        .setStyle(((Style) style)),
+                overlay
+        );
+
+    }
+
+    @Override
+    public String getLanguage() {
+        return "";
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
@@ -24,10 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static de.alive.preiscxn.api.LogPrinter.LOGGER;
-import static de.alive.preiscxn.api.LogPrinter.printDebug;
-import static de.alive.preiscxn.api.LogPrinter.printTester;
 
 public class TradeListener extends InventoryListener {
     private static final int INVENTORY_HEIGHT = 4;
@@ -58,7 +55,7 @@ public class TradeListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("Trade open");
+        PriceCxn.getMod().printDebug("Trade open");
 
         return Flux.concat(
                 Flux.fromIterable(selfInventory)
@@ -73,7 +70,7 @@ public class TradeListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("Trade close");
+        PriceCxn.getMod().printDebug("Trade close");
 
         JsonObject array = new JsonObject();
         array.add("self", TradeStackRow.getData(selfInventory));
@@ -86,7 +83,7 @@ public class TradeListener extends InventoryListener {
                 selfControls.getData(),
                 traderControls.getData());
 
-        printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
+        PriceCxn.getMod().printTester(result.isPresent() ? result.get().toString() : "Failed to get result");
 
         return result.map(jsonElement -> sendData("/trade", jsonElement)).orElse(Mono.empty());
 
@@ -94,7 +91,7 @@ public class TradeListener extends InventoryListener {
 
     @Override
     public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
-        printDebug("Trade updated");
+        PriceCxn.getMod().printDebug("Trade updated");
         return Flux.concat(
                 Flux.fromIterable(selfInventory)
                         .concatMap(row -> row.updateAsync(handler, null, true)),
@@ -140,7 +137,7 @@ public class TradeListener extends InventoryListener {
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
         price.ifPresent(s -> result.addProperty("buyPrice", s));
 
-        LOGGER.debug(result.toString());
+        PriceCxn.getMod().getLogger().debug(result.toString());
 
         return Optional.of(result);
     }

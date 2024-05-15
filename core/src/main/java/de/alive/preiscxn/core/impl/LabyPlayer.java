@@ -18,4 +18,10 @@ public class LabyPlayer implements IPlayer {
         }
         return clientPlayer.getName();
     }
+
+    @Override
+    public String getUUIDasString() {
+        ClientPlayer clientPlayer = minecraftClient.getClientPlayer();
+        return clientPlayer == null ? "" : clientPlayer.getUniqueId().toString();
+    }
 }
