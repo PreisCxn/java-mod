@@ -1,6 +1,6 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import de.alive.api.keybinds.CustomKeyBinding;
+import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
 import de.alive.preiscxn.core.impl.LabyInventory;
 import de.alive.preiscxn.core.impl.LabyKeyBinding;

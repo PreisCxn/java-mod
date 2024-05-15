@@ -1,7 +1,7 @@
 package de.alive.preiscxn.fabric.mixin;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.ICxnListener;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;

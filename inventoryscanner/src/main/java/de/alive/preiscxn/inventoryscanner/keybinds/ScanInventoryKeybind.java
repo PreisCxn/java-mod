@@ -1,9 +1,9 @@
 package de.alive.preiscxn.inventoryscanner.keybinds;
 
-import de.alive.api.interfaces.IInventory;
-import de.alive.api.interfaces.IItemStack;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.preiscxn.api.interfaces.IInventory;
+import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class ScanInventoryKeybind implements KeybindExecutor {
     @Override

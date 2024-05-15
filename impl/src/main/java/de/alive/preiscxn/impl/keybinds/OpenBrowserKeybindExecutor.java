@@ -1,11 +1,11 @@
 package de.alive.preiscxn.impl.keybinds;
 
 import com.google.gson.JsonObject;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.interfaces.IItemStack;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.keybinds.KeybindExecutor;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,6 +1,6 @@
 package de.alive.preiscxn.fabric.mixin;
 
-import de.alive.api.PriceCxn;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.fabric.impl.ItemStackImpl;
 import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
 import net.minecraft.client.MinecraftClient;

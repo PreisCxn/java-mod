@@ -1,6 +1,6 @@
 package de.alive.preiscxn.core.impl;
 
-import de.alive.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.IPlayer;
 import net.labymod.api.client.Minecraft;
 import net.labymod.api.client.entity.player.ClientPlayer;
 

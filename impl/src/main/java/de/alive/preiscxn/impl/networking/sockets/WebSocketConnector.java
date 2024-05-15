@@ -1,9 +1,9 @@
 package de.alive.preiscxn.impl.networking.sockets;
 
-import de.alive.api.networking.sockets.IWebSocketConnector;
-import de.alive.api.networking.sockets.SocketCloseListener;
-import de.alive.api.networking.sockets.SocketMessageListener;
-import de.alive.api.networking.sockets.SocketOpenListener;
+import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
+import de.alive.preiscxn.api.networking.sockets.SocketCloseListener;
+import de.alive.preiscxn.api.networking.sockets.SocketMessageListener;
+import de.alive.preiscxn.api.networking.sockets.SocketOpenListener;
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.OnClose;
@@ -26,7 +26,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 @ClientEndpoint
 public class WebSocketConnector implements IWebSocketConnector {

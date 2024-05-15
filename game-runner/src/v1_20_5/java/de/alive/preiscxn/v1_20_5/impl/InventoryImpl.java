@@ -1,9 +1,9 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import de.alive.api.interfaces.IItemStack;
-import net.minecraft.client.Minecraft;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.core.impl.LabyInventory;
 import net.labymod.api.models.Implements;
+import net.minecraft.client.Minecraft;
 
 @Implements(LabyInventory.class)
 public final class InventoryImpl implements LabyInventory {

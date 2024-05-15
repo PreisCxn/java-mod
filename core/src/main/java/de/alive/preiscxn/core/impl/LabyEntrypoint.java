@@ -1,6 +1,6 @@
 package de.alive.preiscxn.core.impl;
 
-import de.alive.api.keybinds.CustomKeyBinding;
+import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
 import net.labymod.api.reference.annotation.Referenceable;
 
 @Referenceable

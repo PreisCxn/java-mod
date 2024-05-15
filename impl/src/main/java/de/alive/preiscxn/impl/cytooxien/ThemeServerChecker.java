@@ -1,12 +1,12 @@
 package de.alive.preiscxn.impl.cytooxien;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.cytooxien.Modes;
-import de.alive.api.cytooxien.TranslationDataAccess;
-import de.alive.api.listener.ServerListener;
-import de.alive.api.listener.TabListener;
-import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.Modes;
+import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.listener.ServerListener;
+import de.alive.preiscxn.api.listener.TabListener;
+import de.alive.preiscxn.api.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -17,8 +17,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.DEBUG_MODE;
-import static de.alive.api.LogPrinter.printDebug;
+import static de.alive.preiscxn.api.LogPrinter.DEBUG_MODE;
+import static de.alive.preiscxn.api.LogPrinter.printDebug;
 
 /**
  * This class is used to check the theme server for the current mode.

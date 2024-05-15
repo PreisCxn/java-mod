@@ -1,8 +1,7 @@
 package de.alive.preiscxn.impl.networking.cdn;
 
-import de.alive.api.networking.cdn.CdnFileHandler;
+import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.impl.networking.HttpImpl;
-import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

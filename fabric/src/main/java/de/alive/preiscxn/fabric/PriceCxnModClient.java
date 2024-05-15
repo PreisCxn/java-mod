@@ -1,27 +1,27 @@
 package de.alive.preiscxn.fabric;
 
-import de.alive.api.Mod;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.ICxnConnectionManager;
-import de.alive.api.cytooxien.ICxnListener;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.interfaces.IItemStack;
-import de.alive.api.interfaces.IKeyBinding;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.interfaces.IPlayer;
-import de.alive.api.keybinds.CustomKeyBinding;
-import de.alive.api.keybinds.KeybindExecutor;
-import de.alive.api.module.Module;
-import de.alive.api.module.ModuleLoader;
-import de.alive.api.module.PriceCxnModule;
-import de.alive.api.networking.DataAccess;
-import de.alive.api.networking.Http;
-import de.alive.api.networking.cdn.CdnFileHandler;
-import de.alive.preiscxn.impl.cytooxien.CxnListener;
-import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
+import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
+import de.alive.preiscxn.api.cytooxien.ICxnListener;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
+import de.alive.preiscxn.api.keybinds.KeybindExecutor;
+import de.alive.preiscxn.api.module.Module;
+import de.alive.preiscxn.api.module.ModuleLoader;
+import de.alive.preiscxn.api.module.PriceCxnModule;
+import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.Http;
+import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.fabric.impl.ItemStackImpl;
 import de.alive.preiscxn.fabric.impl.KeyBindingImpl;
 import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
+import de.alive.preiscxn.impl.cytooxien.CxnListener;
+import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import de.alive.preiscxn.impl.keybinds.SwitchItemViewKeybindExecutor;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 import static de.alive.preiscxn.fabric.PriceCxnMod.MOD_NAME;
 
 public class PriceCxnModClient implements ClientModInitializer, Mod {
@@ -88,14 +88,14 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException(e);
         }
 
-        this.projectLoader.addModule(new ClasspathModule("de.alive.api"));
-        this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory"));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.pricecxn.api"));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.inventoryscanner"));
 
         registerRemoteModule(
-                "de.alive.inventory.listener.AuctionHouseListener",
+                "de.alive.preiscxn.listener.inventory.AuctionHouseListener",
                 "Listener.jar",
                 Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
-                "de.alive.inventory")
+                "de.alive.preiscxn.listener")
                 .doOnNext(module1 -> {
                     LOGGER.info("Adding module: {}", module1);
                     this.projectLoader.addModule(module1);

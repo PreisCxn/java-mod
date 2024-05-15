@@ -1,11 +1,11 @@
 package de.alive.preiscxn.inventoryscanner;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.keybinds.CustomKeyBinding;
-import de.alive.api.module.PriceCxnModule;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.keybinds.CustomKeyBinding;
+import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.inventoryscanner.keybinds.ScanInventoryKeybind;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class InventoryScanner implements PriceCxnModule {
     @Override

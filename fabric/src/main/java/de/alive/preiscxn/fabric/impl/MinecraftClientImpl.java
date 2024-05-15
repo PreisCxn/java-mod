@@ -2,9 +2,9 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import de.alive.api.interfaces.IInventory;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.interfaces.IInventory;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IScreenHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 

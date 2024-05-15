@@ -3,9 +3,9 @@ package de.alive.preiscxn.impl.networking.cdn;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import de.alive.api.PriceCxn;
-import de.alive.api.networking.Http;
-import de.alive.api.networking.cdn.CdnFileHandler;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.networking.Http;
+import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class CdnFileHandlerImpl implements CdnFileHandler {
 

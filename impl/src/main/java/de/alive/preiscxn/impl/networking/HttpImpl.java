@@ -1,7 +1,7 @@
 package de.alive.preiscxn.impl.networking;
 
 import com.google.gson.JsonObject;
-import de.alive.api.networking.Http;
+import de.alive.preiscxn.api.networking.Http;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;

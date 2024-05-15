@@ -1,7 +1,7 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import de.alive.api.interfaces.IInventory;
-import de.alive.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.interfaces.IInventory;
+import de.alive.preiscxn.api.interfaces.IScreenHandler;
 import de.alive.preiscxn.core.impl.LabyMinecraftClient;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;

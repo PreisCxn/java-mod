@@ -1,8 +1,8 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.core.impl.LabySlot;
 import net.labymod.api.models.Implements;
 import net.minecraft.world.inventory.Slot;

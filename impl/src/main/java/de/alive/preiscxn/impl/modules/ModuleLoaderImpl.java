@@ -1,14 +1,14 @@
 package de.alive.preiscxn.impl.modules;
 
-import de.alive.api.module.Module;
-import de.alive.api.module.ModuleLoader;
+import de.alive.preiscxn.api.module.Module;
+import de.alive.preiscxn.api.module.ModuleLoader;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class ModuleLoaderImpl implements ModuleLoader {
 

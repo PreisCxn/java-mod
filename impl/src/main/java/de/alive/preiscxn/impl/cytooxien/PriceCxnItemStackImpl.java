@@ -7,15 +7,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.cytooxien.PriceText;
-import de.alive.api.cytooxien.TranslationDataAccess;
-import de.alive.api.interfaces.IItemStack;
-import de.alive.api.networking.DataAccess;
-import de.alive.api.networking.IServerChecker;
-import de.alive.api.utils.StringUtil;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.IServerChecker;
+import de.alive.preiscxn.api.utils.StringUtil;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 

@@ -1,6 +1,6 @@
 package de.alive.preiscxn.impl.modules;
 
-import de.alive.api.module.Module;
+import de.alive.preiscxn.api.module.Module;
 
 import java.net.URI;
 import java.net.URL;
@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class ClasspathModule implements Module {
 

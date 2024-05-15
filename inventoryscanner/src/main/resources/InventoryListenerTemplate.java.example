@@ -1,14 +1,14 @@
 package de.alive.inventory.listener;
 
 import com.google.gson.JsonArray;
-import de.alive.api.Mod;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.cytooxien.TranslationDataAccess;
-import de.alive.api.interfaces.IMinecraftClient;
-import de.alive.api.interfaces.IScreenHandler;
-import de.alive.api.listener.InventoryListener;
-import de.alive.api.networking.DataAccess;
-import de.alive.preiscxn.inventory.InventoryDataAccess;
+import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.listener.InventoryListener;
+import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.listener.InventoryDataAccess;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.printDebug;
-import static de.alive.api.LogPrinter.printTester;
-import static de.alive.api.utils.ItemUpdater.updateItemsAsync;
+import static de.alive.preiscxn.api.LogPrinter.printDebug;
+import static de.alive.preiscxn.api.LogPrinter.printTester;
+import static de.alive.preiscxn.api.utils.ItemUpdater.updateItemsAsync;
 
 public enum {{CLASSNAME}}Listener extends InventoryListener implements DataAccess {
 {{ENUM_VALUES}};

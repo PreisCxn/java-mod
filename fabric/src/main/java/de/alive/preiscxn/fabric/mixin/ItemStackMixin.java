@@ -1,16 +1,16 @@
 package de.alive.preiscxn.fabric.mixin;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.cytooxien.Modes;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.cytooxien.PriceText;
-import de.alive.api.cytooxien.TranslationDataAccess;
-import de.alive.api.interfaces.IKeyBinding;
-import de.alive.api.networking.IServerChecker;
-import de.alive.api.utils.TimeUtil;
-import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.Modes;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.networking.IServerChecker;
+import de.alive.preiscxn.api.utils.TimeUtil;
 import de.alive.preiscxn.fabric.impl.ItemStackImpl;
+import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {

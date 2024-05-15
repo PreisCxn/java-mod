@@ -1,7 +1,7 @@
 package de.alive.preiscxn.impl.modules;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.module.Module;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.impl.Version;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public final class RemoteModule implements Module {
     private final String remotePath;

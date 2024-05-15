@@ -1,12 +1,12 @@
 package de.alive.preiscxn.impl.cytooxien;
 
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.ActionNotification;
-import de.alive.api.cytooxien.ICxnConnectionManager;
-import de.alive.api.cytooxien.ICxnDataHandler;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.networking.IServerChecker;
-import de.alive.api.networking.NetworkingState;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.ActionNotification;
+import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
+import de.alive.preiscxn.api.cytooxien.ICxnDataHandler;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.networking.IServerChecker;
+import de.alive.preiscxn.api.networking.NetworkingState;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketCompletion;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 /**
  * This class manages the connection to the server and handles the state of the connection.

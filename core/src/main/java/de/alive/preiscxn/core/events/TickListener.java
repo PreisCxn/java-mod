@@ -1,6 +1,6 @@
 package de.alive.preiscxn.core.events;
 
-import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import net.labymod.api.event.Phase;
 import net.labymod.api.event.Subscribe;
 import net.labymod.api.event.client.lifecycle.GameTickEvent;

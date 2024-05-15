@@ -2,10 +2,10 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.PriceCxnItemStack;
-import de.alive.api.interfaces.ISlot;
-import de.alive.api.networking.DataAccess;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.ISlot;
+import de.alive.preiscxn.api.networking.DataAccess;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.Nullable;
 

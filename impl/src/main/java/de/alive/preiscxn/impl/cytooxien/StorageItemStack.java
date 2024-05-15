@@ -2,9 +2,9 @@ package de.alive.preiscxn.impl.cytooxien;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import de.alive.api.cytooxien.PriceText;
-import de.alive.api.networking.sockets.IWebSocketConnector;
-import de.alive.api.utils.TimeUtil;
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
+import de.alive.preiscxn.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketCompletion;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketConnector;
 import org.jetbrains.annotations.NotNull;

@@ -2,7 +2,7 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import de.alive.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import net.minecraft.client.option.KeyBinding;
 
 import java.util.concurrent.ExecutionException;

@@ -2,14 +2,14 @@ package de.alive.preiscxn.impl.cytooxien;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.ICxnDataHandler;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.cytooxien.Modes;
-import de.alive.api.networking.DataAccess;
-import de.alive.api.networking.DataHandler;
-import de.alive.api.networking.IServerChecker;
-import de.alive.api.utils.StringUtil;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.ICxnDataHandler;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.Modes;
+import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.DataHandler;
+import de.alive.preiscxn.api.networking.IServerChecker;
+import de.alive.preiscxn.api.utils.StringUtil;
 import de.alive.preiscxn.impl.networking.sockets.WebSocketCompletion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class CxnDataHandler implements ICxnDataHandler {
 

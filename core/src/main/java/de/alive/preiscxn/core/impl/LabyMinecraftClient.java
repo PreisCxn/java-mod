@@ -1,6 +1,6 @@
 package de.alive.preiscxn.core.impl;
 
-import de.alive.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import net.labymod.api.reference.annotation.Referenceable;
 
 @Referenceable

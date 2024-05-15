@@ -2,8 +2,8 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import de.alive.api.interfaces.IInventory;
-import de.alive.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.interfaces.IInventory;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.concurrent.ExecutionException;

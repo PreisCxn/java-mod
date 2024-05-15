@@ -2,8 +2,8 @@ package de.alive.preiscxn.fabric.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import de.alive.api.interfaces.IScreenHandler;
-import de.alive.api.interfaces.ISlot;
+import de.alive.preiscxn.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.interfaces.ISlot;
 import net.minecraft.screen.ScreenHandler;
 
 import java.util.concurrent.ExecutionException;

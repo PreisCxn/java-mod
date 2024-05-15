@@ -1,16 +1,16 @@
 package de.alive.preiscxn.impl.cytooxien;
 
-import de.alive.api.Mod;
-import de.alive.api.PriceCxn;
-import de.alive.api.cytooxien.ICxnConnectionManager;
-import de.alive.api.cytooxien.ICxnDataHandler;
-import de.alive.api.cytooxien.ICxnListener;
-import de.alive.api.cytooxien.IThemeServerChecker;
-import de.alive.api.listener.InventoryListener;
-import de.alive.api.listener.ServerListener;
-import de.alive.api.module.ModuleLoader;
-import de.alive.api.networking.DataHandler;
-import de.alive.api.networking.IServerChecker;
+import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
+import de.alive.preiscxn.api.cytooxien.ICxnDataHandler;
+import de.alive.preiscxn.api.cytooxien.ICxnListener;
+import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.listener.InventoryListener;
+import de.alive.preiscxn.api.listener.ServerListener;
+import de.alive.preiscxn.api.module.ModuleLoader;
+import de.alive.preiscxn.api.networking.DataHandler;
+import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.impl.networking.ServerChecker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static de.alive.api.LogPrinter.LOGGER;
+import static de.alive.preiscxn.api.LogPrinter.LOGGER;
 
 public class CxnListener extends ServerListener implements ICxnListener {
 
