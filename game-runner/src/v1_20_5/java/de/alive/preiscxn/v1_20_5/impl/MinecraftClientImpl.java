@@ -7,6 +7,7 @@ import net.labymod.api.models.Implements;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 @Implements(LabyMinecraftClient.class)
 public final class MinecraftClientImpl implements LabyMinecraftClient {
@@ -87,5 +88,30 @@ public final class MinecraftClientImpl implements LabyMinecraftClient {
                 text,
                 overlay
         );
+    }
+
+    @Override
+    public void sendStyledTranslatableMessage(String translatable, boolean overlay, Object style, String... args) {
+        if (minecraftClient.player == null)
+            return;
+
+        Component[] components = new Component[args.length];
+        for (int i = 0; i < args.length; i++) {
+            components[i] = Component.literal(args[i]);
+        }
+        Style style2 = (Style) style;
+        Component
+                .translatable(translatable, (Object[]) components)
+                .withStyle((style2::applyTo));
+
+        minecraftClient.player.displayClientMessage(
+                Component.translatable(translatable, (Object[]) components).withStyle((style2::applyTo)),
+                overlay
+        );
+    }
+
+    @Override
+    public String getLanguage() {
+        return minecraftClient.getLanguageManager().getSelected();
     }
 }

@@ -226,8 +226,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
-    public PriceText<?> space() {
-        return new PriceTextImpl(false).withIdentifierText(" ");
+    public Object space() {
+        return Text.of(" ");
     }
 
     @Override

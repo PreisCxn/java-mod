@@ -24,6 +24,8 @@ import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
 import de.alive.preiscxn.core.impl.LabyPlayer;
 import de.alive.preiscxn.core.impl.LoggerImpl;
+import de.alive.preiscxn.core.impl.PriceTextImpl;
+import de.alive.preiscxn.impl.Version;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
@@ -161,7 +163,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public String getVersion() {
-        return PriceCxn.getMod().getVersion();
+        return Version.MOD_VERSION;
     }
 
     @Override
@@ -208,17 +210,17 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public PriceText<?> createPriceText() {
-        return null;
+        return new PriceTextImpl(false);
     }
 
     @Override
     public PriceText<?> createPriceText(boolean b) {
-        return null;
+        return new PriceTextImpl(b);
     }
 
     @Override
-    public PriceText<?> space() {
-        return null;
+    public Object space() {
+        return Component.text(" ");
     }
 
     @Override

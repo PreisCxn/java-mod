@@ -37,7 +37,7 @@ public interface Mod {
 
     PriceText<?> createPriceText();
     PriceText<?> createPriceText(boolean b);
-    PriceText<?> space();
+    Object space();
 
 
     PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
