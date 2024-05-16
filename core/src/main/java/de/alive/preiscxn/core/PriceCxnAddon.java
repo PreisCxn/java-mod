@@ -7,6 +7,7 @@ import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.interfaces.IGameHud;
+import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
@@ -21,6 +22,7 @@ import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.core.events.ItemStackTooltipListener;
+import de.alive.preiscxn.core.events.KeyListener;
 import de.alive.preiscxn.core.events.TickListener;
 import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
@@ -30,6 +32,8 @@ import de.alive.preiscxn.core.impl.PriceTextImpl;
 import de.alive.preiscxn.impl.Version;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
+import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
+import de.alive.preiscxn.impl.keybinds.SwitchItemViewKeybindExecutor;
 import de.alive.preiscxn.impl.modules.ClasspathModule;
 import de.alive.preiscxn.impl.modules.MainModule;
 import de.alive.preiscxn.impl.modules.ModuleLoaderImpl;
@@ -40,7 +44,10 @@ import net.labymod.api.addon.LabyAddon;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.Style;
+import net.labymod.api.client.gui.screen.key.Key;
+import net.labymod.api.configuration.loader.property.ConfigProperty;
 import net.labymod.api.models.addon.annotation.AddonMain;
+import net.labymod.core.configuration.labymod.main.DefaultLabyConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -57,14 +64,6 @@ import java.util.function.Consumer;
 @AddonMain
 public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements Mod {
     public static final Style DEFAULT_STYLE = Style.EMPTY.color(NamedTextColor.GRAY);
-    public static final Component MOD_TEXT = Component
-            .text(Component.empty())
-            .append(Component.text(Component.text("["))
-                    .style(Style.EMPTY.color(NamedTextColor.DARK_GRAY)))
-            .append(Component.translatable("cxn_listener.mod_text")
-                    .style(Style.EMPTY.color(NamedTextColor.GOLD)))
-            .append(Component.text(Component.text("] "))
-                    .style(Style.EMPTY.color(NamedTextColor.DARK_GRAY)));
 
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
@@ -74,8 +73,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
     private final TickListener tickListener;
-    private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
     private final ILogger logger = new LoggerImpl(logger());
+    private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
 
     public PriceCxnAddon() {
         this.logger().info("Creating PriceCxn client");
@@ -156,6 +155,19 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
         this.registerListener(tickListener);
         this.registerListener(new ItemStackTooltipListener());
+        PriceCxnConfiguration priceCxnConfiguration = this.configuration();
+        KeyListener keyListener = new KeyListener(priceCxnConfiguration);
+
+        registerKeybinding(
+                keyListener,
+                priceCxnConfiguration.getOpenInBrowser(),
+                new OpenBrowserKeybindExecutor(),
+                true);
+        registerKeybinding(
+                keyListener,
+                priceCxnConfiguration.getCycleAmount(),
+                new SwitchItemViewKeybindExecutor(),
+                true);
 
         this.logger().info("Enabled the Addon");
     }
@@ -177,7 +189,12 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public Component getModText() {
-        return MOD_TEXT;
+        return Component.text("[")
+                .color(NamedTextColor.DARK_GRAY)
+                .append(Component.translatable("cxn_listener.mod_text")
+                        .color(NamedTextColor.GOLD))
+                .append(Component.text("] ")
+                        .color(NamedTextColor.DARK_GRAY));
     }
 
     @Override
@@ -244,6 +261,11 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     }
 
     @Override
+    public IInventory createInventory() {
+        return getLabyEntrypoint().createInventory();
+    }
+
+    @Override
     public ICxnListener getCxnListener() {
         return cxnListener;
     }
@@ -283,15 +305,15 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         return http;
     }
 
-    @Override
-    public void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+    private void registerKeybinding(KeyListener keyListener, ConfigProperty<Key> keyConfigProperty, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
         IKeyBinding keyBinding = getLabyEntrypoint()
-                .createKeyBinding(code, translationKey, category, keybindExecutor, inInventory);
+                .createKeyBinding(keyConfigProperty.get().getId(), keyConfigProperty.get().getTranslationKey(), keyConfigProperty.get().getName(), keybindExecutor, inInventory);
 
         classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
         if (keyBinding.isInInventory())
             keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
 
+        keyListener.registerKeyBinding(keyBinding);
         tickListener.addTickConsumer(client -> {
             if (keyBinding.wasPressed() && !client.isPlayerNull()) {
 

@@ -15,6 +15,7 @@ import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.Style;
+import net.labymod.api.client.component.serializer.legacy.LegacyComponentSerializer;
 import net.labymod.api.client.world.item.ItemStack;
 import net.labymod.api.event.Subscribe;
 import net.labymod.api.event.client.world.ItemStackTooltipEvent;
@@ -61,7 +62,7 @@ public class ItemStackTooltipListener {
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
 
         List<String> lore = new ArrayList<>();
-        list.forEach(text -> lore.add(text.toString()));
+        list.forEach(text -> lore.add(LegacyComponentSerializer.legacySection().serialize(text)));
         int amount = itemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
         list.add((Component) PriceCxn.getMod().space());
@@ -70,7 +71,7 @@ public class ItemStackTooltipListener {
         list.add(
                 Component.text("--- ")
                         .color(NamedTextColor.DARK_GRAY)
-                        .append(((Component) PriceCxn.getMod().getModText()).copy())
+                        .append((Component) PriceCxn.getMod().getModText())
                         .append(Component.text("x" + (viewMode == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount))
                                 .color(NamedTextColor.DARK_GRAY))
                         .append(Component.text(" ---")
@@ -101,7 +102,7 @@ public class ItemStackTooltipListener {
         if (itemStack.getPcxnPrice() != null) {
 
             IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
-            if (itemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
+            if (keyBinding != null && itemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
                 Component text = Component.translatable("cxn_listener.display_prices.view_in_browser",
                                 Component.text(keyBinding.getBoundKeyLocalizedText())
                                         .copy()
@@ -161,7 +162,7 @@ public class ItemStackTooltipListener {
 
         for (Component text : list) {
             for (String datum : TranslationDataAccess.VISIT_ISLAND.getData().getData()) {
-                if (text.toString().contains(datum)) {
+                if (LegacyComponentSerializer.legacySection().serialize(text).contains(datum)) {
                     return true;
                 }
             }

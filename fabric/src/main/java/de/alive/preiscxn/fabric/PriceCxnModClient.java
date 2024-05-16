@@ -7,6 +7,7 @@ import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.interfaces.IGameHud;
+import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
@@ -21,6 +22,7 @@ import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.fabric.impl.GameHudImpl;
+import de.alive.preiscxn.fabric.impl.InventoryImpl;
 import de.alive.preiscxn.fabric.impl.ItemStackImpl;
 import de.alive.preiscxn.fabric.impl.KeyBindingImpl;
 import de.alive.preiscxn.fabric.impl.LoggerImpl;
@@ -258,6 +260,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     @Override
+    public IInventory createInventory() {
+        return InventoryImpl.getInstance(MinecraftClient.getInstance());
+    }
+
+    @Override
     public ICxnListener getCxnListener() {
         return cxnListener;
     }
@@ -309,8 +316,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         return http;
     }
 
-    @Override
-    public void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+    private void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
         IKeyBinding keyBinding = new KeyBindingImpl(
                 KeyBindingHelper.registerKeyBinding(
                         new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category)),

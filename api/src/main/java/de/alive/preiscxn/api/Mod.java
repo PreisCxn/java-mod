@@ -5,6 +5,7 @@ import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.interfaces.IGameHud;
+import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
@@ -45,6 +46,8 @@ public interface Mod {
     PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment);
     PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData);
 
+    IInventory createInventory();
+
     void runOnEndClientTick(Consumer<IMinecraftClient> consumer);
     void runOnJoin(Consumer<IMinecraftClient> consumer);
     void runOnDisconnect(Consumer<IMinecraftClient> consumer);
@@ -54,7 +57,6 @@ public interface Mod {
     CdnFileHandler getCdnFileHandler();
     IMinecraftClient getMinecraftClient();
     Http getHttp();
-    void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory);
     IKeyBinding getKeyBinding(Class<? extends KeybindExecutor> keybindExecutorClass);
     void forEachKeybindExecutor(BiConsumer<? super IKeyBinding, ? super KeybindExecutor> keyBinding);
     ModuleLoader getProjectLoader();

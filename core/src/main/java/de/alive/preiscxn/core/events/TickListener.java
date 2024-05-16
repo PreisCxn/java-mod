@@ -7,6 +7,8 @@ import net.labymod.api.event.Subscribe;
 import net.labymod.api.event.client.lifecycle.GameTickEvent;
 import net.labymod.api.event.client.network.server.ServerDisconnectEvent;
 import net.labymod.api.event.client.network.server.ServerJoinEvent;
+import net.labymod.api.event.client.network.server.ServerSwitchEvent;
+import net.labymod.api.event.client.network.server.SubServerSwitchEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,11 @@ public class TickListener {
 
     @Subscribe
     public void onJoin(ServerJoinEvent event){
+        this.joinConsumers.forEach(consumer -> consumer.accept(getClient()));
+    }
+
+    @Subscribe
+    public void onJoin(SubServerSwitchEvent event){
         this.joinConsumers.forEach(consumer -> consumer.accept(getClient()));
     }
 

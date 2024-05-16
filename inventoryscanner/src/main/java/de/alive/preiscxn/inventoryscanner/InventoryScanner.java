@@ -9,12 +9,12 @@ public class InventoryScanner implements PriceCxnModule {
     @Override
     public void loadModule() {
         PriceCxn.getMod().getLogger().info("InventoryScanner loaded");
-        PriceCxn.getMod()
+        /*PriceCxn.getMod()
                 .registerKeybinding(
                         CustomKeyBinding.GLFW_KEY_M,
                         "a",
                         "b",
                         new ScanInventoryKeybind(),
-                        true);
+                        true);*/
     }
 }
