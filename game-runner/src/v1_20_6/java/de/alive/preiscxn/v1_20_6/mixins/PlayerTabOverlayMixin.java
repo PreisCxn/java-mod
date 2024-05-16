@@ -1,6 +1,7 @@
 package de.alive.preiscxn.v1_20_6.mixins;
 
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
+import net.labymod.api.client.component.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,11 +22,11 @@ public class PlayerTabOverlayMixin implements VersionedTabGui {
     @Unique
     @Override
     public String priceCxn$getHeader() {
-        return header == null ? "" : header.getString();
+        return header == null ? "" : PlainTextComponentSerializer.plainText().serialize((net.labymod.api.client.component.Component) header);
     }
 
     @Override
     public String priceCxn$getFooter() {
-        return footer == null ? "" : footer.getString();
+        return header == null ? "" : PlainTextComponentSerializer.plainText().serialize((net.labymod.api.client.component.Component) header);
     }
 }
