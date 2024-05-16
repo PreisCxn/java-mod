@@ -1,8 +1,8 @@
-package de.alive.preiscxn.v1_20_4.mixin;
+package de.alive.preiscxn.v1_20_5.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
-import de.alive.preiscxn.v1_20_4.impl.EntrypointImpl;
-import de.alive.preiscxn.v1_20_4.impl.ItemStackImpl;
+import de.alive.preiscxn.v1_20_5.impl.EntrypointImpl;
+import de.alive.preiscxn.v1_20_5.impl.ItemStackImpl;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;

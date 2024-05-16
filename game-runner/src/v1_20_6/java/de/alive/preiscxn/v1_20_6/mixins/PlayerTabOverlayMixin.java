@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_5.mixin;
+package de.alive.preiscxn.v1_20_6.mixins;
 
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import net.minecraft.client.gui.components.PlayerTabOverlay;

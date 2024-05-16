@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_6.mixin;
+package de.alive.preiscxn.v1_20_4.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
@@ -11,12 +11,14 @@ import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.preiscxn.v1_20_6.impl.ItemStackImpl;
+import de.alive.preiscxn.v1_20_4.impl.ItemStackImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +47,7 @@ public abstract class ItemStackMixin {
     private long lastUpdate = 0;
 
     @Inject(method = "getTooltipLines", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void getToolTip(CallbackInfoReturnable<List<Component>> cir) {
+    private void getToolTip(Player context, TooltipFlag player, CallbackInfoReturnable<List<Component>> cir) {
         if (!PriceCxn.getMod().getConnectionManager().isActive()) {
             return;
         }

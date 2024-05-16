@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_5.mixin;
+package de.alive.preiscxn.v1_20_6.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
@@ -11,7 +11,7 @@ import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.preiscxn.v1_20_5.impl.ItemStackImpl;
+import de.alive.preiscxn.v1_20_6.impl.ItemStackImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
