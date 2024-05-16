@@ -3,7 +3,6 @@ package de.alive.preiscxn.fabric.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -12,13 +11,12 @@ import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.Item;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -70,9 +68,9 @@ public final class ItemStackImpl implements IItemStack {
 
     @Override
     public List<String> priceCxn$getLore() {
-        List<Text> tooltip = stack.getTooltip(Item.TooltipContext.DEFAULT,
+        List<Text> tooltip = stack.getTooltip(
                 MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.ADVANCED : TooltipContext.BASIC);
 
         List<String> lore = new ArrayList<>();
 
@@ -115,84 +113,66 @@ public final class ItemStackImpl implements IItemStack {
     }
 
     @Override
-    public JsonObject priceCxn$getComponentsAsJson() {
-        return componentMapToJson(stack.getComponents());
+    public @NotNull JsonObject priceCxn$getComponentsAsJson() {
+        NbtCompound nbt = stack.getNbt();
+        if (nbt == null) return new JsonObject();
+
+        return nbtToJson(nbt);
     }
 
-    private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
-        if(componentMap.isEmpty())
-            return new JsonObject();
-
+    private @NotNull JsonObject nbtToJson(@NotNull NbtCompound nbt) {
         JsonObject json = new JsonObject();
 
-        for (DataComponentType<?> key : componentMap.getTypes()) {
-            Object component = componentMap.get(key);
-            switch (component) {
-                case null -> {
-                }
-                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
-                case NbtComponent subComponentMap -> {
+        for (String key : nbt.getKeys()) {
+            NbtElement nbtElement = nbt.get(key);
+            if (nbtElement == null)
+                continue;
+
+            if(nbtElement instanceof NbtCompound nbtCompound){
+                json.add(key, nbtToJson(nbtCompound));
+            } else {
+                String nbtString = nbtElement.asString();
+
+                if (nbtString == null) continue;
+
+                nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+                JsonObject valueJson = null;
+
+                //test if only Delete Pattern is needed
+                try {
+                    valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e) {
+                    nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+                    //test if JsonArray
                     try {
-                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
-                        json.add(key.toString(), asJsonObject);
-                    } catch (JsonParseException e) {
-                        try {
-                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
-                            json.add(key.toString(), asJsonObject);
-                        } catch (JsonParseException e1) {
-                            json.addProperty(key.toString(), subComponentMap.toString());
-                        }
+                        JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
+                        json.add(key, array);
+                        continue;
+                    } catch (IllegalStateException ignored) {
                     }
+
+                    //test if JsonKey is missing
+                    try {
+                        valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+                    } catch (IllegalStateException e2) {
+                        //else add as normal String
+                        json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
+                    }
+
+                } catch (JsonParseException e) {
+                    //else add as normal String
+                    json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
                 }
-                default -> {
-                    Object object = object(component.toString());
-                    if (object instanceof JsonElement element)
-                        json.add(key.toString(), element);
-                    else
-                        json.addProperty(key.toString(), object.toString());
+
+                if (valueJson != null) {
+                    json.add(key, valueJson);
                 }
             }
-
         }
 
         return json;
     }
 
-    public Object object(String nbtString) {
-        if (nbtString == null)
-            return "";
-
-        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
-
-        JsonObject valueJson;
-
-        //test if only Delete Pattern is needed
-        try {
-            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-        } catch (IllegalStateException e) {
-            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-            //test if JsonArray
-            try {
-                return JsonParser.parseString(nbtString).getAsJsonArray();
-            } catch (IllegalStateException ignored) {
-                //test if JsonKey is missing
-                try {
-                    return JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e2) {
-                    //else add as normal String
-                    return nbtString;
-                }
-            }
-        } catch (JsonParseException e) {
-            //else add as normal String
-            return nbtString;
-        }
-
-        if (valueJson != null) {
-            return valueJson;
-        }
-
-        return nbtString;
-    }
 }

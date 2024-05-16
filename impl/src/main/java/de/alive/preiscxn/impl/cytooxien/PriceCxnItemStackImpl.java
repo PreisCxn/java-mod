@@ -33,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-
 public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
     private static final Cache<Tuple4<IItemStack, Map<String, DataAccess>, Boolean, Boolean>, PriceCxnItemStackImpl> CACHE
@@ -367,12 +366,15 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
                 if (searches.length > 1) {
                     String[] nbtSearches = searches[1].split("\\.");
-                    String commentSearch = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().toString();
+                    if (data.get(PriceCxnItemStackImpl.COMMENT_KEY).isJsonObject()){
+                        String commentSearch = data.get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject().toString();
 
-                    for (String s : nbtSearches) {
-                        if (!commentSearch.contains(s)) continue outer;
+                        for (String s : nbtSearches) {
+                            if (!commentSearch.contains(s)) continue outer;
+                        }
+                    }else {
+                        PriceCxn.getMod().getLogger().warn("comment is not a JsonObject: {}", data);
                     }
-
                 }
 
                 foundItems.add(i);
@@ -435,7 +437,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         if (client.isCurrentScreenNull())
             return 1;
 
-        String inventoryTitle = client.getInventory().getTitle();;
+        String inventoryTitle = client.getInventory().getTitle();
+        ;
         if (inventoryTitle == null)
             return 1;
 

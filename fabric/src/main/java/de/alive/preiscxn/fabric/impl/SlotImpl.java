@@ -48,7 +48,7 @@ public final class SlotImpl implements ISlot {
 
     @Override
     public boolean isStackNbtNull() {
-        return slot.getStack() == null || slot.getStack().getComponents() == null;
+        return slot.getStack() == null || slot.getStack().getNbt() == null;
     }
 
     @Override
@@ -58,7 +58,7 @@ public final class SlotImpl implements ISlot {
 
     @Override
     public int stackNbtHash() {
-        return slot.getStack().getComponents() == null ? 0 : slot.getStack().getComponents().hashCode();
+        return slot.getStack().getNbt() == null ? 0 : slot.getStack().getNbt().hashCode();
     }
 
     @Override
