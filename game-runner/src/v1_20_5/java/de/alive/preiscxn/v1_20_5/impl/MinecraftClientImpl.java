@@ -1,13 +1,18 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
 import de.alive.preiscxn.core.impl.LabyMinecraftClient;
 import net.labymod.api.models.Implements;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+
+import java.net.MalformedURLException;
+import java.net.URI;
 
 @Implements(LabyMinecraftClient.class)
 public final class MinecraftClientImpl implements LabyMinecraftClient {
@@ -113,5 +118,29 @@ public final class MinecraftClientImpl implements LabyMinecraftClient {
     @Override
     public String getLanguage() {
         return minecraftClient.getLanguageManager().getSelected();
+    }
+
+    @Override
+    public void sendMessage(Object message) {
+        if (minecraftClient.player == null)
+            return;
+
+        switch (message) {
+            case Component component:
+                minecraftClient.player.displayClientMessage(component, false);
+            case null:
+                break;
+            default:
+                minecraftClient.player.displayClientMessage(Component.literal(message.toString()), false);
+        }
+    }
+
+    @Override
+    public void openUrl(String url) {
+        try {
+            Util.getPlatform().openUrl(URI.create(url).toURL());
+        } catch (MalformedURLException e) {
+            PriceCxn.getMod().getLogger().error("Failed to open URL: " + url, e);
+        }
     }
 }

@@ -181,24 +181,22 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public void printTester(String message) {
+        PriceCxn.getMod().getLogger().debug("[PCXN-TESTER] : {}", message);
         if (!DEBUG_MODE && !TESTER_MODE) return;
 
         if (labyAPI().minecraft() == null) return;
 
-        if (labyAPI().minecraft().chatExecutor() != null)
-            labyAPI().minecraft().chatExecutor().displayClientMessage(message, true);
-
-        PriceCxn.getMod().getLogger().info("[PCXN-TESTER] : {}", message);
+        getMinecraftClient().sendMessage(message);
     }
 
     @Override
     public void printDebug(String message, boolean overlay, boolean sysOut) {
+        PriceCxn.getMod().getLogger().debug("[PCXN-DEBUG] : {}", message);
         if (!DEBUG_MODE && !TESTER_MODE) return;
         if (labyAPI().minecraft() == null) return;
         if (labyAPI().minecraft().getClientPlayer() == null) return;
 
-        labyAPI().minecraft().chatExecutor().displayClientMessage(message, overlay);
-        PriceCxn.getMod().getLogger().info("[PCXN-DEBUG] : {}", message);
+        getMinecraftClient().sendMessage(message);
     }
 
     @Override
@@ -351,11 +349,6 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public void openUrl(String url) {
-
-    }
-
-    @Override
-    public void printChat(Object message) {
 
     }
 

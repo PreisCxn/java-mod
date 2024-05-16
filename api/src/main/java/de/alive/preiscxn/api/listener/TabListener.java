@@ -48,6 +48,7 @@ public abstract class TabListener {
         int finalMaxRefresh = maxRefresh <= 0 ? TabListener.MAX_REFRESH : maxRefresh;
 
         return refresh(notInValue)
+                .doOnNext(aBoolean -> PriceCxn.getMod().getLogger().debug("Refreshed: " + aBoolean))
                 .filter(aBoolean -> !aBoolean)
                 .filter(aBoolean -> attempts.incrementAndGet() < finalMaxRefresh)
                 .flatMap(refresh -> Mono.delay(Duration.ofMillis(500 + attempts.get() * 50L)))
@@ -62,11 +63,14 @@ public abstract class TabListener {
 
 
         return Flux.fromIterable(List.of(gameHud.priceCxn$getHeader(), gameHud.priceCxn$getFooter()))
+                .doOnNext(value -> PriceCxn.getMod().getLogger().debug("Value: " + value))
+                .filter(value -> value != null && !value.isEmpty())
                 .flatMap(value -> Flux.fromIterable(this.searches.getData().getData())
                         .filter(value::contains)
                         .filter(search -> !(notInValue != null && value.toLowerCase().contains(notInValue.toLowerCase())))
                         .flatMap(search -> this.handleData(value).then(Mono.just(search)))
-                ).any(string -> true);
+                )
+                .any(string -> true);
     }
 
     /**

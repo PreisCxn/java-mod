@@ -378,12 +378,6 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public void openUrl(String url) {
-
+        getMinecraftClient().openUrl(url);
     }
-
-    @Override
-    public void printChat(Object message) {
-
-    }
-
 }

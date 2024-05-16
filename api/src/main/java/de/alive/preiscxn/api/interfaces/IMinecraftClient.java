@@ -23,4 +23,8 @@ public interface IMinecraftClient {
     void sendStyledTranslatableMessage(String translatable, boolean overlay, Object style, String... args);
 
     String getLanguage();
+
+    void sendMessage(Object message);
+
+    void openUrl(String url);
 }

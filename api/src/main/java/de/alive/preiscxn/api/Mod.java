@@ -67,6 +67,4 @@ public interface Mod {
     VersionedTabGui getVersionedTabGui();
 
     void openUrl(String url);
-
-    void printChat(Object message);
 }

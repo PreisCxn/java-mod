@@ -16,7 +16,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +42,9 @@ public abstract class ItemStackMixin {
     @Unique
     private long lastUpdate = 0;
 
-    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"))
-    private void getToolTip(CallbackInfoReturnable<List<Component>> cir) {
+    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"), cancellable = true)
+    private void getToolTip(Item.TooltipContext $$0, Player $$1, TooltipFlag $$2, CallbackInfoReturnable<List<Component>> cir) {
+        PriceCxn.getMod().getLogger().debug("getToolTip");
         if (!PriceCxn.getMod().getConnectionManager().isActive()) {
             return;
         }
@@ -64,7 +68,9 @@ public abstract class ItemStackMixin {
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
 
         List<String> lore = new ArrayList<>();
-        list.forEach(text -> lore.add(text.getString()));
+        for (Component component : list) {
+            lore.add(component.getString());
+        }
         int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
         list.add((Component) PriceCxn.getMod().space());
@@ -119,15 +125,17 @@ public abstract class ItemStackMixin {
             Optional<Tuple2<Long, TimeUtil.TimeUnit>> lastUpdate
                     = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().get("timestamp").getAsString()));
 
-            lastUpdate.ifPresent(s -> {
-
+            if(lastUpdate.isPresent()){
+                Tuple2<Long, TimeUtil.TimeUnit> s = lastUpdate.get();
                 Long time = s.getT1();
                 String unitTranslatable = s.getT2().getTranslatable(time);
 
                 list.add(Component.translatable("cxn_listener.display_prices.updated", time.toString(), Component.translatable(unitTranslatable))
                         .setStyle(((Style) PriceCxn.getMod().getDefaultStyle())));
-            });
+            }
         }
+
+        cir.setReturnValue(list);
     }
 
     @Unique

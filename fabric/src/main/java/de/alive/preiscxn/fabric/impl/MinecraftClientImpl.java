@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 import java.util.concurrent.ExecutionException;
 
@@ -111,6 +112,19 @@ public final class MinecraftClientImpl implements IMinecraftClient {
 
     @Override
     public String getLanguage() {
-        return "";
+        return minecraftClient.getLanguageManager().getLanguage();
+    }
+
+    @Override
+    public void sendMessage(Object message) {
+        if (minecraftClient.player == null)
+            return;
+
+        minecraftClient.player.sendMessage((Text) message, false);
+    }
+
+    @Override
+    public void openUrl(String url) {
+        Util.getOperatingSystem().open("https://www.google.com");
     }
 }
