@@ -98,8 +98,6 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
         this.projectLoader.addModule(new MainModule());
         this.tickListener = new TickListener(this::getMinecraftClient);
-        this.registerListener(tickListener);
-        this.registerListener(new ItemStackTooltipListener());
 
         try {
             cxnListener = new CxnListener();
@@ -156,7 +154,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     protected void enable() {
         this.registerSettingCategory();
 
-        this.registerListener(cxnListener);
+        this.registerListener(tickListener);
+        this.registerListener(new ItemStackTooltipListener());
 
         this.logger().info("Enabled the Addon");
     }

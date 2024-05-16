@@ -22,11 +22,11 @@ public class PlayerTabOverlayMixin implements VersionedTabGui {
     @Unique
     @Override
     public String priceCxn$getHeader() {
-        return header == null ? "" : PlainTextComponentSerializer.plainText().serialize((net.labymod.api.client.component.Component) header);
+        return header == null ? "" : header.getString();
     }
 
     @Override
     public String priceCxn$getFooter() {
-        return header == null ? "" : PlainTextComponentSerializer.plainText().serialize((net.labymod.api.client.component.Component) header);
+        return footer == null ? "" : footer.getString();
     }
 }
