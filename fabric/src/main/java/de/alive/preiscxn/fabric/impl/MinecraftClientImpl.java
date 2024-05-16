@@ -125,6 +125,6 @@ public final class MinecraftClientImpl implements IMinecraftClient {
 
     @Override
     public void openUrl(String url) {
-        Util.getOperatingSystem().open("https://www.google.com");
+        Util.getOperatingSystem().open(url);
     }
 }
