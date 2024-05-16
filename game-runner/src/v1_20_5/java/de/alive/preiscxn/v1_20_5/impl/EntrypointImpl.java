@@ -11,7 +11,6 @@ import de.alive.preiscxn.core.impl.LabyScreenHandler;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.PlayerTabOverlay;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;

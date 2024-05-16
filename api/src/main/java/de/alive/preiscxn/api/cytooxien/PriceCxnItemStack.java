@@ -44,6 +44,10 @@ public interface PriceCxnItemStack {
     @Nullable
     JsonObject findItemInfo(String dataKey);
 
+     @Nullable JsonObject getPcxnPrice();
+
+     @Nullable JsonObject getNookPrice();
+
     enum ViewMode {
         SINGLE,
         CURRENT_STACK;

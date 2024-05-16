@@ -10,20 +10,20 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface IItemStack {
-    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
-    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment);
-    PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData);
+    PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
+    PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment);
+    PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData);
 
-    List<String> getLore();
-    String getItemName();
-    String getDisplayName();
+    List<String> priceCxn$getLore();
+    String priceCxn$getItemName();
+    String priceCxn$getDisplayName();
 
-    int getCount();
+    int priceCxn$getCount();
 
-    boolean isTrimTemplate();
-    boolean isNetheriteUpgradeSmithingTemplate();
+    boolean priceCxn$isTrimTemplate();
+    boolean priceCxn$isNetheriteUpgradeSmithingTemplate();
 
-    Optional<String> getRegistryKey();
+    Optional<String> priceCxn$getRegistryKey();
 
-    JsonObject getComponentsAsJson();
+    JsonObject priceCxn$getComponentsAsJson();
 }

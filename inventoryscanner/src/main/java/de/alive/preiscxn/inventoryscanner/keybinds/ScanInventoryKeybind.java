@@ -114,7 +114,7 @@ public class ScanInventoryKeybind implements KeybindExecutor {
     private List<Tuple2<String, String>> getItemDataAccesses(String shortName, IItemStack itemStack) {
         List<Tuple2<String, String>> itemDataAccesses = new ArrayList<>();
 
-        List<String> lore = itemStack.getLore();
+        List<String> lore = itemStack.priceCxn$getLore();
         for (int i = 0; i < lore.size(); i++) {
             itemDataAccesses.add(Tuples.of(shortName.toUpperCase() + "_ITEM_LORE_" + i, lore.get(i)));
         }

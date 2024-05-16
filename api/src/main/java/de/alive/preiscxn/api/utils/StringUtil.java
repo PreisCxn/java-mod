@@ -76,7 +76,7 @@ public final class StringUtil {
     public static List<String> getToolTips(@Nullable IItemStack stack) {
         if (stack == null) return null;
 
-        return stack.getLore();
+        return stack.priceCxn$getLore();
     }
 
     public static @Nullable String extractBetweenParts(@NotNull String s, @NotNull String start, @NotNull String end) {

@@ -42,23 +42,23 @@ public final class ItemStackImpl implements LabyItemStack {
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData,
-                                             boolean addComment) {
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData,
+                                                      boolean addComment) {
         return PriceCxn.getMod().createItemStack(this, searchData, addComment);
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData) {
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData) {
         return PriceCxn.getMod().createItemStack(this, searchData);
     }
 
     @Override
-    public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
         return PriceCxn.getMod().createItemStack(this, searchData, addComment, addTooltips);
     }
 
     @Override
-    public List<String> getLore() {
+    public List<String> priceCxn$getLore() {
         List<Component> tooltip = stack.getTooltipLines(
                 Minecraft.getInstance().player,
                 Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
@@ -73,37 +73,37 @@ public final class ItemStackImpl implements LabyItemStack {
     }
 
     @Override
-    public String getItemName() {
+    public String priceCxn$getItemName() {
         return stack.getItem().getDescriptionId();
     }
 
     @Override
-    public String getDisplayName() {
+    public String priceCxn$getDisplayName() {
         return stack.getDisplayName().getString();
     }
 
     @Override
-    public int getCount() {
+    public int priceCxn$getCount() {
         return stack.getCount();
     }
 
     @Override
-    public boolean isTrimTemplate() {
+    public boolean priceCxn$isTrimTemplate() {
         return stack.is(ItemTags.TRIM_TEMPLATES);
     }
 
     @Override
-    public boolean isNetheriteUpgradeSmithingTemplate() {
+    public boolean priceCxn$isNetheriteUpgradeSmithingTemplate() {
         return stack.is(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
     }
 
     @Override
-    public Optional<String> getRegistryKey() {
+    public Optional<String> priceCxn$getRegistryKey() {
         return Optional.of(stack.getItemHolder().kind().name());
     }
 
     @Override
-    public JsonObject getComponentsAsJson() {
+    public JsonObject priceCxn$getComponentsAsJson() {
         return componentMapToJson(stack.getTag());
     }
 

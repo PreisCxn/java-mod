@@ -1,187 +1,206 @@
 package de.alive.preiscxn.v1_20_5.mixins;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import de.alive.preiscxn.api.PriceCxn;
-import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
-import de.alive.preiscxn.api.cytooxien.Modes;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
-import de.alive.preiscxn.api.cytooxien.PriceText;
-import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
-import de.alive.preiscxn.api.interfaces.IKeyBinding;
-import de.alive.preiscxn.api.networking.IServerChecker;
-import de.alive.preiscxn.api.utils.TimeUtil;
-import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
-import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
-import de.alive.preiscxn.v1_20_5.impl.ItemStackImpl;
-import net.minecraft.ChatFormatting;
+import de.alive.preiscxn.api.interfaces.IItemStack;
+import de.alive.preiscxn.api.networking.DataAccess;
+import net.labymod.api.component.data.NbtDataComponentContainer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Pattern;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin {
+public abstract class ItemStackMixin implements IItemStack {
     @Unique
-    private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
-
+    private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
     @Unique
-    private long lastUpdate = 0;
+    private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
 
-    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"), cancellable = true)
-    private void getToolTip(Item.TooltipContext $$0, Player $$1, TooltipFlag $$2, CallbackInfoReturnable<List<Component>> cir) {
-        PriceCxn.getMod().getLogger().debug("getToolTip");
-        if (!PriceCxn.getMod().getConnectionManager().isActive()) {
-            return;
-        }
+    @Shadow
+    public abstract List<Component> getTooltipLines(Item.TooltipContext $$0, @javax.annotation.Nullable Player $$1, TooltipFlag $$2);
 
-        List<Component> list = cir.getReturnValue();
-        IServerChecker serverChecker = PriceCxn.getMod().getCxnListener().getServerChecker();
+    @Shadow
+    public abstract Item getItem();
 
-        if (shouldCancel(list))
-            return;
+    @Shadow
+    public abstract Component getDisplayName();
 
-        if (this.cxnItemStack == null || this.lastUpdate > 50) {
-            this.cxnItemStack = getPriceCxnItemStack();
-            this.lastUpdate = 0;
-        }
+    @Shadow public abstract int getCount();
 
-        this.lastUpdate++;
-        if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty())
-            && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
-            return;
+    @Shadow public abstract boolean is(TagKey<Item> $$0);
 
-        AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
+    @Shadow public abstract boolean is(Item $$0);
+
+    @Shadow public abstract Holder<Item> getItemHolder();
+
+    @Shadow public abstract DataComponentMap getComponents();
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment, addTooltips);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData) {
+        return PriceCxn.getMod().createItemStack(this, searchData);
+    }
+
+    @Override
+    public List<String> priceCxn$getLore() {
+        List<Component> tooltip = getTooltipLines(Item.TooltipContext.EMPTY,
+                Minecraft.getInstance().player,
+                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
 
         List<String> lore = new ArrayList<>();
-        for (Component component : list) {
-            lore.add(component.getString());
-        }
-        int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
-        list.add((Component) PriceCxn.getMod().space());
-        PriceCxnItemStack.ViewMode viewMode = PriceCxn.getMod().getViewMode();
-
-        list.add(
-                Component.literal("--- ")
-                        .withStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY))
-                        .append(((Component) PriceCxn.getMod().getModText()).copy())
-                        .append(Component.literal("x" + (viewMode == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount))
-                                .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)))
-                        .append(Component.literal(" ---")
-                                .setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY))));
-
-        PriceCxn.getMod().getLogger().debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
-        if (this.cxnItemStack.getPcxnPrice() != null) {
-            list.add((Component) pcxnPriceText.get()
-                    .withPrices(this.cxnItemStack
-                            .getPcxnPrice()
-                            .get("lower_price")
-                            .getAsDouble(),
-                            this.cxnItemStack.getPcxnPrice()
-                                    .get("upper_price")
-                                    .getAsDouble())
-                    .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
-                    .getText());
+        for (Component text : tooltip) {
+            lore.add(text.getString());
         }
 
-        if (this.cxnItemStack.getNookPrice() != null) {
-            list.add((Component) PriceCxn.getMod().createPriceText()
-                             .withIdentifierText("Tom Block:")
-                             .withPrices(this.cxnItemStack.getNookPrice().get("price").getAsDouble())
-                             .withPriceMultiplier(amount)
-                             .getText());
+        return lore;
+    }
 
-        }
-        if (this.cxnItemStack.getPcxnPrice() != null) {
+    @Override
+    public String priceCxn$getItemName() {
+        return getItem().getDescriptionId();
+    }
 
-            IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
-            if (this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
-                Component text = Component.translatable("cxn_listener.display_prices.view_in_browser",
-                                Component.keybind(keyBinding.getBoundKeyLocalizedText())
-                                              .copy()
-                                              .setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)))
-                        .setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY));
+    @Override
+    public String priceCxn$getDisplayName() {
+        return getDisplayName().getString();
+    }
 
-                list.add(text);
-            }
+    @Override
+    public int priceCxn$getCount() {
+        return getCount();
+    }
 
-            list.add((Component) PriceCxn.getMod().space());
+    @Override
+    public boolean priceCxn$isTrimTemplate() {
+        return is(ItemTags.TRIM_TEMPLATES);
+    }
 
-            Optional<Tuple2<Long, TimeUtil.TimeUnit>> lastUpdate
-                    = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().get("timestamp").getAsString()));
+    @Override
+    public boolean priceCxn$isNetheriteUpgradeSmithingTemplate() {
+        return is(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+    }
 
-            if(lastUpdate.isPresent()){
-                Tuple2<Long, TimeUtil.TimeUnit> s = lastUpdate.get();
-                Long time = s.getT1();
-                String unitTranslatable = s.getT2().getTranslatable(time);
+    @Override
+    public Optional<String> priceCxn$getRegistryKey() {
+        return Optional.of(getItemHolder().getRegisteredName());
+    }
 
-                list.add(Component.translatable("cxn_listener.display_prices.updated", time.toString(), Component.translatable(unitTranslatable))
-                        .setStyle(((Style) PriceCxn.getMod().getDefaultStyle())));
-            }
-        }
-
-        cir.setReturnValue(list);
+    @Override
+    public JsonObject priceCxn$getComponentsAsJson() {
+        return componentMapToJson(getComponents());
     }
 
     @Unique
-    public boolean shouldCancel(@NotNull List<Component> list) {
-        IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
+    private @NotNull JsonObject componentMapToJson(@NotNull DataComponentMap componentMap) {
+        if(componentMap.isEmpty())
+            return new JsonObject();
 
-        Modes mode = themeChecker.getMode();
+        JsonObject json = new JsonObject();
 
-        if (mode == Modes.NOTHING || mode == Modes.LOBBY)
-            return true;
-
-        Minecraft client = Minecraft.getInstance();
-
-        if (client.player == null || client.screen == null) return true;
-        if (client.screen.getTitle().getString().isEmpty())
-            return true;
-
-        List<String> invBlocks = switch (mode) {
-            case SKYBLOCK -> TranslationDataAccess.SKYBLOCK_INV_BLOCK.getData().getData();
-            case CITYBUILD -> TranslationDataAccess.CITYBUILD_INV_BLOCK.getData().getData();
-            default -> null;
-        };
-
-        if (invBlocks == null)
-            return true;
-
-        String title = client.screen.getTitle().getString().toUpperCase();
-        for (String s : invBlocks) {
-            if (title.contains(s.toUpperCase())) {
-                return true;
-            }
-        }
-
-        for (Component text : list) {
-            for (String datum : TranslationDataAccess.VISIT_ISLAND.getData().getData()) {
-                if (text.getString().contains(datum)) {
-                    return true;
+        for (DataComponentType<?> key : componentMap.keySet()) {
+            Object component = componentMap.get(key);
+            switch (component) {
+                case null -> {
+                }
+                case DataComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
+                case NbtDataComponentContainer subComponentMap -> {
+                    try {
+                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
+                        json.add(key.toString(), asJsonObject);
+                    } catch (JsonParseException e) {
+                        try {
+                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                            json.add(key.toString(), asJsonObject);
+                        } catch (JsonParseException e1) {
+                            json.addProperty(key.toString(), subComponentMap.toString());
+                        }
+                    }
+                }
+                default -> {
+                    Object object = object(component.toString());
+                    if (object instanceof JsonElement element)
+                        json.add(key.toString(), element);
+                    else
+                        json.addProperty(key.toString(), object.toString());
                 }
             }
+
         }
 
-        return false;
+        return json;
     }
 
     @Unique
-    private PriceCxnItemStackImpl getPriceCxnItemStack() {
-        return PriceCxnItemStackImpl.getInstance(new ItemStackImpl().setStack((ItemStack) (Object) this), null, true, false);
+    private Object object(String nbtString) {
+        if (nbtString == null)
+            return "";
+
+        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+        JsonObject valueJson;
+
+        //test if only Delete Pattern is needed
+        try {
+            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+            //test if JsonArray
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonArray();
+            } catch (IllegalStateException ignored) {
+                //test if JsonKey is missing
+                try {
+                    return JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e2) {
+                    //else add as normal String
+                    return nbtString;
+                }
+            }
+        } catch (JsonParseException e) {
+            //else add as normal String
+            return nbtString;
+        }
+
+        if (valueJson != null) {
+            return valueJson;
+        }
+
+        return nbtString;
     }
 }

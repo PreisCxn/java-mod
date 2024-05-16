@@ -14,7 +14,7 @@ public class OpenBrowserKeybindExecutor implements KeybindExecutor {
     private static final String URL_PREFIX = "https://preiscxn.de/";
     @Override
     public void onKeybindPressed(IMinecraftClient client, @NotNull IItemStack itemStack) {
-        PriceCxnItemStack priceCxnItemStackImpl = itemStack.createItemStack(null, true, false);
+        PriceCxnItemStack priceCxnItemStackImpl = itemStack.priceCxn$createItemStack(null, true, false);
 
         JsonObject data = priceCxnItemStackImpl.findItemInfo("pricecxn.data.item_data");
 

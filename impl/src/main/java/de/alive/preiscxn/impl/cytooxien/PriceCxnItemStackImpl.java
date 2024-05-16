@@ -57,13 +57,13 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         if (addTooltips)
             this.toolTips = StringUtil.getToolTips(item);
-        this.itemName = item.getItemName();
-        String displayName = item.getDisplayName();
-        this.amount = item.getCount();
+        this.itemName = item.priceCxn$getItemName();
+        String displayName = item.priceCxn$getDisplayName();
+        this.amount = item.priceCxn$getCount();
 
-        if (item.isTrimTemplate() || item.isNetheriteUpgradeSmithingTemplate()) {
+        if (item.priceCxn$isTrimTemplate() || item.priceCxn$isNetheriteUpgradeSmithingTemplate()) {
 
-            item.getRegistryKey()
+            item.priceCxn$getRegistryKey()
                     .ifPresent(s -> this.itemName += "." + s);
         }
 
@@ -136,11 +136,11 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     }
 
     private @NotNull JsonObject getCustomData(@NotNull IItemStack item) {
-        JsonObject jsonObject = item.getComponentsAsJson();
+        JsonObject jsonObject = item.priceCxn$getComponentsAsJson();
         if (jsonObject == null) return new JsonObject();
 
         if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
-            PriceCxn.getMod().getLogger().warn("Found no custom_data in item: " + item.getItemName());
+            PriceCxn.getMod().getLogger().warn("Found no custom_data in item: " + item.priceCxn$getItemName());
             return new JsonObject();
         }
         return jsonObject.getAsJsonObject("minecraft:custom_data");

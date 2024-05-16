@@ -20,6 +20,7 @@ import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
+import de.alive.preiscxn.core.events.ItemStackTooltipListener;
 import de.alive.preiscxn.core.events.TickListener;
 import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
@@ -98,6 +99,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         this.projectLoader.addModule(new MainModule());
         this.tickListener = new TickListener(this::getMinecraftClient);
         this.registerListener(tickListener);
+        this.registerListener(new ItemStackTooltipListener());
 
         try {
             cxnListener = new CxnListener();
