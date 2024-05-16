@@ -16,18 +16,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
@@ -37,17 +33,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-    @Shadow
-    public abstract boolean isEmpty();
-
     @Unique
     private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
 
     @Unique
     private long lastUpdate = 0;
 
-    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void getToolTip(Player context, TooltipFlag player, CallbackInfoReturnable<List<Component>> cir) {
+    @Inject(method = "getTooltipLines", at = @At(value = "RETURN"))
+    private void getToolTip(CallbackInfoReturnable<List<Component>> cir) {
         if (!PriceCxn.getMod().getConnectionManager().isActive()) {
             return;
         }
