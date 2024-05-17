@@ -65,7 +65,7 @@ public class TomNookListener extends InventoryListener {
         if (!items.isEmpty()) {
             for (PriceCxnItemStack item : items) {
                 if (this.invBuyPrice != null) {
-                    JsonObject obj = item.getData();
+                    JsonObject obj = item.getDataWithoutDisplay();
                     obj.addProperty("buyPrice", this.invBuyPrice);
                     array.add(obj);
                 }

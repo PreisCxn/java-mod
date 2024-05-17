@@ -6,6 +6,8 @@ repositories {
     mavenCentral()
 }
 
+version = project(":").version
+
 dependencies {
     implementation("io.projectreactor:reactor-core:3.6.5")
     implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")

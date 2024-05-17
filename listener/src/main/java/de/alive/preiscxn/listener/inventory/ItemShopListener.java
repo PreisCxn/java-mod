@@ -70,8 +70,10 @@ public class ItemShopListener extends InventoryListener {
         PriceCxn.getMod().printDebug("ItemShop close");
         if (sellItem == null && buyItem == null || itemStack == null) return Mono.empty();
 
-        JsonObject object = itemStack.getData();
+        JsonObject object = itemStack.getDataWithoutDisplay();
 
+        if(buyItem == null)
+            return Mono.empty();
         if (!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return Mono.empty();
 
         JsonElement buyItemE = buyItem.getData().get("buyPrice");
