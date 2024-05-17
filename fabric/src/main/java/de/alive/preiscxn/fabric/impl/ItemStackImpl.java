@@ -126,7 +126,6 @@ public final class ItemStackImpl implements IItemStack {
 
         for (String key : componentMap.getKeys()) {
             Object component = componentMap.get(key);
-            System.out.println(component);
             switch (component) {
                 case null -> {
                 }
@@ -149,11 +148,6 @@ public final class ItemStackImpl implements IItemStack {
                     }
                 }
                 default -> {
-                    Object object = object(component.toString());
-                    if (object instanceof JsonElement element)
-                        json.add(key, element);
-                    else
-                        json.addProperty(key, object.toString());
                 }
             }
 
