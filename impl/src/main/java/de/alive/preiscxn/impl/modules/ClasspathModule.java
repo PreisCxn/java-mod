@@ -15,9 +15,11 @@ import java.util.stream.Stream;
 public class ClasspathModule implements Module {
 
     private final String primaryPackage;
+    private final ClassLoader loader;
 
-    public ClasspathModule(String primaryPackage) {
+    public ClasspathModule(String primaryPackage, ClassLoader loader) {
         this.primaryPackage = primaryPackage;
+        this.loader = loader;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class ClasspathModule implements Module {
                             className = className.substring(index);
                         }
                         try {
-                            consumer.accept(Thread.currentThread().getContextClassLoader().loadClass(className));
+                            consumer.accept(loader.loadClass(className));
                         } catch (ClassNotFoundException e) {
                             PriceCxn.getMod().getLogger().error("Error while loading class", e);
                         } catch (RuntimeException e) {

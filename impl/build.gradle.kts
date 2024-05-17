@@ -38,7 +38,7 @@ tasks.processResources {
 
 tasks.withType<JavaCompile>().configureEach {
     // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-    options.release.set(21)
+    options.release.set(17)
 }
 
 java {
@@ -47,8 +47,8 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.jar {

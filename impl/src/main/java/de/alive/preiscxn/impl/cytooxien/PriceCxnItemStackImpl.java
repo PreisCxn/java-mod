@@ -385,7 +385,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         }
 
         if (foundItems.size() == 1) {
-            return array.get(foundItems.getFirst()).getAsJsonObject();
+            return array.get(foundItems.get(0)).getAsJsonObject();
         }
 
         return null;

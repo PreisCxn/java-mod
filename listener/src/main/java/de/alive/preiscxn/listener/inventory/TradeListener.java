@@ -124,14 +124,14 @@ public class TradeListener extends InventoryListener {
             price = getBuyPrice(traderControls).map(JsonElement::getAsString);
         } else return Optional.empty();
 
-        int amount = items.getFirst().getAmount();
+        int amount = items.get(0).getAmount();
 
         for (int i = 1; i < items.size(); i++) {
-            if (!items.get(i).isSameItem(items.getFirst())) return Optional.empty();
+            if (!items.get(i).isSameItem(items.get(0))) return Optional.empty();
             amount += items.get(i).getAmount();
         }
 
-        JsonObject result = items.getFirst().getDataWithoutDisplay();
+        JsonObject result = items.get(0).getDataWithoutDisplay();
 
         result.remove(PriceCxnItemStack.AMOUNT_KEY);
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);

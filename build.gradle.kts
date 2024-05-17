@@ -73,7 +73,7 @@ fun configureRun(provider: net.labymod.gradle.core.minecraft.provider.VersionPro
 		args("--addon-dev-environment", "true")
 	}
 
-	provider.javaVersion = JavaVersion.VERSION_21
+	provider.javaVersion = JavaVersion.VERSION_17
 
 	provider.mixin {
 		minVersion = "0.8.2"

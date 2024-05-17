@@ -126,11 +126,10 @@ public final class ItemStackImpl implements IItemStack {
 
         for (String key : componentMap.getKeys()) {
             Object component = componentMap.get(key);
-            switch (component) {
-                case null -> {
-                }
-                case NbtCompound subComponentMap -> json.add(key, componentMapToJson(subComponentMap));
-                case NbtElement subComponentMap -> {
+            if(component != null){
+                if (component instanceof NbtCompound subComponentMap) {
+                    json.add(key, componentMapToJson(subComponentMap));
+                } else if (component instanceof NbtElement subComponentMap) {
                     try {
                         JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
                         json.add(key, asJsonObject);
@@ -147,10 +146,7 @@ public final class ItemStackImpl implements IItemStack {
                         }
                     }
                 }
-                default -> {
-                }
             }
-
         }
 
         return json;
