@@ -205,7 +205,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     @Override
     public @NotNull JsonObject getDataWithoutDisplay() {
         JsonObject data = this.data.deepCopy();
-        data.get(COMMENT_KEY).getAsJsonObject().remove("display");
+        if (data.has(COMMENT_KEY) && data.get(COMMENT_KEY).isJsonObject())
+            data.get(COMMENT_KEY).getAsJsonObject().remove("display");
         return data;
     }
 
