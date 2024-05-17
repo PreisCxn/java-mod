@@ -3,6 +3,7 @@ package de.alive.preiscxn.fabric.impl;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -16,7 +17,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -112,67 +112,91 @@ public final class ItemStackImpl implements IItemStack {
                 .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
     }
 
-    @Override
-    public @NotNull JsonObject priceCxn$getComponentsAsJson() {
-        NbtCompound nbt = stack.getNbt();
-        if (nbt == null) return new JsonObject();
-
-        return nbtToJson(nbt);
+    public JsonObject priceCxn$getComponentsAsJson() {
+        if (stack.getNbt() == null)
+            return new JsonObject();
+        return componentMapToJson(stack.getNbt());
     }
 
-    private @NotNull JsonObject nbtToJson(@NotNull NbtCompound nbt) {
+    private @NotNull JsonObject componentMapToJson(NbtCompound componentMap) {
+        if (componentMap.isEmpty())
+            return new JsonObject();
+
         JsonObject json = new JsonObject();
 
-        for (String key : nbt.getKeys()) {
-            NbtElement nbtElement = nbt.get(key);
-            if (nbtElement == null)
-                continue;
-
-            if(nbtElement instanceof NbtCompound nbtCompound){
-                json.add(key, nbtToJson(nbtCompound));
-            } else {
-                String nbtString = nbtElement.asString();
-
-                if (nbtString == null) continue;
-
-                nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
-
-                JsonObject valueJson = null;
-
-                //test if only Delete Pattern is needed
-                try {
-                    valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e) {
-                    nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-                    //test if JsonArray
-                    try {
-                        JsonArray array = JsonParser.parseString(nbtString).getAsJsonArray();
-                        json.add(key, array);
-                        continue;
-                    } catch (IllegalStateException ignored) {
-                    }
-
-                    //test if JsonKey is missing
-                    try {
-                        valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-                    } catch (IllegalStateException e2) {
-                        //else add as normal String
-                        json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
-                    }
-
-                } catch (JsonParseException e) {
-                    //else add as normal String
-                    json.addProperty(key, Optional.of(nbtElement).map(NbtElement::asString).orElse("null"));
+        for (String key : componentMap.getKeys()) {
+            Object component = componentMap.get(key);
+            System.out.println(component);
+            switch (component) {
+                case null -> {
                 }
-
-                if (valueJson != null) {
-                    json.add(key, valueJson);
+                case NbtCompound subComponentMap -> json.add(key, componentMapToJson(subComponentMap));
+                case NbtElement subComponentMap -> {
+                    try {
+                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
+                        json.add(key, asJsonObject);
+                    } catch (JsonParseException | IllegalStateException e) {
+                        try {
+                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                            json.add(key, asJsonObject);
+                        } catch (JsonParseException | IllegalStateException e1) {
+                            Object object = object(component.toString());
+                            if (object instanceof JsonElement element)
+                                json.add(key, element);
+                            else
+                                json.addProperty(key, object.toString());
+                        }
+                    }
+                }
+                default -> {
+                    Object object = object(component.toString());
+                    if (object instanceof JsonElement element)
+                        json.add(key, element);
+                    else
+                        json.addProperty(key, object.toString());
                 }
             }
+
         }
 
         return json;
     }
 
+    public Object object(String nbtString) {
+        if (nbtString == null)
+            return "";
+
+        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+        JsonObject valueJson;
+
+        //test if only Delete Pattern is needed
+        try {
+            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+            //test if JsonArray
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonArray();
+            } catch (IllegalStateException ignored) {
+                //test if JsonKey is missing
+                try {
+                    return JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e2) {
+                    //else add as normal String
+                    return nbtString;
+                }
+            }
+        } catch (JsonParseException e) {
+            //else add as normal String
+            return nbtString;
+        }
+
+        if (valueJson != null) {
+            return valueJson;
+        }
+
+        return nbtString;
+    }
 }
