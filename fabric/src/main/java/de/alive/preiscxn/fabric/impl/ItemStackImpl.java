@@ -12,13 +12,11 @@ import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.networking.DataAccess;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.Item;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -70,9 +68,9 @@ public final class ItemStackImpl implements IItemStack {
 
     @Override
     public List<String> priceCxn$getLore() {
-        List<Text> tooltip = stack.getTooltip(Item.TooltipContext.DEFAULT,
+        List<Text> tooltip = stack.getTooltip(
                 MinecraftClient.getInstance().player,
-                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.ADVANCED : TooltipContext.BASIC);
 
         List<String> lore = new ArrayList<>();
 
@@ -114,45 +112,41 @@ public final class ItemStackImpl implements IItemStack {
                 .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
     }
 
-    @Override
     public JsonObject priceCxn$getComponentsAsJson() {
-        return componentMapToJson(stack.getComponents());
+        if (stack.getNbt() == null)
+            return new JsonObject();
+        return componentMapToJson(stack.getNbt());
     }
 
-    private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
-        if(componentMap.isEmpty())
+    private @NotNull JsonObject componentMapToJson(NbtCompound componentMap) {
+        if (componentMap.isEmpty())
             return new JsonObject();
 
         JsonObject json = new JsonObject();
 
-        for (DataComponentType<?> key : componentMap.getTypes()) {
+        for (String key : componentMap.getKeys()) {
             Object component = componentMap.get(key);
-            switch (component) {
-                case null -> {
-                }
-                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
-                case NbtComponent subComponentMap -> {
+            if(component != null){
+                if (component instanceof NbtCompound subComponentMap) {
+                    json.add(key, componentMapToJson(subComponentMap));
+                } else if (component instanceof NbtElement subComponentMap) {
                     try {
                         JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
-                        json.add(key.toString(), asJsonObject);
-                    } catch (JsonParseException e) {
+                        json.add(key, asJsonObject);
+                    } catch (JsonParseException | IllegalStateException e) {
                         try {
                             JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
-                            json.add(key.toString(), asJsonObject);
-                        } catch (JsonParseException e1) {
-                            json.addProperty(key.toString(), subComponentMap.toString());
+                            json.add(key, asJsonObject);
+                        } catch (JsonParseException | IllegalStateException e1) {
+                            Object object = object(component.toString());
+                            if (object instanceof JsonElement element)
+                                json.add(key, element);
+                            else
+                                json.addProperty(key, object.toString());
                         }
                     }
                 }
-                default -> {
-                    Object object = object(component.toString());
-                    if (object instanceof JsonElement element)
-                        json.add(key.toString(), element);
-                    else
-                        json.addProperty(key.toString(), object.toString());
-                }
             }
-
         }
 
         return json;
@@ -161,6 +155,9 @@ public final class ItemStackImpl implements IItemStack {
     public Object object(String nbtString) {
         if (nbtString == null)
             return "";
+
+        if(!nbtString.matches("[\\[\\]{}]") && nbtString.contains("\""))
+            nbtString = nbtString.replace("\"", "");
 
         nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
 

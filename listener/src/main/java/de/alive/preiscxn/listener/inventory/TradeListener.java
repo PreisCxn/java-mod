@@ -124,14 +124,14 @@ public class TradeListener extends InventoryListener {
             price = getBuyPrice(traderControls).map(JsonElement::getAsString);
         } else return Optional.empty();
 
-        int amount = items.getFirst().getAmount();
+        int amount = items.get(0).getAmount();
 
         for (int i = 1; i < items.size(); i++) {
-            if (!items.get(i).isSameItem(items.getFirst())) return Optional.empty();
+            if (!items.get(i).isSameItem(items.get(0))) return Optional.empty();
             amount += items.get(i).getAmount();
         }
 
-        JsonObject result = items.getFirst().getData();
+        JsonObject result = items.get(0).getDataWithoutDisplay();
 
         result.remove(PriceCxnItemStack.AMOUNT_KEY);
         result.addProperty(PriceCxnItemStack.AMOUNT_KEY, amount);
@@ -139,7 +139,7 @@ public class TradeListener extends InventoryListener {
 
         PriceCxn.getMod().getLogger().debug(result.toString());
 
-        return Optional.of(result);
+        return result.isJsonNull() ? Optional.empty() : Optional.of(result);
     }
 
     private boolean buyPriceIsNull(@NotNull JsonArray array) {
@@ -153,7 +153,8 @@ public class TradeListener extends InventoryListener {
                 .filter(JsonElement::isJsonObject)
                 .filter(e -> e.getAsJsonObject().get("itemName").getAsString().equals("block.minecraft.player_head"))
                 .findFirst()
-                .map(e -> e.getAsJsonObject().get("buyPrice"));
+                .map(e -> e.getAsJsonObject().get("buyPrice"))
+                .filter(jsonElement -> !jsonElement.isJsonNull());
     }
 
     private boolean notAccepted(@NotNull JsonArray array) {
@@ -220,7 +221,7 @@ public class TradeListener extends InventoryListener {
         @NotNull JsonArray getData() {
             JsonArray array = new JsonArray();
             for (PriceCxnItemStack item : slots) {
-                array.add(item.getData());
+                array.add(item.getDataWithoutDisplay());
             }
             return array;
         }

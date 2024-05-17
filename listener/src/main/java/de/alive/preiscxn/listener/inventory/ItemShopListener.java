@@ -70,17 +70,17 @@ public class ItemShopListener extends InventoryListener {
         PriceCxn.getMod().printDebug("ItemShop close");
         if (sellItem == null && buyItem == null || itemStack == null) return Mono.empty();
 
-        JsonObject object = itemStack.getData();
+        JsonObject object = itemStack.getDataWithoutDisplay();
 
-        if (!buyItem.getData().has("sellPrice") && !sellItem.getData().has("buyPrice")) return Mono.empty();
+        if (!buyItem.getDataWithoutDisplay().has("sellPrice") && !sellItem.getDataWithoutDisplay().has("buyPrice")) return Mono.empty();
 
-        JsonElement buyItemE = buyItem.getData().get("buyPrice");
-        JsonElement sellItemE = sellItem.getData().get("sellPrice");
+        JsonElement buyItemE = buyItem.getDataWithoutDisplay().get("buyPrice");
+        JsonElement sellItemE = sellItem.getDataWithoutDisplay().get("sellPrice");
 
         if (buyItemE == JsonNull.INSTANCE && sellItemE == JsonNull.INSTANCE) return Mono.empty();
 
-        object.add("sellPrice", sellItem.getData().get("sellPrice"));
-        object.add("buyPrice", buyItem.getData().get("buyPrice"));
+        object.add("sellPrice", sellItem.getDataWithoutDisplay().get("sellPrice"));
+        object.add("buyPrice", buyItem.getDataWithoutDisplay().get("buyPrice"));
 
         return sendData("/itemshop", object).doOnSuccess(aVoid -> PriceCxn.getMod().printTester("ItemShop data sent"));
     }

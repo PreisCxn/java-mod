@@ -32,7 +32,7 @@ def get_version(with_mc_version=True):
                 minecraft_version = line.split("=")[1].strip()
 
     if with_mc_version and version and minecraft_version:
-        return f"{minecraft_version}-{version}"
+        return f"{version}-{minecraft_version}"
     elif version:
         return version
     else:
@@ -63,7 +63,7 @@ def upload_file(file_path, url):
         file_id = json.loads(response.text)['file-id']
 
         # Iterate over the file in chunks and stream the data
-        for chunk in iter(lambda: f.read(128 * 1024), b''):
+        for chunk in iter(lambda: f.read(512 * 1024), b''):
             # Make the POST request with chunked data
             response = requests.post(url, headers={**headers, 'file-id': str(file_id)}, data=chunk)
 

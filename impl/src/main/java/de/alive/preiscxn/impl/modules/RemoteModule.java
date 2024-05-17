@@ -36,7 +36,7 @@ public final class RemoteModule implements Module {
     public static Mono<Module> create(String remotePath, Path jarPath, String primaryPackage, boolean useRemote, ClassLoader classLoader) {
 
         if (!useRemote)
-            return Mono.just(new ClasspathModule(primaryPackage));
+            return Mono.just(new ClasspathModule(primaryPackage, classLoader));
 
         PriceCxn.getMod().getLogger().info("Creating remote module with remotePath: {}, jarPath: {}, primaryPackage: {}", remotePath, jarPath, primaryPackage);
         RemoteModule remoteModule = new RemoteModule(remotePath, jarPath, primaryPackage, classLoader);
@@ -136,7 +136,7 @@ public final class RemoteModule implements Module {
         }
         PriceCxn.getMod().getLogger().info("Loading module from {}", jarPath);
         try (JarFile jarFile = new JarFile(jarPath.toFile());
-             URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{jarPath.toUri().toURL()}, Thread.currentThread().getContextClassLoader())) {
+             URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{jarPath.toUri().toURL()}, classLoader)) {
             Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
@@ -148,7 +148,7 @@ public final class RemoteModule implements Module {
                         try {
                             consumer.accept(urlClassLoader.loadClass(className));
                         } catch (ClassNotFoundException | NoClassDefFoundError e) {
-                            PriceCxn.getMod().getLogger().error("Error while loading class {}", className);
+                            PriceCxn.getMod().getLogger().error("Error while loading class {}", className, e);
                         }
                     }
                 }

@@ -158,6 +158,15 @@ public class DataHandler {
                                 JsonNull no = json.get(columnName).getAsJsonNull();
                             } catch (Exception e) {
                                 String[] rowData = json.get(columnName).getAsString().split(", ");
+                                for (int i = 0; i < rowData.length; i++) {
+                                    rowData[i] = rowData[i].replace("Ã¤", "ä");
+                                    rowData[i] = rowData[i].replace("Ã¶", "ö");
+                                    rowData[i] = rowData[i].replace("Ã¼", "ü");
+                                    rowData[i] = rowData[i].replace("ÃŸ", "ß");
+                                    rowData[i] = rowData[i].replace("Ã„", "Ä");
+                                    rowData[i] = rowData[i].replace("Ã–", "Ö");
+                                    rowData[i] = rowData[i].replace("Ãœ", "Ü");
+                                }
                                 values.addAll(Arrays.asList(rowData));
                             }
                         }

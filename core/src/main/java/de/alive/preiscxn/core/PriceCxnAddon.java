@@ -104,8 +104,8 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
             throw new RuntimeException(e);
         }
 
-        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api"));
-        this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory"));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api", Thread.currentThread().getContextClassLoader()));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.scanner.inventory", Thread.currentThread().getContextClassLoader())));
 
         registerRemoteModule(
                 "de.alive.inventory.listener.AuctionHouseListener",
