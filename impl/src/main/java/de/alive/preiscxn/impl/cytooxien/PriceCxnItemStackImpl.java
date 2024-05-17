@@ -138,9 +138,9 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         JsonObject jsonObject = item.priceCxn$getComponentsAsJson();
         if (jsonObject == null) return new JsonObject();
 
-        if (jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
-            PriceCxn.getMod().getLogger().warn("Found no custom_data in item: " + item.priceCxn$getItemName());
-            return new JsonObject();
+        if (!jsonObject.has("minecraft:custom_data")
+                || jsonObject.get("minecraft:custom_data") instanceof JsonPrimitive) {
+            return jsonObject;
         }
         return jsonObject.getAsJsonObject("minecraft:custom_data");
     }

@@ -166,6 +166,9 @@ public final class ItemStackImpl implements IItemStack {
         if (nbtString == null)
             return "";
 
+        if(!nbtString.matches("[\\[\\]{}]") && nbtString.contains("\""))
+            nbtString = nbtString.replace("\"", "");
+
         nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
 
         JsonObject valueJson;
