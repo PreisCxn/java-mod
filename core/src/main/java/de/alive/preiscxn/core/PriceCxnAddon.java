@@ -210,7 +210,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public void printDebug(String message, boolean overlay, boolean sysOut) {
         PriceCxn.getMod().getLogger().debug("[PCXN-DEBUG] : {}", message);
-        if (!DEBUG_MODE && !TESTER_MODE) return;
+        if (!DEBUG_MODE) return;
         if (labyAPI().minecraft() == null) return;
         if (labyAPI().minecraft().getClientPlayer() == null) return;
 

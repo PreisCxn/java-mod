@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static de.alive.preiscxn.api.Mod.DEBUG_MODE;
@@ -25,6 +26,7 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
     private final @NotNull AtomicBoolean onServer;
 
     private final @Nullable ServerListener serverListener;
+    private Modes lastSend = null;
 
     public ThemeServerChecker(@Nullable ServerListener serverListener, @NotNull DataAccess searches, @NotNull AtomicBoolean onServer) {
         super(searches);
@@ -60,13 +62,17 @@ public class ThemeServerChecker extends TabListener implements IThemeServerCheck
         PriceCxn.getMod().printDebug("New Mode: " + this.mode);
 
 
-        if (DEBUG_MODE && !PriceCxn.getMod().getMinecraftClient().isPlayerNull())
+        if (DEBUG_MODE && !PriceCxn.getMod().getMinecraftClient().isPlayerNull()){
+            if(Objects.equals(lastSend, this.mode))
+                return voidMono;
+            lastSend = this.mode;
             PriceCxn.getMod().getMinecraftClient()
                     .sendTranslatableMessage(
                             "cxn_listener.theme_checker.changed",
                             true,
                             true,
                             this.mode.toString());
+        }
 
         return voidMono;
     }

@@ -205,7 +205,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public void printDebug(String message, boolean overlay, boolean sysOut) {
-        if (!DEBUG_MODE && !TESTER_MODE) return;
+        if (!DEBUG_MODE) return;
         if (MinecraftClient.getInstance() == null) return;
         if (MinecraftClient.getInstance().player == null) return;
         MinecraftClient client = MinecraftClient.getInstance();
