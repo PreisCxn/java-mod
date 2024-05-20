@@ -8,14 +8,14 @@ version = "${project.extra["mod_version"]}"
 group = "${project.extra["maven_group"]}"
 
 labyMod {
-	defaultPackageName = "de.alive.preiscxn"
+	defaultPackageName = "${project.property("maven_group")}"
 	addonInfo {
 		namespace = "preiscxn"
 		displayName = "PreisCxn"
 		author = "TeddyBear_2004"
 		description = "A simple addon for LabyMod that shows the price items on cytooxien.de"
 		minecraftVersion = ">1.20.4"
-		version = System.getenv().getOrDefault("VERSION", "0.0.1")
+		version = "${project.extra["mod_version"]}"
 	}
 
 	minecraft {

@@ -7,6 +7,7 @@ repositories {
 }
 
 version = "${project(":").property("mod_version")}"
+group = "${project.property("maven_group")}"
 
 dependencies {
     implementation("io.projectreactor:reactor-core:3.6.5")
