@@ -57,7 +57,7 @@ public final class RemoteModule implements Module {
         if (remotePath == null)
             return Mono.empty();
 
-        return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, null)
+        return PriceCxn.getMod().getCdnFileHandler().getFile(remotePath, PriceCxn.getMod().getVersion())
                 .switchIfEmpty(Mono.error(new RuntimeException("Could not download module from " + remotePath)))
                 .doOnNext(bytes -> PriceCxn.getMod().getLogger().info("Downloaded module from {} with length: {}", remotePath, bytes.length))
                 .publishOn(Schedulers.boundedElastic())
