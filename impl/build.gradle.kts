@@ -2,8 +2,8 @@ plugins {
     id("maven-publish")
 }
 
-version = "${project.property("mod_version")}-${project.property("minecraft_version")}"
-group = project.property("maven_group") as String
+version = "${project(":").property("mod_version")}"
+group = "${project.property("maven_group")}"
 
 repositories {
     mavenCentral()

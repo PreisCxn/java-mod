@@ -3,14 +3,13 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-version = "${project.extra["mod_version"]}-${project.extra["minecraft_version"]}"
-group = "${project.extra["maven_group"]}"
+version = "${project(":").property("mod_version")}"
+group = "${project.property("maven_group")}"
 
 dependencies {
     labyApi("core")
-
-    implementation(project(":api"))
-    implementation(project(":impl"))
+    api(project(":api"))
+    api(project(":impl"))
 
     maven(mavenCentral(),"javax.json:javax.json-api:1.1.4")
     maven(mavenCentral(),"org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")

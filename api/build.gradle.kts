@@ -6,7 +6,7 @@ repositories {
     mavenCentral()
 }
 
-version = project(":").version
+version = "${project(":").property("mod_version")}"
 
 dependencies {
     implementation("io.projectreactor:reactor-core:3.6.5")
