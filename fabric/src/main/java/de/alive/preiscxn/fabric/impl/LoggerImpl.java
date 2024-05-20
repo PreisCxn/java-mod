@@ -32,8 +32,8 @@ public class LoggerImpl implements ILogger {
     @Override
     public void error(String message, Throwable throwable, Object... args) {
         this.logger.error(message,
-                throwable,
                 args);
+        this.logger.error("", throwable);
     }
 
     @Override

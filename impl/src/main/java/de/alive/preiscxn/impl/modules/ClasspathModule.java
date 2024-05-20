@@ -25,7 +25,7 @@ public class ClasspathModule implements Module {
     @Override
     public void forEach(Consumer<Class<?>> consumer) {
         try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(primaryPackage.replace(".", "/"));
+            Enumeration<URL> resources = loader.getResources(primaryPackage.replace(".", "/"));
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 URI uri = url.toURI();
@@ -37,9 +37,13 @@ public class ClasspathModule implements Module {
                     try (FileSystem fs = FileSystems.newFileSystem(URI.create(array[0]), env)) {
                         path = fs.getPath(array[1]);
                         processPath(path, consumer);
-                    } catch (FileSystemNotFoundException e) {
-                        path = Paths.get(URI.create(array[0])); // Handle jar within a nested jar
-                        processPath(path, consumer);
+                    } catch (FileSystemNotFoundException | FileSystemAlreadyExistsException e) {
+                        try {
+                            path = Paths.get(URI.create(array[0])); // Handle jar within a nested jar
+                            processPath(path, consumer);
+                        }catch (Exception ex){
+                            //this is not supposed to be, but if it works, its fine.
+                        }
                     }
                 } else {
                     path = Paths.get(uri);

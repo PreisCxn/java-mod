@@ -105,7 +105,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException(e);
         }
 
-        this.projectLoader.addModule(new ClasspathModule("de.alive.pricecxn.api", Thread.currentThread().getContextClassLoader()));
+        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api", Thread.currentThread().getContextClassLoader()));
         this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.inventoryscanner", Thread.currentThread().getContextClassLoader()));
 
         registerRemoteModule(
