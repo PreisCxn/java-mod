@@ -75,8 +75,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
         if (!this.isOnServer().get())
             return Mono.empty();
 
-        return dataHandler.get("pricecxn.data.mod_users").refresh(true)
-                .then(dataHandler.refreshItemData("pricecxn.data.item_data", false))
+        return dataHandler.refreshItemData("pricecxn.data.item_data", false)
                 .then(dataHandler.refreshItemData("pricecxn.data.nook_data", true))
                 .then();
     }
@@ -106,7 +105,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
                                         messageInformation.getT1(),
                                         messageInformation.getT2(),
                                         true))
-                .then();
+                .then(dataHandler.get("pricecxn.data.mod_users").refresh(true));
 
     }
 

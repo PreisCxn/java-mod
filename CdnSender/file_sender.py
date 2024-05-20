@@ -49,6 +49,7 @@ def get_version_from_build_gradle(module_name):
 
 
 def upload_file(file_path, url):
+    print(f"Uploading file {file_path} to {url}")
     headers = {
         "Content-Type": "application/octet-stream",
         "Pricecxn-Auth": os.getenv("PRICECXNAUTH"),
