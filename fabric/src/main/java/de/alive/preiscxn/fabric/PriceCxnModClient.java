@@ -88,10 +88,13 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
         PriceCxn.getMod().getLogger().info("PriceCxn client created");
 
-        ModuleLoader versionLoader = new ModuleLoaderImpl();
         this.projectLoader = new ModuleLoaderImpl();
 
-        this.entrypoint = this.initialiseVersionLoader(versionLoader).block();
+        this.entrypoint = this.initialiseVersionLoader().block();
+
+        if(this.entrypoint == null) {
+            throw new RuntimeException("Failed to initialise version loader");
+        }
 
         this.initialiseProjectLoader(this.projectLoader)
                 .subscribe();
@@ -133,12 +136,13 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                 }).then();
     }
 
-    private Mono<Entrypoint> initialiseVersionLoader(ModuleLoader projectLoader) {
-        return Mono.fromCallable(() -> {
-            String gameVersion = MinecraftClient.getInstance().getGameVersion()
-                    .replace(".", "_");
-            projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.fabric.v" + gameVersion, Thread.currentThread().getContextClassLoader()));
+    private Mono<Entrypoint> initialiseVersionLoader() {
+        ModuleLoader projectLoader = new ModuleLoaderImpl();
+        String gameVersion = MinecraftClient.getInstance().getGameVersion()
+                .replace(".", "_");
+        projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.fabric.v" + gameVersion, Thread.currentThread().getContextClassLoader()));
 
+        return Mono.fromCallable(() -> {
             projectLoader.loadInterfaces(Entrypoint.class).forEach(entrypoint -> {
                 try {
                     entrypoint.getConstructor().newInstance();
