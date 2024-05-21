@@ -37,6 +37,7 @@ import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
@@ -52,9 +53,8 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -96,14 +96,14 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
             throw new RuntimeException("Failed to initialise version loader");
         }
 
-        this.initialiseProjectLoader(this.projectLoader)
-                .subscribe();
-
         try {
             cxnListener = new CxnListener();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        this.initialiseProjectLoader(this.projectLoader)
+                .subscribe();
     }
 
     private Mono<Void> initialiseProjectLoader(ModuleLoader projectLoader) {
@@ -138,19 +138,20 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     private Mono<Entrypoint> initialiseVersionLoader() {
         ModuleLoader projectLoader = new ModuleLoaderImpl();
-        String gameVersion = MinecraftClient.getInstance().getGameVersion()
+        String gameVersion = SharedConstants.getGameVersion().getName()
                 .replace(".", "_");
         projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.fabric.v" + gameVersion, Thread.currentThread().getContextClassLoader()));
 
         return Mono.fromCallable(() -> {
-            projectLoader.loadInterfaces(Entrypoint.class).forEach(entrypoint -> {
+            AtomicReference<Entrypoint> entrypoint = new AtomicReference<>();
+            projectLoader.loadInterfaces(Entrypoint.class).forEach(entrypointClass -> {
                 try {
-                    entrypoint.getConstructor().newInstance();
+                    entrypoint.set(entrypointClass.getConstructor().newInstance());
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    PriceCxn.getMod().getLogger().error("Failed to load entrypoint: {}", entrypoint, e);
+                    PriceCxn.getMod().getLogger().error("Failed to load entrypoint: {}", entrypointClass, e);
                 }
             });
-            return null;
+            return entrypoint.get();
         });
     }
 
