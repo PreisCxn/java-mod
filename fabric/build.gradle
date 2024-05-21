@@ -3,7 +3,7 @@ plugins {
     id 'java'
 }
 
-version = project(":").version
+version = "${project(":").property("mod_version")}"
 group = project(":").group
 
 repositories {

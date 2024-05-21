@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
+version = "${project(":").property("mod_version")}"
 group = 'de.alive'
-version = '1.0'
 
 repositories {
     mavenCentral()

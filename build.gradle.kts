@@ -1,13 +1,13 @@
 plugins {
 	id("java-library")
-	id("net.labymod.gradle")
-	id("net.labymod.gradle.addon")
+	//id("net.labymod.gradle")
+	//id("net.labymod.gradle.addon")
 }
 
 version = "${project.extra["mod_version"]}-${project.extra["minecraft_version"]}"
 group = "${project.extra["maven_group"]}"
 
-labyMod {
+/*labyMod {
 	defaultPackageName = "de.alive.preiscxn"
 	addonInfo {
 		namespace = "preiscxn"
@@ -78,4 +78,4 @@ fun configureRun(provider: net.labymod.gradle.core.minecraft.provider.VersionPro
 	provider.mixin {
 		minVersion = "0.8.2"
 	}
-}
+}*/

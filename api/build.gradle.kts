@@ -1,12 +1,12 @@
 plugins {
-    id("maven-publish")
+    id("java-library")
 }
+
+version = "${project(":").property("mod_version")}"
 
 repositories {
     mavenCentral()
 }
-
-version = project(":").version
 
 dependencies {
     implementation("io.projectreactor:reactor-core:3.6.5")
