@@ -1,7 +1,5 @@
 plugins {
-	id("java-library")
-	//id("net.labymod.gradle")
-	//id("net.labymod.gradle.addon")
+	id("java")
 }
 
 version = "${project.extra["mod_version"]}-${project.extra["minecraft_version"]}"

@@ -1,5 +1,5 @@
 plugins {
-    id("java-library")
+    id("java")
 }
 
 version = "${project(":").property("mod_version")}"

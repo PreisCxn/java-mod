@@ -1,5 +1,5 @@
 plugins {
-    id("java-library")
+    id("java")
 }
 
 version = "${project(":").property("mod_version")}"
@@ -13,6 +13,13 @@ dependencies {
     implementation(project(":api"))
     implementation(project(":inventoryscanner"))
     implementation(project(":listener"))
+    implementation("javax.json:javax.json-api:1.1.4")
+    implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client:2.1.5")
+    implementation("org.java-websocket:Java-WebSocket:1.5.6")
+    implementation("io.projectreactor:reactor-core:3.6.5")
+    implementation("com.google.guava:guava:33.2.0-jre")
+    implementation("org.jetbrains:annotations:24.1.0")
+    implementation("com.google.code.gson:gson:2.8.9")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
@@ -25,10 +32,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-base {
-    archivesName.set(project.property("archives_base_name") as String)
-}
-
 tasks.processResources {
     inputs.property("version", project.version)
     filesMatching("fabric.mod.json") {
@@ -36,25 +39,9 @@ tasks.processResources {
     }
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-    options.release.set(17)
-}
-
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.jar {
-    from("LICENSE") {
-        rename { "${it}_${base.archivesName.get()}" }
-    }
 }
 
 tasks.register<Copy>("generateVersion") {
@@ -77,11 +64,6 @@ tasks.named("compileJava") {
     dependsOn("generateVersion")
 }
 
-tasks.named("sourcesJar") {
-    dependsOn("generateVersion")
-}
-
 tasks.named("build") {
     dependsOn("generateVersion")
-    //dependsOn("checkstyleMain")
 }
