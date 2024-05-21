@@ -21,7 +21,6 @@ dependencies {
     implementation project(path: ":impl")
     implementation project(path: ":inventoryscanner")
     implementation project(path: ":listener")
-    include(project(path: ":fabric:1.20.6",  configuration: "namedElements"))
 
     include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
     include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
@@ -29,9 +28,9 @@ dependencies {
     include 'io.projectreactor:reactor-core:3.6.5'
     include 'org.reactivestreams:reactive-streams:1.0.4'
 
-    include(project(path: ":fabric:1.20.4",  configuration: "namedElements"))
-    include(project(path: ":fabric:1.20.5",  configuration: "namedElements"))
-    include(project(path: ":fabric:1.20.6",  configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_4",  configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_5",  configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_6",  configuration: "namedElements"))
 
     include project(path: ":impl")
     include project(path: ":api")

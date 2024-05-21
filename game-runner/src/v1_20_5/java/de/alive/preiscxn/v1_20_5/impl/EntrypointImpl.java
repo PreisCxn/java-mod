@@ -1,5 +1,7 @@
 package de.alive.preiscxn.v1_20_5.impl;
 
+import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.interfaces.IPlayer;
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
@@ -8,6 +10,8 @@ import de.alive.preiscxn.core.impl.LabyInventory;
 import de.alive.preiscxn.core.impl.LabyKeyBinding;
 import de.alive.preiscxn.core.impl.LabyMinecraftClient;
 import de.alive.preiscxn.core.impl.LabyScreenHandler;
+import de.alive.preiscxn.fabric.v1_20_6.impl.PlayerImpl;
+import de.alive.preiscxn.fabric.v1_20_6.impl.PriceTextImpl;
 import net.labymod.api.models.Implements;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -38,14 +42,6 @@ public class EntrypointImpl implements LabyEntrypoint {
     }
 
     @Override
-    public LabyScreenHandler createScreenHandler() {
-        if (Minecraft.getInstance().player == null)
-            return null;
-
-        return new ScreenHandlerImpl().setScreenHandler(Minecraft.getInstance().player.containerMenu);
-    }
-
-    @Override
     public LabyGameHub createGameHub() {
         return new GameHubImpl();
     }
@@ -53,5 +49,15 @@ public class EntrypointImpl implements LabyEntrypoint {
     @Override
     public VersionedTabGui createVersionedTabGui() {
         return (VersionedTabGui) Minecraft.getInstance().gui.getTabList();
+    }
+
+    @Override
+    public IPlayer createPlayer() {
+        return new PlayerImpl();
+    }
+
+    @Override
+    public PriceText<?> createPriceText(boolean b) {
+        return new PriceTextImpl(b);
     }
 }
