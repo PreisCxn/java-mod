@@ -27,12 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Implements(LabyItemStack.class)
 public final class ItemStackImpl implements LabyItemStack {
-    private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
-    private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
     private ItemStack stack;
 
     public ItemStackImpl() {

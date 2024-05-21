@@ -1,4 +1,4 @@
-package de.alive.preiscxn.v1_20_4.impl;
+package de.alive.preiscxn.fabric.v1_20_4.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -7,17 +7,16 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.networking.DataAccess;
-import de.alive.preiscxn.core.impl.LabyItemStack;
-import net.labymod.api.component.data.NbtDataComponentContainer;
-import net.labymod.api.models.Implements;
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,16 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Implements(LabyItemStack.class)
-public final class ItemStackImpl implements LabyItemStack {
-    private ItemStack stack;
+public final class ItemStackImpl implements IItemStack {
+    private final ItemStack stack;
 
-    public ItemStackImpl() {
-    }
-
-    public ItemStackImpl setStack(ItemStack stack) {
+    public ItemStackImpl(ItemStack stack) {
         this.stack = stack;
-        return this;
     }
 
     @Override
@@ -56,13 +50,13 @@ public final class ItemStackImpl implements LabyItemStack {
 
     @Override
     public List<String> priceCxn$getLore() {
-        List<Component> tooltip = stack.getTooltipLines(
-                Minecraft.getInstance().player,
-                Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
+        List<Text> tooltip = stack.getTooltip(
+                MinecraftClient.getInstance().player,
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.ADVANCED : TooltipContext.BASIC);
 
         List<String> lore = new ArrayList<>();
 
-        for (Component text : tooltip) {
+        for (Text text : tooltip) {
             lore.add(text.getString());
         }
 
@@ -71,12 +65,12 @@ public final class ItemStackImpl implements LabyItemStack {
 
     @Override
     public String priceCxn$getItemName() {
-        return stack.getItem().getDescriptionId();
+        return stack.getItem().getTranslationKey();
     }
 
     @Override
     public String priceCxn$getDisplayName() {
-        return stack.getDisplayName().getString();
+        return stack.getName().getString();
     }
 
     @Override
@@ -86,58 +80,55 @@ public final class ItemStackImpl implements LabyItemStack {
 
     @Override
     public boolean priceCxn$isTrimTemplate() {
-        return stack.is(ItemTags.TRIM_TEMPLATES);
+        return stack.isIn(ItemTags.TRIM_TEMPLATES);
     }
 
     @Override
     public boolean priceCxn$isNetheriteUpgradeSmithingTemplate() {
-        return stack.is(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+        return stack.isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
     }
 
     @Override
     public Optional<String> priceCxn$getRegistryKey() {
-        return Optional.of(stack.getItemHolder().kind().name());
+        return stack.getRegistryEntry().getKey()
+                .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
     }
 
-    @Override
     public JsonObject priceCxn$getComponentsAsJson() {
-        return componentMapToJson(stack.getTag());
+        if (stack.getNbt() == null)
+            return new JsonObject();
+        return componentMapToJson(stack.getNbt());
     }
 
-    private @NotNull JsonObject componentMapToJson(CompoundTag componentMap) {
-        if (componentMap == null || componentMap.isEmpty())
+    private @NotNull JsonObject componentMapToJson(NbtCompound componentMap) {
+        if (componentMap.isEmpty())
             return new JsonObject();
 
         JsonObject json = new JsonObject();
 
-        for (String key : componentMap.getAllKeys()) {
+        for (String key : componentMap.getKeys()) {
             Object component = componentMap.get(key);
-            switch (component) {
-                case null -> {
-                }
-                case CompoundTag subComponentMap -> json.add(key, componentMapToJson(subComponentMap));
-                case NbtDataComponentContainer subComponentMap -> {
+            if(component != null){
+                if (component instanceof NbtCompound subComponentMap) {
+                    json.add(key, componentMapToJson(subComponentMap));
+                } else if (component instanceof NbtElement subComponentMap) {
                     try {
                         JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
                         json.add(key, asJsonObject);
-                    } catch (JsonParseException e) {
+                    } catch (JsonParseException | IllegalStateException e) {
                         try {
                             JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
                             json.add(key, asJsonObject);
-                        } catch (JsonParseException e1) {
-                            json.addProperty(key, subComponentMap.toString());
+                        } catch (JsonParseException | IllegalStateException e1) {
+                            Object object = object(component.toString());
+                            if (object instanceof JsonElement element)
+                                json.add(key, element);
+                            else
+                                json.addProperty(key, object.toString());
                         }
                     }
                 }
-                default -> {
-                    Object object = object(component.toString());
-                    if (object instanceof JsonElement element)
-                        json.add(key, element);
-                    else
-                        json.addProperty(key, object.toString());
-                }
             }
-
         }
 
         return json;
@@ -146,6 +137,9 @@ public final class ItemStackImpl implements LabyItemStack {
     public Object object(String nbtString) {
         if (nbtString == null)
             return "";
+
+        if(!nbtString.matches("[\\[\\]{}]") && nbtString.contains("\""))
+            nbtString = nbtString.replace("\"", "");
 
         nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
 

@@ -47,7 +47,6 @@ import net.labymod.api.client.component.format.Style;
 import net.labymod.api.client.gui.screen.key.Key;
 import net.labymod.api.configuration.loader.property.ConfigProperty;
 import net.labymod.api.models.addon.annotation.AddonMain;
-import net.labymod.core.configuration.labymod.main.DefaultLabyConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
@@ -372,7 +371,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
     @Override
     public void openUrl(String url) {
-
+        getMinecraftClient().openUrl(url);
     }
 
     private LabyEntrypoint getLabyEntrypoint() {

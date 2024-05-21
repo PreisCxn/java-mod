@@ -6,6 +6,7 @@ import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
 import de.alive.preiscxn.api.cytooxien.ICxnListener;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
+import de.alive.preiscxn.api.interfaces.Entrypoint;
 import de.alive.preiscxn.api.interfaces.IGameHud;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IItemStack;
@@ -21,14 +22,7 @@ import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
-import de.alive.preiscxn.fabric.impl.GameHudImpl;
-import de.alive.preiscxn.fabric.impl.InventoryImpl;
-import de.alive.preiscxn.fabric.impl.ItemStackImpl;
-import de.alive.preiscxn.fabric.impl.KeyBindingImpl;
 import de.alive.preiscxn.fabric.impl.LoggerImpl;
-import de.alive.preiscxn.fabric.impl.MinecraftClientImpl;
-import de.alive.preiscxn.fabric.impl.PlayerImpl;
-import de.alive.preiscxn.fabric.impl.PriceTextImpl;
 import de.alive.preiscxn.impl.Version;
 import de.alive.preiscxn.impl.cytooxien.CxnListener;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
@@ -42,11 +36,8 @@ import de.alive.preiscxn.impl.networking.HttpImpl;
 import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
@@ -71,6 +62,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     private static final String MOD_NAME = "PriceCxn";
     public final ILogger logger = new LoggerImpl(LoggerFactory.getLogger("PriceCxn"));
 
+    private final Entrypoint entrypoint;
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
     private final ModuleLoader projectLoader;
@@ -84,6 +76,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public PriceCxnModClient() {
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
+
         try {
             Field mod = PriceCxn.class.getDeclaredField("mod");
             mod.setAccessible(true);
@@ -95,20 +88,28 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
         PriceCxn.getMod().getLogger().info("PriceCxn client created");
 
+        ModuleLoader versionLoader = new ModuleLoaderImpl();
         this.projectLoader = new ModuleLoaderImpl();
 
-        this.projectLoader.addModule(new MainModule());
+        this.entrypoint = this.initialiseVersionLoader(versionLoader).block();
+
+        this.initialiseProjectLoader(this.projectLoader)
+                .subscribe();
 
         try {
             cxnListener = new CxnListener();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
-        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api", Thread.currentThread().getContextClassLoader()));
-        this.projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.inventoryscanner", Thread.currentThread().getContextClassLoader()));
+    private Mono<Void> initialiseProjectLoader(ModuleLoader projectLoader) {
+        projectLoader.addModule(new MainModule());
 
-        registerRemoteModule(
+        projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.api", Thread.currentThread().getContextClassLoader()));
+        projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.inventoryscanner", Thread.currentThread().getContextClassLoader()));
+
+        return registerRemoteModule(
                 "de.alive.preiscxn.listener.inventory.AuctionHouseListener",
                 "Listener.jar",
                 Path.of("./downloads/" + MOD_NAME + "_modules/cxn.listener.jar"),
@@ -129,7 +130,24 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
                             PriceCxn.getMod().getLogger().error("Failed to load module: {}", aClass, e);
                         }
                     });
-                }).subscribe();
+                }).then();
+    }
+
+    private Mono<Entrypoint> initialiseVersionLoader(ModuleLoader projectLoader) {
+        return Mono.fromCallable(() -> {
+            String gameVersion = MinecraftClient.getInstance().getGameVersion()
+                    .replace(".", "_");
+            projectLoader.addModule(new ClasspathModule("de.alive.preiscxn.fabric.v" + gameVersion, Thread.currentThread().getContextClassLoader()));
+
+            projectLoader.loadInterfaces(Entrypoint.class).forEach(entrypoint -> {
+                try {
+                    entrypoint.getConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    PriceCxn.getMod().getLogger().error("Failed to load entrypoint: {}", entrypoint, e);
+                }
+            });
+            return null;
+        });
     }
 
     private Mono<Module> registerRemoteModule(String classPath, String remotePath, Path localPath, String primaryPackage) {
@@ -181,7 +199,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public Text getModText() {
-        return  MutableText
+        return MutableText
                 .of(new PlainTextContent.Literal(""))
                 .append(MutableText.of(new PlainTextContent.Literal("["))
                         .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY)))
@@ -228,12 +246,12 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public PriceText<?> createPriceText() {
-        return new PriceTextImpl(false);
+        return entrypoint.createPriceText(false);
     }
 
     @Override
     public PriceText<?> createPriceText(boolean b) {
-        return new PriceTextImpl(b);
+        return entrypoint.createPriceText(b);
     }
 
     @Override
@@ -261,7 +279,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IInventory createInventory() {
-        return InventoryImpl.getInstance(MinecraftClient.getInstance());
+        return entrypoint.createInventory();
     }
 
     @Override
@@ -271,14 +289,14 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IPlayer getPlayer() {
-        return new PlayerImpl();
+        return entrypoint.createPlayer();
     }
 
     @Override
     public void runOnEndClientTick(Consumer<IMinecraftClient> consumer) {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client != null) {
-                consumer.accept(MinecraftClientImpl.getInstance(client));
+                consumer.accept(entrypoint.createMinecraftClient());
             }
         });
     }
@@ -287,7 +305,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public void runOnJoin(Consumer<IMinecraftClient> consumer) {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             if (client != null) {
-                consumer.accept(MinecraftClientImpl.getInstance(client));
+                consumer.accept(entrypoint.createMinecraftClient());
             }
         });
     }
@@ -296,7 +314,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     public void runOnDisconnect(Consumer<IMinecraftClient> consumer) {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             if (client != null) {
-                consumer.accept(MinecraftClientImpl.getInstance(client));
+                consumer.accept(entrypoint.createMinecraftClient());
             }
         });
     }
@@ -308,7 +326,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IMinecraftClient getMinecraftClient() {
-        return MinecraftClientImpl.getInstance(MinecraftClient.getInstance());
+        return entrypoint.createMinecraftClient();
     }
 
     @Override
@@ -317,9 +335,10 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     }
 
     private void registerKeybinding(int code, String translationKey, String category, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
-        IKeyBinding keyBinding = new KeyBindingImpl(
-                KeyBindingHelper.registerKeyBinding(
-                        new KeyBinding(translationKey, InputUtil.Type.KEYSYM, code, category)),
+        IKeyBinding keyBinding = entrypoint.createKeyBinding(
+                code,
+                translationKey,
+                category,
                 keybindExecutor,
                 inInventory);
 
@@ -330,9 +349,8 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (keyBinding.wasPressed() && client.player != null) {
                 keybindExecutor.onKeybindPressed(
-                        MinecraftClientImpl.getInstance(client),
-                        ItemStackImpl.getInstance(client.player.getInventory().getMainHandStack())
-                );
+                        entrypoint.createMinecraftClient(),
+                        entrypoint.createInventory().getMainHandStack());
             }
         });
     }
@@ -374,7 +392,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public IGameHud getGameHud() {
-        return new GameHudImpl(MinecraftClient.getInstance().inGameHud);
+        return entrypoint.createGameHub();
     }
 
     @Override

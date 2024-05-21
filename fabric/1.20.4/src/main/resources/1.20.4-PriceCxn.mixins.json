@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "priority": 1001,
+  "compatibilityLevel": "JAVA_21",
+  "package": "de.alive.preiscxn.fabric.v1_20_4.mixin",
+  "verbose": false,
+  "minVersion": "0.8.2",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "HandledScreenMixin",
+    "ItemStackMixin",
+    "PlayerListEntryMixin",
+    "PlayerTabOverlayMixin"
+  ]
+}

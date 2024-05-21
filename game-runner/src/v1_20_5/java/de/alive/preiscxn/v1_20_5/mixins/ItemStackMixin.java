@@ -32,15 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements IItemStack {
-    @Unique
-    private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
-    @Unique
-    private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
-
     @Shadow
     public abstract List<Component> getTooltipLines(Item.TooltipContext $$0, @javax.annotation.Nullable Player $$1, TooltipFlag $$2);
 
