@@ -14,7 +14,7 @@ labyMod {
 		displayName = "PreisCxn"
 		author = "TeddyBear_2004"
 		description = "A simple addon for LabyMod that shows the price items on cytooxien.de"
-		minecraftVersion = ">1.20.4"
+		minecraftVersion = ">1.20.3"
 		version = "${project.extra["mod_version"]}"
 	}
 
