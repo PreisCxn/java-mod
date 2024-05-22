@@ -32,15 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements IItemStack {
-    @Unique
-    private static final Pattern JSON_KEY_PATTERN = Pattern.compile("([{,])(\\w+):");
-    @Unique
-    private static final Pattern TO_DELETE_PATTERN = Pattern.compile("[\\\\']");
-
     @Shadow
     public abstract List<Component> getTooltipLines(Item.TooltipContext $$0, @javax.annotation.Nullable Player $$1, TooltipFlag $$2);
 
@@ -163,44 +157,5 @@ public abstract class ItemStackMixin implements IItemStack {
         }
 
         return json;
-    }
-
-    @Unique
-    private Object object(String nbtString) {
-        if (nbtString == null)
-            return "";
-
-        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
-
-        JsonObject valueJson;
-
-        //test if only Delete Pattern is needed
-        try {
-            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-        } catch (IllegalStateException e) {
-            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-            //test if JsonArray
-            try {
-                return JsonParser.parseString(nbtString).getAsJsonArray();
-            } catch (IllegalStateException ignored) {
-                //test if JsonKey is missing
-                try {
-                    return JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e2) {
-                    //else add as normal String
-                    return nbtString;
-                }
-            }
-        } catch (JsonParseException e) {
-            //else add as normal String
-            return nbtString;
-        }
-
-        if (valueJson != null) {
-            return valueJson;
-        }
-
-        return nbtString;
     }
 }

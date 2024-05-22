@@ -22,7 +22,6 @@ import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.core.events.ItemStackTooltipListener;
-import de.alive.preiscxn.core.events.KeyListener;
 import de.alive.preiscxn.core.events.TickListener;
 import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
 import de.alive.preiscxn.core.impl.LabyEntrypoint;
@@ -40,10 +39,12 @@ import de.alive.preiscxn.impl.modules.ModuleLoaderImpl;
 import de.alive.preiscxn.impl.modules.RemoteModule;
 import de.alive.preiscxn.impl.networking.HttpImpl;
 import de.alive.preiscxn.impl.networking.cdn.CdnFileHandlerImpl;
+import net.labymod.api.Laby;
 import net.labymod.api.addon.LabyAddon;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.Style;
+import net.labymod.api.client.gui.screen.key.HotkeyService;
 import net.labymod.api.client.gui.screen.key.Key;
 import net.labymod.api.configuration.loader.property.ConfigProperty;
 import net.labymod.api.models.addon.annotation.AddonMain;
@@ -155,15 +156,12 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         this.registerListener(tickListener);
         this.registerListener(new ItemStackTooltipListener());
         PriceCxnConfiguration priceCxnConfiguration = this.configuration();
-        KeyListener keyListener = new KeyListener(priceCxnConfiguration);
 
         registerKeybinding(
-                keyListener,
                 priceCxnConfiguration.getOpenInBrowser(),
                 new OpenBrowserKeybindExecutor(),
                 true);
         registerKeybinding(
-                keyListener,
                 priceCxnConfiguration.getCycleAmount(),
                 new SwitchItemViewKeybindExecutor(),
                 true);
@@ -304,24 +302,22 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
         return http;
     }
 
-    private void registerKeybinding(KeyListener keyListener, ConfigProperty<Key> keyConfigProperty, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
+    private void registerKeybinding(ConfigProperty<Key> keyConfigProperty, @NotNull KeybindExecutor keybindExecutor, boolean inInventory) {
         IKeyBinding keyBinding = getLabyEntrypoint()
                 .createKeyBinding(keyConfigProperty.get().getId(), keyConfigProperty.get().getTranslationKey(), keyConfigProperty.get().getName(), keybindExecutor, inInventory);
 
-        classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
-        if (keyBinding.isInInventory())
-            keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
-
-        keyListener.registerKeyBinding(keyBinding);
-        tickListener.addTickConsumer(client -> {
-            if (keyBinding.wasPressed() && !client.isPlayerNull()) {
-
+        Laby.references().hotkeyService().register(keyConfigProperty.get().getName(), keyConfigProperty, () -> HotkeyService.Type.TOGGLE, active -> {
+            if (active) {
                 keybindExecutor.onKeybindPressed(
                         getLabyEntrypoint().createMinecraftClient(),
                         getLabyEntrypoint().createInventory().getMainHandStack()
                 );
             }
         });
+
+        classKeyBindingMap.put(keybindExecutor.getClass(), keyBinding);
+        if (keyBinding.isInInventory())
+            keyBindingKeybindExecutorMap.put(keyBinding, keybindExecutor);
     }
 
     @Override

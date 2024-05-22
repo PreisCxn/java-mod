@@ -2,6 +2,7 @@ package de.alive.preiscxn.core;
 
 import net.labymod.api.addon.AddonConfig;
 import net.labymod.api.client.gui.screen.key.Key;
+import net.labymod.api.client.gui.screen.widget.widgets.input.KeybindWidget.KeyBindSetting;
 import net.labymod.api.client.gui.screen.widget.widgets.input.SwitchWidget.SwitchSetting;
 import net.labymod.api.configuration.loader.annotation.ConfigName;
 import net.labymod.api.configuration.loader.property.ConfigProperty;
@@ -16,9 +17,11 @@ public class PriceCxnConfiguration extends AddonConfig {
     private final ConfigProperty<Boolean> displayCoin = new ConfigProperty<>(true);
 
     @SwitchSetting
+    @KeyBindSetting
     private final ConfigProperty<Key> openInBrowser = new ConfigProperty<>(Key.H);
 
     @SwitchSetting
+    @KeyBindSetting
     private final ConfigProperty<Key> cycleAmount = new ConfigProperty<>(Key.R_BRACKET);
 
     @Override
