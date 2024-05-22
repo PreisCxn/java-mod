@@ -2,6 +2,7 @@ package de.alive.preiscxn.v1_20_5.impl;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.core.impl.LabySlot;
 import net.labymod.api.models.Implements;
@@ -24,17 +25,17 @@ public final class SlotImpl implements LabySlot {
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData, addComment);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getItem(), searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getItem(), searchData);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl().setStack(slot.getItem()), searchData, addComment, addTooltips);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getItem(), searchData, addComment, addTooltips);
     }
 
     @Override

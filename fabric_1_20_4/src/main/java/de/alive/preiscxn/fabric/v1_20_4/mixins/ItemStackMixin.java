@@ -320,46 +320,4 @@ public abstract class ItemStackMixin implements IItemStack {
 
         return json;
     }
-
-    @Unique
-    public Object object(String nbtString) {
-        if (nbtString == null)
-            return "";
-
-        if(!nbtString.matches("[\\[\\]{}]") && nbtString.contains("\""))
-            nbtString = nbtString.replace("\"", "");
-
-        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
-
-        JsonObject valueJson;
-
-        //test if only Delete Pattern is needed
-        try {
-            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
-        } catch (IllegalStateException e) {
-            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
-
-            //test if JsonArray
-            try {
-                return JsonParser.parseString(nbtString).getAsJsonArray();
-            } catch (IllegalStateException ignored) {
-                //test if JsonKey is missing
-                try {
-                    return JsonParser.parseString(nbtString).getAsJsonObject();
-                } catch (IllegalStateException e2) {
-                    //else add as normal String
-                    return nbtString;
-                }
-            }
-        } catch (JsonParseException e) {
-            //else add as normal String
-            return nbtString;
-        }
-
-        if (valueJson != null) {
-            return valueJson;
-        }
-
-        return nbtString;
-    }
 }

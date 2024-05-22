@@ -37,6 +37,6 @@ public final class InventoryImpl implements LabyInventory {
     public IItemStack getMainHandStack() {
         if(minecraftClient.player == null)
             return null;
-        return new ItemStackImpl().setStack(minecraftClient.player.getMainHandItem());
+        return (IItemStack) (Object) minecraftClient.player.getMainHandItem();
     }
 }
