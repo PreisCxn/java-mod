@@ -1,8 +1,8 @@
 package de.alive.preiscxn.v1_20_4.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.v1_20_4.impl.EntrypointImpl;
-import de.alive.preiscxn.v1_20_4.impl.ItemStackImpl;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +30,7 @@ public abstract class HandledScreenMixin {
                         if (keyBinding.matchesKey(keyCode, scanCode)) {
                             keybindExecutor.onKeybindPressed(
                                     new EntrypointImpl().createMinecraftClient(),
-                                    new ItemStackImpl().setStack(this.hoveredSlot.getItem()));
+                                    (IItemStack) (Object) this.hoveredSlot.getItem());
                         }
                     }
             );
