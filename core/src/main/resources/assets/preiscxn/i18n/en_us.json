@@ -4,6 +4,15 @@
       "name": "PriceCxn",
       "enabled": {
         "name": "Enabled"
+      },
+      "displayCoin": {
+        "name": "Display Coin"
+      },
+      "openInBrowser": {
+        "name": "Open in Browser"
+      },
+      "cycleAmount": {
+        "name": "Cycle Amount"
       }
     }
   },

@@ -4,6 +4,15 @@
       "name": "PreisCxn",
       "enabled": {
         "name": "Eingeschaltet"
+      },
+      "displayCoin": {
+        "name": "Münze anzeigen"
+      },
+      "openInBrowser": {
+        "name": "Im Browser öffnen"
+      },
+      "cycleAmount": {
+        "name": "Menge für die Berechnung ändern"
       }
     }
   },
