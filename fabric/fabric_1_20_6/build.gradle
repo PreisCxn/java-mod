@@ -24,3 +24,9 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+loom {
+    mixin {
+        defaultRefmapName.set("${maven_group}.mixins.fabric.v1_20_6.refmap.json")
+    }
+}

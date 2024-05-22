@@ -22,9 +22,9 @@ dependencies {
     implementation project(path: ":inventoryscanner")
     implementation project(path: ":listener")
 
-    implementation(project(path: ":fabric_1_20_4", configuration: "namedElements"))
-    implementation(project(path: ":fabric_1_20_5", configuration: "namedElements"))
-    implementation(project(path: ":fabric_1_20_6", configuration: "namedElements"))
+    implementation(project(path: ":fabric:fabric_1_20_4", configuration: "namedElements"))
+    implementation(project(path: ":fabric:fabric_1_20_5", configuration: "namedElements"))
+    implementation(project(path: ":fabric:fabric_1_20_6", configuration: "namedElements"))
 
     include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
     include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
@@ -32,9 +32,9 @@ dependencies {
     include 'io.projectreactor:reactor-core:3.6.5'
     include 'org.reactivestreams:reactive-streams:1.0.4'
 
-    include(project(path: ":fabric_1_20_4", configuration: "namedElements"))
-    include(project(path: ":fabric_1_20_5", configuration: "namedElements"))
-    include(project(path: ":fabric_1_20_6", configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_4", configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_5", configuration: "namedElements"))
+    include(project(path: ":fabric:fabric_1_20_6", configuration: "namedElements"))
 
     include project(path: ":impl")
     include project(path: ":api")
@@ -55,3 +55,19 @@ processResources {
         expand "version": project.version
     }
 }
+
+tasks.register('allJar', Jar) {
+    dependsOn subprojects.findAll { it.name.startsWith('fabric_1') }.assemble
+    doLast {
+        println "Processing subprojects: ${subprojects.findAll { it.name.startsWith('fabric_1_') }}"
+        subprojects.findAll { it.name.startsWith('fabric_1_') }.each { subproject ->
+            println "Processing subproject: ${subproject.name}"
+            from subproject.configurations.archives.allArtifacts.files.stream().filter { a -> a.name.startsWith("fabric_1_") && a.name.contains(project.version) }.collect {
+                println "Found file: ${it.name}"
+                zipTree(it)
+            }
+        }
+    }
+}
+
+build.dependsOn(allJar);
