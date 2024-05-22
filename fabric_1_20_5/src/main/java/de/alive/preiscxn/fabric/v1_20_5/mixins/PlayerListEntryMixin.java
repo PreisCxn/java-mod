@@ -27,6 +27,10 @@ public abstract class PlayerListEntryMixin {
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void getDisplayName(@NotNull CallbackInfoReturnable<Text> ci) {
+        if (!PriceCxn.getMod().getConfig().isDisplayCoin()) {
+            return;
+        }
+
         Text originalDisplayName = this.displayName;
         if (originalDisplayName == null) return;
 

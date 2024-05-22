@@ -21,6 +21,10 @@ import java.util.List;
 public abstract class PlayerListEntryMixin {
     @Inject(method = "getTabListDisplayName", at = @At("RETURN"), cancellable = true)
     private void getDisplayName(@NotNull CallbackInfoReturnable<Component> ci) {
+        if (!PriceCxn.getMod().getConfig().isDisplayCoin()) {
+            return;
+        }
+
         Component originalDisplayName = ci.getReturnValue();
         if (originalDisplayName == null) return;
 

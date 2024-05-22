@@ -9,11 +9,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(PlayerListHud.class)
-public class PlayerTabOverlayMixin implements VersionedTabGui {
+public abstract class PlayerTabOverlayMixin implements VersionedTabGui {
 
     @Shadow @Nullable private Text header;
 
     @Shadow @Nullable private Text footer;
+
+    @Shadow private boolean visible;
+
+    @Shadow public abstract void setVisible(boolean visible);
 
     @Unique
     @Override
@@ -24,5 +28,12 @@ public class PlayerTabOverlayMixin implements VersionedTabGui {
     @Override
     public String priceCxn$getFooter() {
         return footer == null ? "" : footer.getString();
+    }
+
+    @Override
+    public void priceCxn$refresh() {
+        boolean visible1 = visible;
+        setVisible(!visible1);
+        setVisible(visible1);
     }
 }

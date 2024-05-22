@@ -14,6 +14,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.PriceCxnConfig;
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
@@ -53,7 +54,9 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -262,6 +265,22 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public Object space() {
         return Text.of(" ");
+    }
+
+    @Override
+    public PriceCxnConfig getConfig() {
+        //todo
+        return new PriceCxnConfig() {
+            @Override
+            public boolean getShowPricesInTooltip() {
+                return true;
+            }
+
+            @Override
+            public boolean isDisplayCoin() {
+                return true;
+            }
+        };
     }
 
     @Override

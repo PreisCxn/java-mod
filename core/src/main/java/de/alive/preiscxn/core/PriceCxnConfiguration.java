@@ -1,5 +1,6 @@
 package de.alive.preiscxn.core;
 
+import de.alive.preiscxn.api.interfaces.PriceCxnConfig;
 import net.labymod.api.addon.AddonConfig;
 import net.labymod.api.client.gui.screen.key.Key;
 import net.labymod.api.client.gui.screen.widget.widgets.input.KeybindWidget.KeyBindSetting;
@@ -8,10 +9,10 @@ import net.labymod.api.configuration.loader.annotation.ConfigName;
 import net.labymod.api.configuration.loader.property.ConfigProperty;
 
 @ConfigName("settings")
-public class PriceCxnConfiguration extends AddonConfig {
+public class PriceCxnConfiguration extends AddonConfig implements PriceCxnConfig {
 
     @SwitchSetting
-    private final ConfigProperty<Boolean> enabled = new ConfigProperty<>(true);
+    private final ConfigProperty<Boolean> showPricesInTooltip = new ConfigProperty<>(true);
 
     @SwitchSetting
     private final ConfigProperty<Boolean> displayCoin = new ConfigProperty<>(true);
@@ -26,7 +27,7 @@ public class PriceCxnConfiguration extends AddonConfig {
 
     @Override
     public ConfigProperty<Boolean> enabled() {
-        return this.enabled;
+        return this.showPricesInTooltip;
     }
 
   public ConfigProperty<Boolean> getDisplayCoin() {
@@ -39,5 +40,15 @@ public class PriceCxnConfiguration extends AddonConfig {
 
     public ConfigProperty<Key> getCycleAmount() {
         return cycleAmount;
+    }
+
+    @Override
+    public boolean getShowPricesInTooltip() {
+        return showPricesInTooltip.get();
+    }
+
+    @Override
+    public boolean isDisplayCoin() {
+        return displayCoin.get() && showPricesInTooltip.get();
     }
 }

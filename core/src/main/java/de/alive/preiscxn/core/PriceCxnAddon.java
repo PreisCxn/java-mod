@@ -13,6 +13,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.PriceCxnConfig;
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.Module;
@@ -21,6 +22,7 @@ import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
+import de.alive.preiscxn.core.events.ConfigChangeListener;
 import de.alive.preiscxn.core.events.ItemStackTooltipListener;
 import de.alive.preiscxn.core.events.TickListener;
 import de.alive.preiscxn.core.generated.DefaultReferenceStorage;
@@ -155,6 +157,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
 
         this.registerListener(tickListener);
         this.registerListener(new ItemStackTooltipListener());
+        this.registerListener(new ConfigChangeListener());
         PriceCxnConfiguration priceCxnConfiguration = this.configuration();
 
         registerKeybinding(
@@ -237,6 +240,11 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public Object space() {
         return Component.text(" ");
+    }
+
+    @Override
+    public PriceCxnConfig getConfig() {
+        return configuration();
     }
 
     @Override

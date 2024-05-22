@@ -11,6 +11,7 @@ import de.alive.preiscxn.api.interfaces.IKeyBinding;
 import de.alive.preiscxn.api.interfaces.ILogger;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
+import de.alive.preiscxn.api.interfaces.PriceCxnConfig;
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -41,6 +42,7 @@ public interface Mod {
     PriceText<?> createPriceText(boolean b);
     Object space();
 
+    PriceCxnConfig getConfig();
 
     PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips);
     PriceCxnItemStack createItemStack(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment);
