@@ -73,10 +73,15 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     private final CxnListener cxnListener;
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
+    private final FabricConfig config;
 
     private PriceCxnItemStack.ViewMode viewMode = PriceCxnItemStack.ViewMode.CURRENT_STACK;
 
     public PriceCxnModClient() {
+        Path configPath = Path.of("./config/" + MOD_NAME + ".json");
+        this.config = FabricConfig.saveDefault(configPath)
+                .then(FabricConfig.loadConfig(configPath))
+                .block();
         this.http = new HttpImpl();
         this.cdnFileHandler = new CdnFileHandlerImpl(http);
 
@@ -269,18 +274,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
 
     @Override
     public PriceCxnConfig getConfig() {
-        //todo
-        return new PriceCxnConfig() {
-            @Override
-            public boolean isActive() {
-                return true;
-            }
-
-            @Override
-            public boolean isDisplayCoin() {
-                return true;
-            }
-        };
+        return config;
     }
 
     @Override

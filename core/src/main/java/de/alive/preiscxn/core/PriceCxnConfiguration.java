@@ -39,12 +39,12 @@ public class PriceCxnConfiguration extends AddonConfig implements PriceCxnConfig
     }
 
     @Override
-    public boolean isActive() {
+    public Boolean isActive() {
         return enabled.get();
     }
 
     @Override
-    public boolean isDisplayCoin() {
+    public Boolean isDisplayCoin() {
         return displayCoin.get() && enabled.get();
     }
 }
