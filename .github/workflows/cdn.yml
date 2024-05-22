@@ -19,7 +19,7 @@ jobs:
           java-version: 21
 
       - name: Build with Gradle
-        run: ./gradlew Api:clean clean Api:build build
+        run: ./gradlew :fabric:build
 
       - name: Run Python script
         run: python3 ./CdnSender/mod_sender.py

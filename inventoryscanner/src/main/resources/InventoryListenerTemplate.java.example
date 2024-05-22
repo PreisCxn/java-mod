@@ -1,0 +1,87 @@
+package de.alive.inventory.listener;
+
+import com.google.gson.JsonArray;
+import de.alive.preiscxn.api.Mod;
+import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IMinecraftClient;
+import de.alive.preiscxn.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.listener.InventoryListener;
+import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.listener.InventoryDataAccess;
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static de.alive.preiscxn.api.LogPrinter.printDebug;
+import static de.alive.preiscxn.api.LogPrinter.printTester;
+import static de.alive.preiscxn.api.utils.ItemUpdater.updateItemsAsync;
+
+public enum {{CLASSNAME}}Listener extends InventoryListener implements DataAccess {
+{{ENUM_VALUES}};
+
+    private final List<PriceCxnItemStack> items = new ArrayList<>();
+    private final Tuple2<Integer, Integer> itemRange = Tuples.of(10, 35);
+
+    private final Map<String, DataAccess> searchData = new HashMap<>();
+
+
+    /**
+     * This constructor is used to listen to a specific inventory
+     *
+     * @param inventoryTitles The titles of the inventories to listen to
+     * @param inventorySize   The size of the inventories to listen to (in slots)
+     */
+    public {{CLASSNAME}}Listener(@NotNull Mod mod, @NotNull DataAccess inventoryTitles, int inventorySize, AtomicBoolean... active) {
+        super(mod, inventoryTitles, inventorySize <= 0 ? 6 * 9 : inventorySize, active);
+
+{{DATA_ACCESSES}}
+    }
+
+    public {{CLASSNAME}}Listener(Mod mod, AtomicBoolean... active) {
+        this(mod, {{DATA_ACCESS_TITLE}}, 0, active);
+    }
+
+    @Override
+    public @NotNull Mono<Void> onInventoryOpen(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+        printDebug("{{CLASSNAME}} open");
+
+        this.items.clear();
+        return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
+    }
+
+    @Override
+    public @NotNull Mono<Void> onInventoryClose(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+        printDebug("{{CLASSNAME}} close");
+
+        JsonArray array = new JsonArray();
+
+        for (PriceCxnItemStack item : items) {
+            array.add(item.getDataWithoutDisplay());
+        }
+
+        if (!array.isEmpty()) {
+            return sendData("/auctionhouse", array)
+                    .doOnSuccess(aVoid -> {
+                        if (client.isPlayerNull())
+                            return;
+                        printTester("{{CLASSNAME}} data sent: " + array.size() + " items");
+                    });
+        }
+        return Mono.empty();
+    }
+
+    @Override
+    public @NotNull Mono<Void> onInventoryUpdate(@NotNull IMinecraftClient client, @NotNull IScreenHandler handler) {
+        printDebug("{{CLASSNAME}} updated");
+        return updateItemsAsync(this.items, handler, this.itemRange, this.searchData);
+    }
+
+}

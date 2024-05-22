@@ -1,0 +1,50 @@
+{
+  "preiscxn": {
+    "settings": {
+      "name": "PriceCxn",
+      "enabled": {
+        "name": "Enabled"
+      },
+      "displayCoin": {
+        "name": "Display Coin"
+      },
+      "openInBrowser": {
+        "name": "Open in Browser"
+      },
+      "cycleAmount": {
+        "name": "Cycle Amount"
+      }
+    }
+  },
+  "cxn_listener.mod_text": "PriceCxn",
+
+  "cxn_listener.test": "Test",
+
+  "cxn_listener.mod_started": "The mod started successfully.",
+  "cxn_listener.mod_stopped": "The mod has been disabled.",
+  "cxn_listener.wrong_version": "Outdated mod version. Please update at least to version %s.",
+
+  "cxn_listener.server_connection.error": "Connection to server could not be established.",
+  "cxn_listener.server_connection.success": "Connection to server successfully established.",
+  "cxn_listener.server_connection.maintenance": "The server is currently undergoing maintenance.",
+  "cxn_listener.server_connection.maintenance_with_permission": "Access to server granted despite maintenance work.",
+
+  "cxn_listener.data_handler.refresh": "%s data has been updated.",
+
+  "cxn_listener.theme_checker.changed": "Changed mode to %s.",
+
+  "cxn_listener.display_prices.updated": "Updated %s %s ago",
+  "cxn_listener.display_prices.search": "Searching%s",
+  "cxn_listener.display_prices.search_failed": "Search failed",
+  "cxn_listener.display_prices.minutes_plural": "minutes",
+  "cxn_listener.display_prices.minutes_singular": "minute",
+  "cxn_listener.display_prices.hours_plural": "hours",
+  "cxn_listener.display_prices.hours_singular": "hour",
+  "cxn_listener.display_prices.days_plural": "days",
+  "cxn_listener.display_prices.days_singular": "day",
+  "cxn_listener.display_prices.view_in_browser": "Press %s, for more info.",
+
+  "cxn_listener.keys.open_in_browser": "Open item in browser",
+  "cxn_listener.keys.cycle_amount": "Cycle amount for calculation"
+
+}

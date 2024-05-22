@@ -2,7 +2,7 @@ import os
 
 from file_sender import upload_file, select_file, get_version
 
-selected_file = select_file('./Listener/build/libs', 'Listener')
+selected_file = select_file('./Listener/build/libs', 'listener')
 
 if selected_file:
     file_path = os.path.join('./Listener/build/libs', selected_file)

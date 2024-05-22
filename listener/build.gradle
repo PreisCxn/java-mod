@@ -1,0 +1,55 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
+plugins {
+    id 'java'
+}
+
+version = "${project(":").property("mod_version")}"
+group = "${project.property("maven_group")}"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ":api")
+    implementation 'io.projectreactor:reactor-core:3.6.5'
+    implementation 'org.jetbrains:annotations:24.1.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation "org.slf4j:slf4j-api:2.0.13"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('uploadBeta') {
+    dependsOn 'build'
+
+    doLast {
+        def jarFile = file('build/libs/Listener.jar')
+        def url = URI.create('https://cdn.preiscxn.de/Listener.jar?channel=beta&version=' + project(":").mod_version).toURL()
+
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+        connection.setRequestMethod('POST')
+        connection.setDoOutput(true)
+
+        // Use the environment variable as the header key
+        connection.setRequestProperty("pricecxn-auth", System.getenv("PRICECXNAUTH"))
+
+
+        byte[] jarBytes = Files.readAllBytes(Paths.get(jarFile.toURI()))
+
+        connection.getOutputStream().write(jarBytes)
+
+        println connection.responseCode + " " + connection.getResponseMessage()
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            println 'Upload successful'
+        } else {
+            println 'Upload failed'
+        }
+
+        connection.disconnect()
+    }
+}

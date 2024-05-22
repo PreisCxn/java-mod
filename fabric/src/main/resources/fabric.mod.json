@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "pricecxn",
+	"version": "${version}",
+
+	"name": "PriceCxn",
+	"description": "Displays and listening for CxnPrices.",
+	"authors": [
+		"_Alive_",
+		"TeddyBear_2004"
+	],
+	"contact": {
+		"homepage": "https://preiscxn.de/",
+		"sources": "https://preiscxn.de/mod"
+	},
+
+	"license": "MIT License",
+	"icon": "assets/preiscxn/textures/icon.png",
+
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"de.alive.preiscxn.fabric.PriceCxnModClient"
+		]
+	},
+
+	"depends": {
+		"fabricloader": ">=0.14.0",
+		"fabric-api": "*",
+		"minecraft": ">=1.20.5",
+		"java": ">=21"
+	},
+	"mixins": [
+		"1.20.4-Fabric-PriceCxn.mixins.json",
+		"1.20.5-Fabric-PriceCxn.mixins.json",
+		"1.20.6-Fabric-PriceCxn.mixins.json"
+	]
+}
