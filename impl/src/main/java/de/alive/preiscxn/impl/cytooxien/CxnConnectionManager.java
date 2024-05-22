@@ -268,7 +268,7 @@ public class CxnConnectionManager implements ICxnConnectionManager {
      */
     @Override
     public boolean isActive() {
-        return this.active.get();
+        return this.active.get() && PriceCxn.getMod().getConfig().isActive();
     }
     /**
      * Sends a connection information message to the Minecraft player.

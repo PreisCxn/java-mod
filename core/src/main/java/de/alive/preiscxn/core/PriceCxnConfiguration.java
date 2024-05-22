@@ -12,7 +12,7 @@ import net.labymod.api.configuration.loader.property.ConfigProperty;
 public class PriceCxnConfiguration extends AddonConfig implements PriceCxnConfig {
 
     @SwitchSetting
-    private final ConfigProperty<Boolean> showPricesInTooltip = new ConfigProperty<>(true);
+    private final ConfigProperty<Boolean> enabled = new ConfigProperty<>(true);
 
     @SwitchSetting
     private final ConfigProperty<Boolean> displayCoin = new ConfigProperty<>(true);
@@ -27,12 +27,8 @@ public class PriceCxnConfiguration extends AddonConfig implements PriceCxnConfig
 
     @Override
     public ConfigProperty<Boolean> enabled() {
-        return this.showPricesInTooltip;
+        return this.enabled;
     }
-
-  public ConfigProperty<Boolean> getDisplayCoin() {
-    return displayCoin;
-  }
 
     public ConfigProperty<Key> getOpenInBrowser() {
         return openInBrowser;
@@ -43,12 +39,12 @@ public class PriceCxnConfiguration extends AddonConfig implements PriceCxnConfig
     }
 
     @Override
-    public boolean getShowPricesInTooltip() {
-        return showPricesInTooltip.get();
+    public boolean isActive() {
+        return enabled.get();
     }
 
     @Override
     public boolean isDisplayCoin() {
-        return displayCoin.get() && showPricesInTooltip.get();
+        return displayCoin.get() && enabled.get();
     }
 }

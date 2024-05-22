@@ -18,10 +18,6 @@ public abstract class PlayerTabOverlayMixin implements VersionedTabGui {
     @Shadow
     private Component header;
 
-    @Shadow private boolean visible;
-
-    @Shadow public abstract void setVisible(boolean $$0);
-
     @Unique
     @Override
     public String priceCxn$getHeader() {
@@ -31,12 +27,5 @@ public abstract class PlayerTabOverlayMixin implements VersionedTabGui {
     @Override
     public String priceCxn$getFooter() {
         return footer == null ? "" : footer.getString();
-    }
-
-    @Override
-    public void priceCxn$refresh() {
-        boolean visible1 = visible;
-        setVisible(!visible1);
-        setVisible(visible1);
     }
 }

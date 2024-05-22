@@ -272,7 +272,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
         //todo
         return new PriceCxnConfig() {
             @Override
-            public boolean getShowPricesInTooltip() {
+            public boolean isActive() {
                 return true;
             }
 

@@ -60,6 +60,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -169,7 +170,12 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
                 new SwitchItemViewKeybindExecutor(),
                 true);
 
-        this.logger().info("Enabled the Addon");
+        AtomicBoolean currentCoinSetting = new AtomicBoolean(getConfig().isDisplayCoin());
+        tickListener.addTickConsumer(iMinecraftClient -> {
+            if(getConfig().isDisplayCoin() != currentCoinSetting.get()) {
+                currentCoinSetting.set(getConfig().isDisplayCoin());
+            }
+        });
     }
 
     @Override
