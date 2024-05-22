@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_20_6.mixin;
+package de.alive.preiscxn.fabric.v1_20_5.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.ICxnListener;

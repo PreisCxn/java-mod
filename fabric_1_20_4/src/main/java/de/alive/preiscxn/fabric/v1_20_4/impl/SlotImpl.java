@@ -4,6 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.ISlot;
 import de.alive.preiscxn.api.networking.DataAccess;
 import net.minecraft.screen.slot.Slot;
@@ -33,17 +34,17 @@ public final class SlotImpl implements ISlot {
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl(slot.getStack()), searchData, addComment);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getStack(), searchData, addComment);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl(slot.getStack()), searchData);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getStack(), searchData);
     }
 
     @Override
     public PriceCxnItemStack createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
-        return PriceCxn.getMod().createItemStack(new ItemStackImpl(slot.getStack()), searchData, addComment, addTooltips);
+        return PriceCxn.getMod().createItemStack((IItemStack) (Object) slot.getStack(), searchData, addComment, addTooltips);
     }
 
     @Override

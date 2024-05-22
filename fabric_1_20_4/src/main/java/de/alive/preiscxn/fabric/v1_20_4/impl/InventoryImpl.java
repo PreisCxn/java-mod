@@ -30,6 +30,6 @@ public final class InventoryImpl implements IInventory {
     public IItemStack getMainHandStack() {
         if(minecraftClient.player == null)
             return null;
-        return new ItemStackImpl(minecraftClient.player.getMainHandStack());
+        return ((IItemStack) (Object) minecraftClient.player.getMainHandStack());
     }
 }

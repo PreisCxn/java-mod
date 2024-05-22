@@ -1,7 +1,7 @@
-package de.alive.preiscxn.fabric.v1_20_6.mixin;
+package de.alive.preiscxn.fabric.v1_20_6.mixins;
 
 import de.alive.preiscxn.api.PriceCxn;
-import de.alive.preiscxn.fabric.v1_20_6.impl.ItemStackImpl;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.fabric.v1_20_6.impl.MinecraftClientImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -28,7 +28,7 @@ public abstract class HandledScreenMixin {
 
         if (this.focusedSlot != null && this.focusedSlot.hasStack()) {
             MinecraftClientImpl minecraftClient = new MinecraftClientImpl(MinecraftClient.getInstance());
-            ItemStackImpl itemStack = new ItemStackImpl(this.focusedSlot.getStack());
+            IItemStack itemStack = (IItemStack) (Object) this.focusedSlot.getStack();
 
             PriceCxn.getMod().forEachKeybindExecutor(
                     (keyBinding, keybindExecutor) -> {

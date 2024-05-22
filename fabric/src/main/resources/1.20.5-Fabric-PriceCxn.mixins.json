@@ -2,7 +2,8 @@
   "required": true,
   "priority": 1001,
   "compatibilityLevel": "JAVA_21",
-  "package": "de.alive.preiscxn.fabric.v1_20_6.mixin",
+  "package": "de.alive.preiscxn.fabric.v1_20_5.mixins",
+  "plugin": "de.alive.preiscxn.fabric.MixinConfig",
   "verbose": false,
   "minVersion": "0.8.2",
   "injectors": {

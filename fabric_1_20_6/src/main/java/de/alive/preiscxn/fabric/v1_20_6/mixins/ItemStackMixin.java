@@ -1,22 +1,34 @@
-package de.alive.preiscxn.fabric.v1_20_6.mixin;
+package de.alive.preiscxn.fabric.v1_20_6.mixins;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
 import de.alive.preiscxn.api.cytooxien.Modes;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.TimeUtil;
-import de.alive.preiscxn.fabric.v1_20_6.impl.ItemStackImpl;
-import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipType;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentType;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
@@ -35,22 +47,50 @@ import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin {
+public abstract class ItemStackMixin implements IItemStack {
     @Shadow
     public abstract boolean isEmpty();
 
+    @Shadow
+    public abstract Text getName();
+
+    @Shadow
+    public abstract int getCount();
+
+    @Shadow
+    public abstract boolean isIn(TagKey<Item> tag);
+
+    @Shadow
+    public abstract String getTranslationKey();
+
+    @Shadow
+    public abstract boolean isOf(Item item);
+
+    @Shadow
+    public abstract RegistryEntry<Item> getRegistryEntry();
+
+    @Shadow
+    public abstract ComponentMap getComponents();
+
+    @Shadow
+    public abstract Item getItem();
+
     @Unique
-    private @Nullable PriceCxnItemStackImpl cxnItemStack = null;
+    private PriceCxnItemStack cxnItemStack = null;
 
     @Unique
     private long lastUpdate = 0;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+    public void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+        if (cir == null)
+            return;
+
         if (!PriceCxn.getMod().getConnectionManager().isActive()) {
             return;
         }
@@ -142,7 +182,7 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    public boolean shouldCancel(@NotNull List<Text> list) {
+    private boolean shouldCancel(@NotNull List<Text> list) {
         IThemeServerChecker themeChecker = PriceCxn.getMod().getCxnListener().getThemeChecker();
 
         Modes mode = themeChecker.getMode();
@@ -184,7 +224,153 @@ public abstract class ItemStackMixin {
     }
 
     @Unique
-    private PriceCxnItemStackImpl getPriceCxnItemStack() {
-        return PriceCxnItemStackImpl.getInstance(new ItemStackImpl((ItemStack) (Object) this), null, true, false);
+    private PriceCxnItemStack getPriceCxnItemStack() {
+        return priceCxn$createItemStack(null, true, false);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData,
+                                                      boolean addComment) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData) {
+        return PriceCxn.getMod().createItemStack(this, searchData);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment, addTooltips);
+    }
+
+    @Override
+    public List<String> priceCxn$getLore() {
+        List<Text> tooltip = ((ItemStack) (Object) this).getTooltip(Item.TooltipContext.DEFAULT,
+                MinecraftClient.getInstance().player,
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipType.ADVANCED : TooltipType.BASIC);
+
+        List<String> lore = new ArrayList<>();
+
+        for (Text text : tooltip) {
+            lore.add(text.getString());
+        }
+
+        return lore;
+    }
+
+    @Override
+    public String priceCxn$getItemName() {
+        return getTranslationKey();
+    }
+
+    @Override
+    public String priceCxn$getDisplayName() {
+        return getName().getString();
+    }
+
+    @Override
+    public int priceCxn$getCount() {
+        return getCount();
+    }
+
+    @Override
+    public boolean priceCxn$isTrimTemplate() {
+        return isIn(ItemTags.TRIM_TEMPLATES);
+    }
+
+    @Override
+    public boolean priceCxn$isNetheriteUpgradeSmithingTemplate() {
+        return isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+    }
+
+    @Override
+    public Optional<String> priceCxn$getRegistryKey() {
+        return getRegistryEntry().getKey()
+                .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
+    }
+
+    @Override
+    public JsonObject priceCxn$getComponentsAsJson() {
+        return componentMapToJson(getComponents());
+    }
+
+    @Unique
+    private @NotNull JsonObject componentMapToJson(@NotNull ComponentMap componentMap) {
+        if (componentMap.isEmpty())
+            return new JsonObject();
+
+        JsonObject json = new JsonObject();
+
+        for (DataComponentType<?> key : componentMap.getTypes()) {
+            Object component = componentMap.get(key);
+            switch (component) {
+                case null -> {
+                }
+                case ComponentMap subComponentMap -> json.add(key.toString(), componentMapToJson(subComponentMap));
+                case NbtComponent subComponentMap -> {
+                    try {
+                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
+                        json.add(key.toString(), asJsonObject);
+                    } catch (JsonParseException e) {
+                        try {
+                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                            json.add(key.toString(), asJsonObject);
+                        } catch (JsonParseException e1) {
+                            json.addProperty(key.toString(), subComponentMap.toString());
+                        }
+                    }
+                }
+                default -> {
+                    Object object = object(component.toString());
+                    if (object instanceof JsonElement element)
+                        json.add(key.toString(), element);
+                    else
+                        json.addProperty(key.toString(), object.toString());
+                }
+            }
+
+        }
+
+        return json;
+    }
+
+    @Unique
+    private Object object(String nbtString) {
+        if (nbtString == null)
+            return "";
+
+        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+        JsonObject valueJson;
+
+        //test if only Delete Pattern is needed
+        try {
+            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+            //test if JsonArray
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonArray();
+            } catch (IllegalStateException ignored) {
+                //test if JsonKey is missing
+                try {
+                    return JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e2) {
+                    //else add as normal String
+                    return nbtString;
+                }
+            }
+        } catch (JsonParseException e) {
+            //else add as normal String
+            return nbtString;
+        }
+
+        if (valueJson != null) {
+            return valueJson;
+        }
+
+        return nbtString;
     }
 }

@@ -1,22 +1,35 @@
-package de.alive.preiscxn.fabric.v1_20_5.mixin;
+package de.alive.preiscxn.fabric.v1_20_4.mixins;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
 import de.alive.preiscxn.api.cytooxien.Modes;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
+import de.alive.preiscxn.api.interfaces.IItemStack;
 import de.alive.preiscxn.api.interfaces.IKeyBinding;
+import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.TimeUtil;
-import de.alive.preiscxn.fabric.v1_20_5.impl.ItemStackImpl;
 import de.alive.preiscxn.impl.cytooxien.PriceCxnItemStackImpl;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
@@ -35,11 +48,12 @@ import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin {
+public abstract class ItemStackMixin implements IItemStack {
     @Shadow
     public abstract boolean isEmpty();
 
@@ -50,7 +64,7 @@ public abstract class ItemStackMixin {
     private long lastUpdate = 0;
 
     @Inject(method = "getTooltip", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void getToolTip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+    private void getToolTip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir) {
         if (!PriceCxn.getMod().getConnectionManager().isActive()) {
             return;
         }
@@ -185,6 +199,167 @@ public abstract class ItemStackMixin {
 
     @Unique
     private PriceCxnItemStackImpl getPriceCxnItemStack() {
-        return PriceCxnItemStackImpl.getInstance(new ItemStackImpl((ItemStack) (Object) this), null, true, false);
+        return PriceCxnItemStackImpl.getInstance(this, null, true, false);
+    }
+
+    @Shadow
+    public abstract Item getItem();
+
+    @Shadow
+    public abstract int getCount();
+
+    @Shadow public abstract Text getName();
+
+    @Shadow public abstract boolean isOf(Item item);
+
+    @Shadow public abstract boolean isIn(TagKey<Item> tag);
+
+    @Shadow @Nullable public abstract Entity getHolder();
+
+    @Shadow public abstract RegistryEntry<Item> getRegistryEntry();
+
+    @Shadow public abstract NbtCompound getNbt();
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment, addTooltips);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData, boolean addComment) {
+        return PriceCxn.getMod().createItemStack(this, searchData, addComment);
+    }
+
+    @Override
+    public PriceCxnItemStack priceCxn$createItemStack(@Nullable Map<String, DataAccess> searchData) {
+        return PriceCxn.getMod().createItemStack(this, searchData);
+    }
+
+    @Override
+    public List<String> priceCxn$getLore() {
+        List<Text> tooltip = ((ItemStack) (Object) this).getTooltip(
+                MinecraftClient.getInstance().player,
+                MinecraftClient.getInstance().options.advancedItemTooltips ? TooltipContext.ADVANCED : TooltipContext.BASIC);
+
+        List<String> lore = new ArrayList<>();
+
+        for (Text text : tooltip) {
+            lore.add(text.getString());
+        }
+
+        return lore;
+    }
+
+    @Override
+    public String priceCxn$getItemName() {
+        return getItem().getTranslationKey();
+    }
+
+    @Override
+    public String priceCxn$getDisplayName() {
+        return getName().getString();
+    }
+
+    @Override
+    public int priceCxn$getCount() {
+        return getCount();
+    }
+
+    @Override
+    public boolean priceCxn$isTrimTemplate() {
+        return isIn(ItemTags.TRIM_TEMPLATES);
+    }
+
+    @Override
+    public boolean priceCxn$isNetheriteUpgradeSmithingTemplate() {
+        return isOf(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+    }
+
+    @Override
+    public Optional<String> priceCxn$getRegistryKey() {
+        return getRegistryEntry().getKey()
+                .map(itemRegistryKey -> itemRegistryKey.getValue().getPath());
+    }
+
+    @Override
+    public JsonObject priceCxn$getComponentsAsJson() {
+        return componentMapToJson(getNbt());
+    }
+
+    @Unique
+    private @NotNull JsonObject componentMapToJson(NbtCompound componentMap) {
+        if (componentMap.isEmpty())
+            return new JsonObject();
+
+        JsonObject json = new JsonObject();
+
+        for (String key : componentMap.getKeys()) {
+            Object component = componentMap.get(key);
+            if(component != null){
+                if (component instanceof NbtCompound subComponentMap) {
+                    json.add(key, componentMapToJson(subComponentMap));
+                } else if (component instanceof NbtElement subComponentMap) {
+                    try {
+                        JsonObject asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonObject();
+                        json.add(key, asJsonObject);
+                    } catch (JsonParseException | IllegalStateException e) {
+                        try {
+                            JsonArray asJsonObject = JsonParser.parseString(subComponentMap.toString()).getAsJsonArray();
+                            json.add(key, asJsonObject);
+                        } catch (JsonParseException | IllegalStateException e1) {
+                            Object object = object(component.toString());
+                            if (object instanceof JsonElement element)
+                                json.add(key, element);
+                            else
+                                json.addProperty(key, object.toString());
+                        }
+                    }
+                }
+            }
+        }
+
+        return json;
+    }
+
+    @Unique
+    public Object object(String nbtString) {
+        if (nbtString == null)
+            return "";
+
+        if(!nbtString.matches("[\\[\\]{}]") && nbtString.contains("\""))
+            nbtString = nbtString.replace("\"", "");
+
+        nbtString = TO_DELETE_PATTERN.matcher(nbtString).replaceAll("");
+
+        JsonObject valueJson;
+
+        //test if only Delete Pattern is needed
+        try {
+            valueJson = JsonParser.parseString(nbtString).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            nbtString = JSON_KEY_PATTERN.matcher(nbtString).replaceAll("$1\"$2\":");
+
+            //test if JsonArray
+            try {
+                return JsonParser.parseString(nbtString).getAsJsonArray();
+            } catch (IllegalStateException ignored) {
+                //test if JsonKey is missing
+                try {
+                    return JsonParser.parseString(nbtString).getAsJsonObject();
+                } catch (IllegalStateException e2) {
+                    //else add as normal String
+                    return nbtString;
+                }
+            }
+        } catch (JsonParseException e) {
+            //else add as normal String
+            return nbtString;
+        }
+
+        if (valueJson != null) {
+            return valueJson;
+        }
+
+        return nbtString;
     }
 }

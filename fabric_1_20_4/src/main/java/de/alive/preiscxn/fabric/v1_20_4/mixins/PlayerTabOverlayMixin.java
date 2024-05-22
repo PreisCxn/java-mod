@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_20_4.mixin;
+package de.alive.preiscxn.fabric.v1_20_4.mixins;
 
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import net.minecraft.client.gui.hud.PlayerListHud;
