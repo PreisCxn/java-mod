@@ -22,19 +22,15 @@ dependencies {
     implementation project(path: ":inventoryscanner")
     implementation project(path: ":listener")
 
-    implementation(project(path: ":fabric:fabric_1_20_4", configuration: "namedElements"))
-    implementation(project(path: ":fabric:fabric_1_20_5", configuration: "namedElements"))
-    implementation(project(path: ":fabric:fabric_1_20_6", configuration: "namedElements"))
+    implementation(project(path: ":fabric-versions:fabric_1_20_4", configuration: "namedElements"))
+    implementation(project(path: ":fabric-versions:fabric_1_20_5", configuration: "namedElements"))
+    implementation(project(path: ":fabric-versions:fabric_1_20_6", configuration: "namedElements"))
 
     include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
     include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
     include 'org.java-websocket:Java-WebSocket:1.5.6'
     include 'io.projectreactor:reactor-core:3.6.5'
     include 'org.reactivestreams:reactive-streams:1.0.4'
-
-    include(project(path: ":fabric:fabric_1_20_4", configuration: "namedElements"))
-    include(project(path: ":fabric:fabric_1_20_5", configuration: "namedElements"))
-    include(project(path: ":fabric:fabric_1_20_6", configuration: "namedElements"))
 
     include project(path: ":impl")
     include project(path: ":api")
@@ -56,18 +52,33 @@ processResources {
     }
 }
 
-tasks.register('allJar', Jar) {
-    dependsOn subprojects.findAll { it.name.startsWith('fabric_1') }.assemble
-    doLast {
-        println "Processing subprojects: ${subprojects.findAll { it.name.startsWith('fabric_1_') }}"
-        subprojects.findAll { it.name.startsWith('fabric_1_') }.each { subproject ->
-            println "Processing subproject: ${subproject.name}"
-            from subproject.configurations.archives.allArtifacts.files.stream().filter { a -> a.name.startsWith("fabric_1_") && a.name.contains(project.version) }.collect {
-                println "Found file: ${it.name}"
-                zipTree(it)
-            }
+tasks.register("includeFabricVersions", Jar) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    dependsOn project(":fabric-versions").tasks.named("build")
+    logger.lifecycle("Starting to include 'fabric-versions' artifacts from subprojects")
+
+    def partArtifacts = project.configurations.archives.allArtifacts.stream()
+            .filter { a -> a.file.name.contains("fabric") }
+            .map { a -> a.file }
+            .toList()
+
+    def fabricVersionArtifacts = project(":fabric-versions").configurations.archives.allArtifacts.stream()
+            .peek { file -> logger.lifecycle("Checking artifact: ${file.file.name}") }
+            .filter { a -> a.file.name.contains("fabric-versions") }
+            .map { a -> a.file }
+            .peek { file -> logger.lifecycle("Including artifact: ${file}") }
+            .toList()
+
+    def allArtifacts = fabricVersionArtifacts + partArtifacts
+
+    if (allArtifacts.isEmpty()) {
+        logger.lifecycle("No 'fabric-versions-' artifacts found in ${project(":fabric-versions").name}")
+    } else {
+        from(allArtifacts.collect { zipTree(it) }){
+            exclude "fabric.mod.json"
         }
     }
 }
 
-build.dependsOn(allJar);
+build.finalizedBy(includeFabricVersions)

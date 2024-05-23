@@ -34,5 +34,28 @@
 		"1.20.4-Fabric-PriceCxn.mixins.json",
 		"1.20.5-Fabric-PriceCxn.mixins.json",
 		"1.20.6-Fabric-PriceCxn.mixins.json"
+	],
+	"jars": [
+		{
+			"file": "META-INF/jars/pricecxn-1.1.0.jar"
+		},
+		{
+			"file": "META-INF/jars/api-1.1.0.jar"
+		},
+		{
+			"file": "META-INF/jars/javax.json-api-1.1.4.jar"
+		},
+		{
+			"file": "META-INF/jars/tyrus-standalone-client-2.1.5.jar"
+		},
+		{
+			"file": "META-INF/jars/Java-WebSocket-1.5.6.jar"
+		},
+		{
+			"file": "META-INF/jars/reactor-core-3.6.5.jar"
+		},
+		{
+			"file": "META-INF/jars/reactive-streams-1.0.4.jar"
+		}
 	]
 }
