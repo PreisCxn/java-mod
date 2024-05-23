@@ -56,6 +56,15 @@
 		},
 		{
 			"file": "META-INF/jars/reactive-streams-1.0.4.jar"
+		},
+		{
+			"file": "META-INF/jars/fabric_1_20_4-1.1.0-dev.jar"
+		},
+		{
+			"file": "META-INF/jars/fabric_1_20_5-1.1.0-dev.jar"
+		},
+		{
+			"file": "META-INF/jars/fabric_1_20_6-1.1.0-dev.jar"
 		}
 	]
 }
