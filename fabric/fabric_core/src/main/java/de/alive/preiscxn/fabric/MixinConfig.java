@@ -17,7 +17,7 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public String getRefMapperConfig() {
-        return null;
+        return "de.alive.preiscxn.mixins.fabric.v" + SharedConstants.VERSION_NAME.replace(".", "_") + ".refmap.json";
     }
 
     @Override
