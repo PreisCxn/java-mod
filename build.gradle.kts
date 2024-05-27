@@ -56,7 +56,14 @@ subprojects {
 		implementation("io.projectreactor:reactor-core:3.6.5")
 		implementation("com.google.guava:guava:33.2.0-jre")
 		implementation("org.jetbrains:annotations:24.1.0")
-		implementation("com.google.code.gson:gson:2.8.9")
+		implementation("com.google.code.gson:gson:2.10.1")
+		implementation("org.jetbrains:annotations:24.1.0")
+
+		testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+		testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+		testImplementation("org.mockito:mockito-core:5.11.0")
+		testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+		testImplementation("io.projectreactor:reactor-test:3.6.5")
 	}
 }
 
