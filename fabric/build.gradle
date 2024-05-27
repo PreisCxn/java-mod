@@ -1,80 +1,40 @@
 plugins {
-    id ('fabric-loom') version '1.6-SNAPSHOT'
-    id 'java'
+    id("java")
+    id("eclipse")
 }
 
-version = "${project(":").property("mod_version")}"
 group = "${project.property("maven_group")}"
 
-repositories {
-    mavenCentral()
-}
+subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    implementation project(path: ":api")
-    implementation project(path: ":impl")
-    implementation project(path: ":inventoryscanner")
-    implementation project(path: ":listener")
-
-    implementation(project(path: ":fabric-versions:fabric_1_20_4", configuration: "namedElements"))
-    implementation(project(path: ":fabric-versions:fabric_1_20_5", configuration: "namedElements"))
-    implementation(project(path: ":fabric-versions:fabric_1_20_6", configuration: "namedElements"))
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-import net.fabricmc.loom.task.RemapJarTask
-
-tasks.register("includeFabricVersions", RemapJarTask) {
+tasks.register('allJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.WARN
 
-    dependsOn project(":fabric-versions").tasks.named("build")
-    logger.lifecycle("Starting to include 'fabric-versions' artifacts from subprojects")
+    dependsOn subprojects.build
 
-    def partArtifacts = project.configurations.archives.allArtifacts.stream()
-            .filter { a -> a.file.name.contains("fabric") }
-            .map { a -> a.file }
-            .toList()
+    logger.lifecycle("Starting to include 'fabric' artifacts from subprojects")
 
-    def fabricVersionArtifacts = project(":fabric-versions").configurations.archives.allArtifacts.stream()
-            .peek { file -> logger.lifecycle("Checking artifact: ${file.file.name}") }
-            .filter { a -> a.file.name.contains("fabric-versions") }
-            .map { a -> a.file }
-            .peek { file -> logger.lifecycle("Including artifact: ${file}") }
-            .toList()
+    subprojects.each { subproject ->
+        File buildDir = subproject.getLayout().getBuildDirectory().getAsFile().get()
+        List<File> jarFiles = new ArrayList<>();
 
-    def allArtifacts = fabricVersionArtifacts + partArtifacts
-
-    if (allArtifacts.isEmpty()) {
-        logger.lifecycle("No 'fabric-versions-' artifacts found in ${project(":fabric-versions").name}")
-    } else {
-        nestedJars.from(allArtifacts)
+        for (File file : buildDir.listFiles()) {
+            if (file.getName().contains("libs")) {
+                for (File innerFile : file.listFiles()) {
+                    if (innerFile.getName().endsWith(".jar") && !innerFile.getName().contains("-dev")) {
+                        jarFiles.add(innerFile)
+                    }
+                }
+            }
+        }
+        jarFiles.each { jarFile ->
+            logger.lifecycle("Including artifact: ${jarFile}")
+            from zipTree(jarFile)
+        }
     }
 
-    nestedJars.from(project.configurations.implementation.allDependencies.collect {
-        if (it instanceof ProjectDependency) {
-            it.dependencyProject.tasks.named("jar").get().outputs.files
-        }
-    })
+    logger.lifecycle("Finished including 'fabric' artifacts from subprojects")
 }
 
-build.finalizedBy(includeFabricVersions)
+build.dependsOn('allJar')
+jar.enabled(false)
