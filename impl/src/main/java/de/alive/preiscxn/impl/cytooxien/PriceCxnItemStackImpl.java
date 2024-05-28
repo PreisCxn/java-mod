@@ -4,11 +4,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.NookPrice;
+import de.alive.preiscxn.api.cytooxien.PcxnPrice;
 import de.alive.preiscxn.api.cytooxien.PriceCxnItemStack;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.cytooxien.TranslationDataAccess;
@@ -47,8 +48,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private final StorageItemStack storageItemStack = new StorageItemStack();
     private final String itemName;
     private final List<String> toolTips;
-    private final @Nullable JsonObject nookPrice;
-    private final @Nullable JsonObject pcxnPrice;
+    private final NookPrice nookPrice;
+    private final PcxnPrice pcxnPrice;
 
     private PriceCxnItemStackImpl(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
@@ -104,8 +105,8 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
             data.add(entry.getKey(), result);
         }
 
-        this.pcxnPrice = findItemInfo("pricecxn.data.item_data");
-        this.nookPrice = findItemInfo("pricecxn.data.nook_data");
+        this.pcxnPrice = new PcxnPriceImpl(findItemInfo("pricecxn.data.item_data"));
+        this.nookPrice = new NookPriceImpl(findItemInfo("pricecxn.data.nook_data"));
     }
 
     public static PriceCxnItemStackImpl getInstance(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment) {
@@ -282,11 +283,11 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         return amount;
     }
 
-    public @Nullable JsonObject getPcxnPrice() {
+    public @NotNull PcxnPrice getPcxnPrice() {
         return pcxnPrice;
     }
 
-    public @Nullable JsonObject getNookPrice() {
+    public @Nullable NookPrice getNookPrice() {
         return nookPrice;
     }
 
@@ -397,11 +398,11 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     public int getPbvAmountFactor(@NotNull IServerChecker serverChecker, @Nullable AtomicReference<PriceText<?>> pcxnPriceText) {
         if (pcxnPrice == null
                 || !pcxnPrice.has("pbv_search_key")
-                || pcxnPrice.get("pbv_search_key") == JsonNull.INSTANCE
+                || pcxnPrice.getPbvSearchKey() == null
                 || !this.getDataWithoutDisplay().has(PriceCxnItemStackImpl.COMMENT_KEY))
             return 1;
 
-        String pbvKey = pcxnPrice.get("pbv_search_key").getAsString();
+        String pbvKey = pcxnPrice.getPbvSearchKey();
         JsonObject nbtData = this.getDataWithoutDisplay().get(PriceCxnItemStackImpl.COMMENT_KEY).getAsJsonObject();
 
         if (!nbtData.has("PublicBukkitValues")) return 1;

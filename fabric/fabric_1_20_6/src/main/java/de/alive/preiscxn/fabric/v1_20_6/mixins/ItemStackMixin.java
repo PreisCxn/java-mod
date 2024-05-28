@@ -107,8 +107,7 @@ public abstract class ItemStackMixin implements IItemStack {
         }
 
         this.lastUpdate++;
-        if ((this.cxnItemStack.getPcxnPrice() == null || this.cxnItemStack.getPcxnPrice().isEmpty())
-            && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
+        if (this.cxnItemStack.getPcxnPrice().isEmpty() && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
             return;
 
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
@@ -131,15 +130,13 @@ public abstract class ItemStackMixin implements IItemStack {
                                 .setStyle(Style.EMPTY.withColor(Formatting.DARK_GRAY))));
 
         PriceCxn.getMod().getLogger().debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
-        if (this.cxnItemStack.getPcxnPrice() != null) {
+        if (!this.cxnItemStack.getPcxnPrice().isEmpty()) {
             list.add((Text) pcxnPriceText.get()
                     .withPrices(this.cxnItemStack
                             .getPcxnPrice()
-                            .get("lower_price")
-                            .getAsDouble(),
+                            .getLowerPrice(),
                             this.cxnItemStack.getPcxnPrice()
-                                    .get("upper_price")
-                                    .getAsDouble())
+                                    .getUpperPrice())
                     .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
                     .getText());
         }
@@ -147,12 +144,12 @@ public abstract class ItemStackMixin implements IItemStack {
         if (this.cxnItemStack.getNookPrice() != null) {
             list.add((Text) PriceCxn.getMod().createPriceText()
                              .withIdentifierText("Tom Block:")
-                             .withPrices(this.cxnItemStack.getNookPrice().get("price").getAsDouble())
+                             .withPrices(this.cxnItemStack.getNookPrice().getPrice())
                              .withPriceMultiplier(amount)
                              .getText());
 
         }
-        if (this.cxnItemStack.getPcxnPrice() != null) {
+        if (!this.cxnItemStack.getPcxnPrice().isEmpty()) {
 
             IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
             if (this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
@@ -168,7 +165,7 @@ public abstract class ItemStackMixin implements IItemStack {
             list.add((Text) PriceCxn.getMod().space());
 
             Optional<Tuple2<Long, TimeUtil.TimeUnit>> lastUpdate
-                    = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().get("timestamp").getAsString()));
+                    = TimeUtil.getTimestampDifference(Long.parseLong(this.cxnItemStack.getPcxnPrice().getTimestamp()));
 
             lastUpdate.ifPresent(s -> {
 

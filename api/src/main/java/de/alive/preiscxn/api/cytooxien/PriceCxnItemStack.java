@@ -3,6 +3,7 @@ package de.alive.preiscxn.api.cytooxien;
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.IServerChecker;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,9 +45,10 @@ public interface PriceCxnItemStack {
     @Nullable
     JsonObject findItemInfo(String dataKey);
 
-     @Nullable JsonObject getPcxnPrice();
+     @NotNull @Pure
+     PcxnPrice getPcxnPrice();
 
-     @Nullable JsonObject getNookPrice();
+     @Nullable NookPrice getNookPrice();
 
     enum ViewMode {
         SINGLE,
