@@ -23,13 +23,13 @@ public class PcxnPriceImpl implements PcxnPrice {
     @Override
     public double getLowerPrice() {
         if (!jsonObject.has("lower_price") || jsonObject.get("lower_price").isJsonNull()) return 0;
-        return jsonObject.get("lower_price").getAsDouble();
+        return roundIfNecessary(jsonObject.get("lower_price").getAsDouble());
     }
 
     @Override
     public double getUpperPrice() {
         if (!jsonObject.has("upper_price") || jsonObject.get("upper_price").isJsonNull()) return 0;
-        return jsonObject.get("upper_price").getAsDouble();
+        return roundIfNecessary(jsonObject.get("upper_price").getAsDouble());
     }
 
     @Override
@@ -50,5 +50,8 @@ public class PcxnPriceImpl implements PcxnPrice {
         return jsonObject.get("item_search_key").getAsString();
     }
 
-
+    private double roundIfNecessary(double value) {
+        if (value > 100) return Math.round(value);
+        return value;
+    }
 }
