@@ -2,10 +2,7 @@ package de.alive.preiscxn.impl.cytooxien;
 
 import de.alive.preiscxn.api.Mod;
 import de.alive.preiscxn.api.PriceCxn;
-import de.alive.preiscxn.api.cytooxien.ICxnConnectionManager;
-import de.alive.preiscxn.api.cytooxien.ICxnDataHandler;
-import de.alive.preiscxn.api.cytooxien.ICxnListener;
-import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.*;
 import de.alive.preiscxn.api.listener.InventoryListener;
 import de.alive.preiscxn.api.listener.ServerListener;
 import de.alive.preiscxn.api.module.ModuleLoader;
@@ -136,7 +133,7 @@ public class CxnListener extends ServerListener implements ICxnListener {
     }
 
     @Override
-    public @Nullable List<String> getModUsers() {
+    public @Nullable List<ModUser> getModUsers() {
         return dataHandler.getModUsers();
     }
 

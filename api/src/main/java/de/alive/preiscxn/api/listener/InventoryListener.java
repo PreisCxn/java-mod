@@ -181,7 +181,6 @@ public abstract class InventoryListener {
                         obj.addProperty("listener", uri);
                         obj.addProperty("mode", mode.getTranslationKey());
                         obj.addProperty("uuid", uuid);
-                        obj.addProperty("username", instance.getPlayerNameString());
                         obj.add("data", data);
                         return PriceCxn.getMod().getHttp().post("/datahandler/" + uri, obj).then();
                     } else

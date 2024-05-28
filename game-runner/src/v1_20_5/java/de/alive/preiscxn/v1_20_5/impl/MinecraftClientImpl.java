@@ -3,6 +3,7 @@ package de.alive.preiscxn.v1_20_5.impl;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.utils.UUIDHasher;
 import de.alive.preiscxn.core.impl.LabyMinecraftClient;
 import net.labymod.api.models.Implements;
 import net.minecraft.Util;
@@ -44,12 +45,7 @@ public final class MinecraftClientImpl implements LabyMinecraftClient {
 
     @Override
     public String getPlayerUuidAsString() {
-        return minecraftClient.player == null ? "" : minecraftClient.player.getStringUUID();
-    }
-
-    @Override
-    public String getPlayerNameString() {
-        return minecraftClient.player == null ? "" : minecraftClient.player.getName().getString();
+        return minecraftClient.player == null ? "" : UUIDHasher.hash(minecraftClient.player.getUUID()).toString();
     }
 
     @Override
