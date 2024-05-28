@@ -56,7 +56,7 @@ public class ItemStackTooltipListener {
         PriceCxnItemStack itemStack = lastUpdatePcxnPriceTuple.getT2();
         lastUpdate.incrementAndGet();
 
-        if (itemStack.getPcxnPrice().isEmpty() && (itemStack.getNookPrice() == null || itemStack.getNookPrice().isEmpty()))
+        if (itemStack.getPcxnPrice().isEmpty() && (itemStack.getNookPrice().isEmpty() || itemStack.getNookPrice().isEmpty()))
             return;
 
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
@@ -89,7 +89,7 @@ public class ItemStackTooltipListener {
                     .getText());
         }
 
-        if (itemStack.getNookPrice() != null) {
+        if (!itemStack.getNookPrice().isEmpty()) {
             list.add((Component) PriceCxn.getMod().createPriceText()
                     .withIdentifierText("Tom Block:")
                     .withPrices(itemStack.getNookPrice().getPrice())

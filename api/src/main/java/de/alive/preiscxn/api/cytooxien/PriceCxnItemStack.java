@@ -48,7 +48,7 @@ public interface PriceCxnItemStack {
      @NotNull @Pure
      PcxnPrice getPcxnPrice();
 
-     @Nullable NookPrice getNookPrice();
+     @NotNull NookPrice getNookPrice();
 
     enum ViewMode {
         SINGLE,

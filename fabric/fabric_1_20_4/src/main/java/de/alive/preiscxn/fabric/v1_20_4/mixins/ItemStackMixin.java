@@ -82,7 +82,7 @@ public abstract class ItemStackMixin implements IItemStack {
 
         this.lastUpdate++;
         if (this.cxnItemStack.getPcxnPrice().isEmpty()
-            && (this.cxnItemStack.getNookPrice() == null || this.cxnItemStack.getNookPrice().isEmpty()))
+            && this.cxnItemStack.getNookPrice().isEmpty())
             return;
 
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
@@ -116,7 +116,7 @@ public abstract class ItemStackMixin implements IItemStack {
                     .getText());
         }
 
-        if (this.cxnItemStack.getNookPrice() != null) {
+        if (!this.cxnItemStack.getNookPrice() .isEmpty()) {
             list.add((Text) PriceCxn.getMod().createPriceText()
                              .withIdentifierText("Tom Block:")
                              .withPrices(this.cxnItemStack.getNookPrice().getPrice())

@@ -287,7 +287,7 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         return pcxnPrice;
     }
 
-    public @Nullable NookPrice getNookPrice() {
+    public @NotNull NookPrice getNookPrice() {
         return nookPrice;
     }
 
