@@ -3,6 +3,7 @@ package de.alive.preiscxn.fabric;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import org.objectweb.asm.tree.ClassNode;
+
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -10,6 +11,24 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinConfig implements IMixinConfigPlugin {
+
+    private static final String VERSION;
+
+    static {
+        String tempVersion;
+        try{
+            SharedConstants.createGameVersion();
+            tempVersion = SharedConstants.getGameVersion().getName().replace(".", "_");
+        }catch(Exception e){
+            tempVersion = SharedConstants.VERSION_NAME.replace(".", "_");
+        }
+        VERSION = tempVersion;
+    }
+
+    public static boolean isModLoaded(String modid) {
+        return FabricLoader.getInstance().isModLoaded(modid);
+    }
+
     @Override
     public void onLoad(String mixinPackage) {
 
@@ -17,12 +36,12 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public String getRefMapperConfig() {
-        return "de.alive.preiscxn.mixins.fabric.v" + SharedConstants.VERSION_NAME.replace(".", "_") + ".refmap.json";
+        return "de.alive.preiscxn.mixins.fabric.v" + VERSION + ".refmap.json";
     }
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return mixinClassName.contains(SharedConstants.VERSION_NAME.replace(".", "_"));
+        return mixinClassName.contains(VERSION);
     }
 
     @Override
@@ -45,7 +64,4 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     }
 
-    public static boolean isModLoaded(String modid) {
-        return FabricLoader.getInstance().isModLoaded(modid);
-    }
 }
