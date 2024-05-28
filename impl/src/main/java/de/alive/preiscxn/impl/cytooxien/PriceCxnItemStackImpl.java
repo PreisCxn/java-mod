@@ -45,10 +45,10 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
     private final JsonObject data = new JsonObject();
     private final int amount;
     private final StorageItemStack storageItemStack = new StorageItemStack();
-    private String itemName;
-    private List<String> toolTips;
-    private @Nullable JsonObject nookPrice = null;
-    private @Nullable JsonObject pcxnPrice = null;
+    private final String itemName;
+    private final List<String> toolTips;
+    private final @Nullable JsonObject nookPrice;
+    private final @Nullable JsonObject pcxnPrice;
 
     private PriceCxnItemStackImpl(@NotNull IItemStack item, @Nullable Map<String, DataAccess> searchData, boolean addComment, boolean addTooltips) {
 
@@ -56,16 +56,17 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
 
         if (addTooltips)
             this.toolTips = StringUtil.getToolTips(item);
-        this.itemName = item.priceCxn$getItemName();
-        String displayName = item.priceCxn$getDisplayName();
+        else
+            this.toolTips = new ArrayList<>();
+        StringBuilder itemName = new StringBuilder(item.priceCxn$getItemName());
         this.amount = item.priceCxn$getCount();
 
         if (item.priceCxn$isTrimTemplate() || item.priceCxn$isNetheriteUpgradeSmithingTemplate()) {
 
             item.priceCxn$getRegistryKey()
-                    .ifPresent(s -> this.itemName += "." + s);
+                    .ifPresent(s -> itemName.append(".").append(s));
         }
-
+        this.itemName = itemName.toString();
         /*
         wird immer gesucht:
         - itemName
@@ -73,14 +74,14 @@ public final class PriceCxnItemStackImpl implements PriceCxnItemStack {
         - display name + current lang
         - comment (nbts)
          */
-        data.addProperty(ITEM_NAME_KEY, itemName);
+        data.addProperty(ITEM_NAME_KEY, this.itemName);
         data.addProperty(AMOUNT_KEY, amount);
-        data.addProperty(DISPLAY_NAME_KEY, displayName);
+        data.addProperty(DISPLAY_NAME_KEY, item.priceCxn$getDisplayName());
         data.addProperty(MC_CLIENT_LANG_KEY, PriceCxn.getMod().getMinecraftClient().getLanguage());
         if (addComment)
             data.add(COMMENT_KEY, getCustomData(item));
 
-        PriceCxn.getMod().getLogger().debug(itemName);
+        PriceCxn.getMod().getLogger().debug(this.itemName);
 
         /*
         zusätzlich suche nach den keys in searchData:
