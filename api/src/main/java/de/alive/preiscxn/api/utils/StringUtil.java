@@ -34,7 +34,6 @@ public final class StringUtil {
 
     public static String convertPrice(double time) {
         Locale locale = Locale.GERMAN;
-        Locale.setDefault(locale);
 
         DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(locale);
         if (time >= 100000) {
@@ -42,7 +41,7 @@ public final class StringUtil {
             decimalFormat.setMinimumFractionDigits(0);
         } else {
             decimalFormat.setMaximumFractionDigits(2);
-            decimalFormat.setMinimumFractionDigits(2);
+            decimalFormat.setMinimumFractionDigits(1);
         }
 
         DecimalFormatSymbols symbols = decimalFormat.getDecimalFormatSymbols();
