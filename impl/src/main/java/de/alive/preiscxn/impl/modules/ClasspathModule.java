@@ -2,17 +2,13 @@ package de.alive.preiscxn.impl.modules;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.module.Module;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,20 +38,25 @@ public class ClasspathModule implements Module {
                 if ("jar".equals(uri.getScheme())) {
                     String[] array = uri.toString().split("!");
                     try {
-                        try (FileSystem fs = getFileSystem(URI.create(array[0]), env)) {
-                            path = fs.getPath(array[1]);
-                            processPath(path, consumer);
+                        Tuple2<FileSystem, Boolean> fs = getFileSystem(URI.create(array[0]), env);
+                        path = fs.getT1().getPath(array[1]);
+                        processPath(path, consumer);
+                        if (fs.getT2()) {
+                            fs.getT1().close();
                         }
                     } catch (FileSystemNotFoundException | FileSystemAlreadyExistsException e) {
                         try {
-                            String jarUri = array[0].replace("jar:file:", "");
-                            if (!jarUri.contains("!/")) {
-                                jarUri += "!/";
+                            StringBuilder jarUri = new StringBuilder(array[0].replace("jar:file:", ""));
+                            if (!jarUri.toString().contains("!/")) {
+                                jarUri.append("!/");
                             }
-                            try (FileSystem fs = getFileSystem(URI.create("jar:file:" + jarUri), env)) {
-                                path = fs.getPath(array[1]);
-                            }
+
+                            Tuple2<FileSystem, Boolean> fs = getFileSystem(URI.create("jar:file:" + jarUri), env);
+                            path = fs.getT1().getPath(array[1]);
                             processPath(path, consumer);
+                            if (fs.getT2()) {
+                                fs.getT1().close();
+                            }
                         } catch (Exception ex) {
                             PriceCxn.getMod().getLogger().error("Error while loading module", ex);
                         }
@@ -72,11 +73,11 @@ public class ClasspathModule implements Module {
         }
     }
 
-    private FileSystem getFileSystem(URI uri, Map<String, String> env) throws IOException {
+    private Tuple2<FileSystem, Boolean> getFileSystem(URI uri, Map<String, String> env) throws IOException {
         try {
-            return FileSystems.newFileSystem(uri, env);
+            return Tuples.of(FileSystems.newFileSystem(uri, env), true);
         } catch (FileSystemAlreadyExistsException e) {
-            return FileSystems.getFileSystem(uri);
+            return Tuples.of(FileSystems.getFileSystem(uri), false);
         }
     }
 

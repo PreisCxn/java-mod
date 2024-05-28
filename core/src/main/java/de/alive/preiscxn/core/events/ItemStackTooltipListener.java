@@ -55,8 +55,8 @@ public class ItemStackTooltipListener {
         AtomicInteger lastUpdate = lastUpdatePcxnPriceTuple.getT1();
         PriceCxnItemStack itemStack = lastUpdatePcxnPriceTuple.getT2();
         lastUpdate.incrementAndGet();
-        if ((itemStack.getPcxnPrice() == null || itemStack.getPcxnPrice().isEmpty())
-            && (itemStack.getNookPrice() == null || itemStack.getNookPrice().isEmpty()))
+
+        if (itemStack.getPcxnPrice().isEmpty() && (itemStack.getNookPrice().isEmpty() || itemStack.getNookPrice().isEmpty()))
             return;
 
         AtomicReference<PriceText<?>> pcxnPriceText = new AtomicReference<>(PriceCxn.getMod().createPriceText());
@@ -78,28 +78,26 @@ public class ItemStackTooltipListener {
                                 .color(NamedTextColor.DARK_GRAY)));
 
         PriceCxn.getMod().getLogger().debug(String.valueOf(pcxnPriceText.get().getPriceAdder()));
-        if (itemStack.getPcxnPrice() != null) {
+        if (!itemStack.getPcxnPrice().isEmpty()) {
             list.add((Component) pcxnPriceText.get()
                     .withPrices(itemStack
                                     .getPcxnPrice()
-                                    .get("lower_price")
-                                    .getAsDouble(),
+                                    .getLowerPrice(),
                             itemStack.getPcxnPrice()
-                                    .get("upper_price")
-                                    .getAsDouble())
+                                    .getUpperPrice())
                     .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
                     .getText());
         }
 
-        if (itemStack.getNookPrice() != null) {
+        if (!itemStack.getNookPrice().isEmpty()) {
             list.add((Component) PriceCxn.getMod().createPriceText()
                     .withIdentifierText("Tom Block:")
-                    .withPrices(itemStack.getNookPrice().get("price").getAsDouble())
+                    .withPrices(itemStack.getNookPrice().getPrice())
                     .withPriceMultiplier(amount)
                     .getText());
 
         }
-        if (itemStack.getPcxnPrice() != null) {
+        if (!itemStack.getPcxnPrice().isEmpty()) {
 
             IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
             if (keyBinding != null && itemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
@@ -115,7 +113,7 @@ public class ItemStackTooltipListener {
             list.add((Component) PriceCxn.getMod().space());
 
             Optional<Tuple2<Long, TimeUtil.TimeUnit>> lastUpdate2
-                    = TimeUtil.getTimestampDifference(Long.parseLong(itemStack.getPcxnPrice().get("timestamp").getAsString()));
+                    = TimeUtil.getTimestampDifference(Long.parseLong(itemStack.getPcxnPrice().getTimestamp()));
 
             lastUpdate2.ifPresent(s -> {
 

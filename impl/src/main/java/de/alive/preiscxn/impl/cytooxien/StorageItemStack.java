@@ -1,8 +1,7 @@
 package de.alive.preiscxn.impl.cytooxien;
 
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.PriceCxn;
+import de.alive.preiscxn.api.cytooxien.PcxnPrice;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.networking.sockets.IWebSocketConnector;
 import de.alive.preiscxn.api.utils.TimeUtil;
@@ -28,13 +27,13 @@ public class StorageItemStack {
 
     }
 
-    public void setup(@NotNull JsonObject object, IWebSocketConnector connector) {
+    public void setup(@NotNull PcxnPrice object, IWebSocketConnector connector) {
         this.type = isOf(object, Type.VENDITORPL) ? Type.VENDITORPL : Type.ITEM_STORAGE;
         this.connector = connector;
         this.setup = true;
     }
 
-    public StorageItemStack(@NotNull JsonObject object, WebSocketConnector connector) {
+    public StorageItemStack(@NotNull PcxnPrice object, WebSocketConnector connector) {
         setup(object, connector);
     }
     public @NotNull Mono<Void> search(Integer storageSearchResult) {
@@ -75,14 +74,14 @@ public class StorageItemStack {
         return storage != null;
     }
 
-    public static boolean isOf(@NotNull JsonObject data, @NotNull Type item) {
+    public static boolean isOf(@NotNull PcxnPrice data, @NotNull Type item) {
         if (!data.has("item_search_key") || !data.has("pbv_search_key")
-                || data.get("item_search_key") == JsonNull.INSTANCE || data.get("pbv_search_key") == JsonNull.INSTANCE) return false;
+                || data.getItemSearchKey() == null || data.getPbvSearchKey() == null) return false;
 
-        return data.get("item_search_key").getAsString().contains(item.getKey());
+        return data.getItemSearchKey().contains(item.getKey());
     }
 
-    public static boolean isOf(@NotNull JsonObject data) {
+    public static boolean isOf(@NotNull PcxnPrice data) {
         return isOf(data, Type.VENDITORPL) || isOf(data, Type.ITEM_STORAGE);
     }
 

@@ -1,57 +1,40 @@
 plugins {
-    id ('fabric-loom') version '1.6-SNAPSHOT'
-    id 'java'
+    id("java")
+    id("eclipse")
 }
 
-version = "${project(":").property("mod_version")}"
 group = "${project.property("maven_group")}"
 
-repositories {
-    mavenCentral()
-}
+subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+tasks.register('allJar', Jar) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    dependsOn subprojects.build
 
-    implementation project(path: ":api")
-    implementation project(path: ":impl")
-    implementation project(path: ":inventoryscanner")
-    implementation project(path: ":listener")
+    logger.lifecycle("Starting to include 'fabric' artifacts from subprojects")
 
-    implementation(project(path: ":fabric_1_20_4", configuration: "namedElements"))
-    implementation(project(path: ":fabric_1_20_5", configuration: "namedElements"))
-    implementation(project(path: ":fabric_1_20_6", configuration: "namedElements"))
+    subprojects.each { subproject ->
+        File buildDir = subproject.getLayout().getBuildDirectory().getAsFile().get()
+        List<File> jarFiles = new ArrayList<>();
 
-    include group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-    include group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '2.1.5'
-    include 'org.java-websocket:Java-WebSocket:1.5.6'
-    include 'io.projectreactor:reactor-core:3.6.5'
-    include 'org.reactivestreams:reactive-streams:1.0.4'
-
-    include(project(path: ":fabric_1_20_4", configuration: "namedElements"))
-    include(project(path: ":fabric_1_20_5", configuration: "namedElements"))
-    include(project(path: ":fabric_1_20_6", configuration: "namedElements"))
-
-    include project(path: ":impl")
-    include project(path: ":api")
-
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        for (File file : buildDir.listFiles()) {
+            if (file.getName().contains("libs")) {
+                for (File innerFile : file.listFiles()) {
+                    if (innerFile.getName().endsWith(".jar") && !innerFile.getName().contains("-dev")) {
+                        jarFiles.add(innerFile)
+                    }
+                }
+            }
+        }
+        jarFiles.each { jarFile ->
+            logger.lifecycle("Including artifact: ${jarFile}")
+            from zipTree(jarFile)
+        }
     }
+
+    logger.lifecycle("Finished including 'fabric' artifacts from subprojects")
 }
+
+build.dependsOn('allJar')
+jar.enabled(false)
