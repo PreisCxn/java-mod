@@ -3,11 +3,13 @@ package de.alive.preiscxn.impl.cytooxien;
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.cytooxien.NookPrice;
 
+import java.util.Objects;
+
 public class NookPriceImpl implements NookPrice {
     private final JsonObject itemInfo;
 
     public NookPriceImpl(JsonObject itemInfo) {
-        this.itemInfo = itemInfo;
+        this.itemInfo = Objects.requireNonNullElse(!itemInfo.isJsonObject() ? null : itemInfo, new JsonObject());
     }
 
     @Override

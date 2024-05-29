@@ -2,17 +2,20 @@ package de.alive.preiscxn.impl.cytooxien;
 
 import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.cytooxien.PcxnPrice;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public class PcxnPriceImpl implements PcxnPrice {
-    private final JsonObject jsonObject;
+    private final @NotNull JsonObject jsonObject;
 
     public PcxnPriceImpl(JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
+        this.jsonObject = Objects.requireNonNullElse(!jsonObject.isJsonObject() ? null : jsonObject, new JsonObject());
     }
 
     @Override
     public boolean isEmpty() {
-        return jsonObject == null || jsonObject.isJsonNull();
+        return jsonObject.isEmpty();
     }
 
     @Override
@@ -23,35 +26,30 @@ public class PcxnPriceImpl implements PcxnPrice {
 
     @Override
     public double getLowerPrice() {
-        if(jsonObject == null || jsonObject.isJsonNull()) return 0;
         if (!jsonObject.has("lower_price") || jsonObject.get("lower_price").isJsonNull()) return 0;
         return roundIfNecessary(jsonObject.get("lower_price").getAsDouble());
     }
 
     @Override
     public double getUpperPrice() {
-        if(jsonObject == null || jsonObject.isJsonNull()) return 0;
         if (!jsonObject.has("upper_price") || jsonObject.get("upper_price").isJsonNull()) return 0;
         return roundIfNecessary(jsonObject.get("upper_price").getAsDouble());
     }
 
     @Override
     public String getTimestamp() {
-        if(jsonObject == null || jsonObject.isJsonNull()) return null;
         if (!jsonObject.has("timestamp") || jsonObject.get("timestamp").isJsonNull()) return null;
         return jsonObject.get("timestamp").getAsString();
     }
 
     @Override
     public String getPbvSearchKey() {
-        if(jsonObject == null || jsonObject.isJsonNull()) return null;
         if (!jsonObject.has("pbv_search_key") || jsonObject.get("pbv_search_key").isJsonNull()) return null;
         return jsonObject.get("pbv_search_key").getAsString();
     }
 
     @Override
     public String getItemSearchKey() {
-        if(jsonObject == null || jsonObject.isJsonNull()) return null;
         if (!jsonObject.has("item_search_key") || jsonObject.get("item_search_key").isJsonNull()) return null;
         return jsonObject.get("item_search_key").getAsString();
     }

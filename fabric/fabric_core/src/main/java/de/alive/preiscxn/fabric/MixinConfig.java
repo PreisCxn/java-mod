@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import org.objectweb.asm.tree.ClassNode;
 
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -19,8 +20,9 @@ public class MixinConfig implements IMixinConfigPlugin {
         try{
             SharedConstants.createGameVersion();
             tempVersion = SharedConstants.getGameVersion().getName().replace(".", "_");
+            LoggerFactory.getLogger(MixinConfig.class).info("Loaded Minecraft version for pricecxn mixins: {}", tempVersion);
         }catch(Exception e){
-            tempVersion = SharedConstants.VERSION_NAME.replace(".", "_");
+            throw new RuntimeException("Failed to get Minecraft version", e);
         }
         VERSION = tempVersion;
     }
