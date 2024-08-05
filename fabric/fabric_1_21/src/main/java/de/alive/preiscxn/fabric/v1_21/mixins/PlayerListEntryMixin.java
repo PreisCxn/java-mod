@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_20_6.mixins;
+package de.alive.preiscxn.fabric.v1_21.mixins;
 
 import com.mojang.authlib.GameProfile;
 import de.alive.preiscxn.api.PriceCxn;

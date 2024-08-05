@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_20_6;
+package de.alive.preiscxn.fabric.v1_21;
 
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import de.alive.preiscxn.api.interfaces.Entrypoint;
@@ -9,12 +9,12 @@ import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IPlayer;
 import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
-import de.alive.preiscxn.fabric.v1_20_6.impl.GameHudImpl;
-import de.alive.preiscxn.fabric.v1_20_6.impl.InventoryImpl;
-import de.alive.preiscxn.fabric.v1_20_6.impl.KeyBindingImpl;
-import de.alive.preiscxn.fabric.v1_20_6.impl.MinecraftClientImpl;
-import de.alive.preiscxn.fabric.v1_20_6.impl.PlayerImpl;
-import de.alive.preiscxn.fabric.v1_20_6.impl.PriceTextImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.GameHudImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.InventoryImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.KeyBindingImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.MinecraftClientImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.PlayerImpl;
+import de.alive.preiscxn.fabric.v1_21.impl.PriceTextImpl;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;

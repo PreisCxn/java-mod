@@ -27,12 +27,13 @@
 	"depends": {
 		"fabricloader": ">=0.14.0",
 		"fabric-api": "*",
-		"minecraft": ">=1.20.4",
+		"minecraft": ">=1.20.5",
 		"java": ">=21"
 	},
 	"mixins": [
 		"1.20.4-Fabric-PriceCxn.mixins.json",
 		"1.20.5-Fabric-PriceCxn.mixins.json",
-		"1.20.6-Fabric-PriceCxn.mixins.json"
+		"1.20.6-Fabric-PriceCxn.mixins.json",
+		"1.21-Fabric-PriceCxn.mixins.json"
 	]
 }
