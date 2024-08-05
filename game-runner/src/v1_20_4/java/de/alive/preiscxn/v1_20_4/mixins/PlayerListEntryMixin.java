@@ -36,7 +36,7 @@ public abstract class PlayerListEntryMixin {
         if (!listener.isOnServer().get()) return;
         if (!listener.isActive()) return;
 
-        if(DisplayNameUtil.shouldDisplayCoinInTabList(listener, originalDisplayName.getString(), this.profile.getId())){
+        if(!DisplayNameUtil.shouldDisplayCoinInTabList(listener, originalDisplayName.getString(), this.profile.getId())){
             return;
         }
         MutableComponent text = Component.literal("").setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE));

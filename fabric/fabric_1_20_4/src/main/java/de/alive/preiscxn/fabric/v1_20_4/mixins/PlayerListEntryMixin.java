@@ -40,10 +40,9 @@ public abstract class PlayerListEntryMixin {
         if (!listener.isOnServer().get()) return;
         if (!listener.isActive()) return;
 
-        if(DisplayNameUtil.shouldDisplayCoinInTabList(listener, originalDisplayName.getString(), this.profile.getId())){
+        if (!DisplayNameUtil.shouldDisplayCoinInTabList(listener, originalDisplayName.getString(), this.profile.getId())) {
             return;
         }
-
 
         MutableText text = MutableText.of(new PlainTextContent.Literal("")).setStyle(Style.EMPTY.withColor(Formatting.WHITE));
         text.append(originalDisplayName).append("\uE202 ");

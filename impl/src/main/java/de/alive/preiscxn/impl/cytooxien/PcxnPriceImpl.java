@@ -10,7 +10,7 @@ public class PcxnPriceImpl implements PcxnPrice {
     private final @NotNull JsonObject jsonObject;
 
     public PcxnPriceImpl(JsonObject jsonObject) {
-        this.jsonObject = Objects.requireNonNullElse(!jsonObject.isJsonObject() ? null : jsonObject, new JsonObject());
+        this.jsonObject = Objects.requireNonNullElse(jsonObject == null || !jsonObject.isJsonObject() ? null : jsonObject, new JsonObject());
     }
 
     @Override

@@ -9,7 +9,7 @@ public class NookPriceImpl implements NookPrice {
     private final JsonObject itemInfo;
 
     public NookPriceImpl(JsonObject itemInfo) {
-        this.itemInfo = Objects.requireNonNullElse(!itemInfo.isJsonObject() ? null : itemInfo, new JsonObject());
+        this.itemInfo = Objects.requireNonNullElse(itemInfo == null || !itemInfo.isJsonObject() ? null : itemInfo, new JsonObject());
     }
 
     @Override
