@@ -17,14 +17,29 @@ import java.util.Optional;
 
 public class StorageItemStack {
     private static final int REFRESH_AFTER_SECONDS = 10;
+    private final PriceText<?> priceText = PriceCxn.getMod().createPriceText(true);
     private long lastUpdate = 0;
     private boolean setup = false;
-    private final PriceText<?> priceText = PriceCxn.getMod().createPriceText(true);
     private Type type;
     private IWebSocketConnector connector;
 
     public StorageItemStack() {
 
+    }
+
+    public StorageItemStack(@NotNull PcxnPrice object, WebSocketConnector connector) {
+        setup(object, connector);
+    }
+
+    public static boolean isOf(@NotNull PcxnPrice data, @NotNull Type item) {
+        if (!data.has("item_search_key") || !data.has("pbv_search_key")
+                || data.getItemSearchKey() == null || data.getPbvSearchKey() == null) return false;
+
+        return data.getItemSearchKey().contains(item.getKey());
+    }
+
+    public static boolean isOf(@NotNull PcxnPrice data) {
+        return isOf(data, Type.VENDITORPL) || isOf(data, Type.ITEM_STORAGE);
     }
 
     public void setup(@NotNull PcxnPrice object, IWebSocketConnector connector) {
@@ -33,9 +48,6 @@ public class StorageItemStack {
         this.setup = true;
     }
 
-    public StorageItemStack(@NotNull PcxnPrice object, WebSocketConnector connector) {
-        setup(object, connector);
-    }
     public @NotNull Mono<Void> search(Integer storageSearchResult) {
         if (!setup) return Mono.empty();
         if (!changedStorage(storageSearchResult)) {
@@ -56,14 +68,9 @@ public class StorageItemStack {
             searchCompletion = type.requestAmount(storageSearchResult, this.connector);
         }
 
-        return searchCompletion.then().doOnSuccess(v -> type.getPrice(storageSearchResult).ifPresentOrElse(price -> {
-            priceText.withPriceAdder(price)
-                    .finishSearching();
-
-        }, () -> {
-            priceText.withPriceAdder(0)
-                    .setIsSearching(PriceText.SearchingState.FAILED_SEARCHING);
-        }));
+        return searchCompletion.then().doOnSuccess(v -> type.getPrice(storageSearchResult)
+                .ifPresentOrElse(price -> priceText.withPriceAdder(price).finishSearching(),
+                        () -> priceText.withPriceAdder(0).setIsSearching(PriceText.SearchingState.FAILED_SEARCHING)));
     }
 
     public @NotNull PriceText getText() {
@@ -72,17 +79,6 @@ public class StorageItemStack {
 
     public boolean changedStorage(@Nullable Integer storage) {
         return storage != null;
-    }
-
-    public static boolean isOf(@NotNull PcxnPrice data, @NotNull Type item) {
-        if (!data.has("item_search_key") || !data.has("pbv_search_key")
-                || data.getItemSearchKey() == null || data.getPbvSearchKey() == null) return false;
-
-        return data.getItemSearchKey().contains(item.getKey());
-    }
-
-    public static boolean isOf(@NotNull PcxnPrice data) {
-        return isOf(data, Type.VENDITORPL) || isOf(data, Type.ITEM_STORAGE);
     }
 
     public enum Type {

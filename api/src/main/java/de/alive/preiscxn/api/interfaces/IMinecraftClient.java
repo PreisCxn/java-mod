@@ -7,8 +7,6 @@ public interface IMinecraftClient {
 
     String getPlayerUuidAsString();
 
-    String getPlayerNameString();
-
     boolean isCurrentScreenInstanceOfHandledScreen();
 
     IScreenHandler getScreenHandler();

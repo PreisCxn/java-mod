@@ -4,6 +4,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import org.objectweb.asm.tree.ClassNode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
@@ -13,14 +15,17 @@ import java.util.Set;
 public class MixinConfig implements IMixinConfigPlugin {
 
     private static final String VERSION;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MixinConfig.class);
 
     static {
+
         String tempVersion;
         try{
             SharedConstants.createGameVersion();
             tempVersion = SharedConstants.getGameVersion().getName().replace(".", "_");
+            LOGGER.info("Loaded Minecraft version for pricecxn mixins: {}", tempVersion);
         }catch(Exception e){
-            tempVersion = SharedConstants.VERSION_NAME.replace(".", "_");
+            throw new RuntimeException("Failed to get Minecraft version", e);
         }
         VERSION = tempVersion;
     }
@@ -41,7 +46,9 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return mixinClassName.contains(VERSION);
+        boolean contains = mixinClassName.contains(VERSION);
+        LOGGER.info("Mixin {} for {} is {}", mixinClassName, targetClassName, contains ? "enabled" : "disabled");
+        return contains;
     }
 
     @Override

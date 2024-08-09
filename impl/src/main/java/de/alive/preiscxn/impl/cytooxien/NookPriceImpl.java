@@ -12,12 +12,12 @@ public class NookPriceImpl implements NookPrice {
 
     @Override
     public boolean isEmpty() {
-        return itemInfo == null || itemInfo.isJsonNull();
+        return itemInfo == null;
     }
 
     @Override
     public double getPrice() {
-        if (itemInfo == null || itemInfo.isJsonNull()) return 0;
+        if (itemInfo == null) return 0;
         if (!itemInfo.has("price") || itemInfo.get("price").isJsonNull()) return 0;
         return itemInfo.get("price").getAsDouble();
     }

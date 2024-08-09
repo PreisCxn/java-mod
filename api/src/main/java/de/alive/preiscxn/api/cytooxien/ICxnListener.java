@@ -21,7 +21,7 @@ public interface ICxnListener {
     IThemeServerChecker getThemeChecker();
 
     @Nullable
-    List<String> getModUsers();
+    List<ModUser> getModUsers();
 
     boolean isActive();
 

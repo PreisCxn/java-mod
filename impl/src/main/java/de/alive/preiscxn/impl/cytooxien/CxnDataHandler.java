@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.ICxnDataHandler;
 import de.alive.preiscxn.api.cytooxien.IThemeServerChecker;
+import de.alive.preiscxn.api.cytooxien.ModUser;
 import de.alive.preiscxn.api.cytooxien.Modes;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.networking.DataHandler;
@@ -16,13 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 
 
 public class CxnDataHandler implements ICxnDataHandler {
@@ -107,8 +102,8 @@ public class CxnDataHandler implements ICxnDataHandler {
     }
 
     @Override
-    public @Nullable List<String> getModUsers() {
-        List<String> stringList = new ArrayList<>();
+    public @Nullable List<ModUser> getModUsers() {
+        List<ModUser> stringList = new ArrayList<>();
 
         JsonArray array;
 
@@ -118,8 +113,13 @@ public class CxnDataHandler implements ICxnDataHandler {
             if (array == null) return null;
 
             array.forEach(element -> {
-                if (!element.isJsonNull())
-                    stringList.add(element.getAsString());
+                if (!element.isJsonNull()){
+                    if (UUID_PATTERN.matcher(element.getAsString()).matches()) {
+                        stringList.add(new ModUser(UUID.fromString(element.getAsString())));
+                    }else {
+                        stringList.add(new ModUser(element.getAsString()));
+                    }
+                }
             });
 
             if (stringList.isEmpty()) return null;

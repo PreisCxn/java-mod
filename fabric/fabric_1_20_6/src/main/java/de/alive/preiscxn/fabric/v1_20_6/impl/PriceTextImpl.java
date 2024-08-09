@@ -74,6 +74,8 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
     }
 
     public MutableText getText() {
+        if(isSearching == null)
+            return MutableText.of(new PlainTextContent.Literal(""));
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
         PriceCxn.getMod().getLogger().debug("preise!!! ");
         PriceCxn.getMod().getLogger().debug(String.valueOf(this.priceAdder));
@@ -85,13 +87,14 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
                                 .append(MutableText.of(new PlainTextContent.Literal(" - "))
                                         .setStyle(GRAY_STYLE))
                                 .append(mutableText)
-                                .append(COIN_TEXT)).or(() ->
+                                .append(COIN_TEXT))
+                        .or(() ->
                                 Optional.ofNullable(MutableText.of(
                                                 new PlainTextContent.Literal(identifierText.isEmpty() ? "" : identifierText + " "))
                                         .setStyle(GRAY_STYLE)
                                         .append(text)
                                         .append(COIN_TEXT))))
-                .orElse(getSearchingText());
+                .orElse(MutableText.of(new PlainTextContent.Literal("")));
     }
 
     private MutableText getSearchingText() {

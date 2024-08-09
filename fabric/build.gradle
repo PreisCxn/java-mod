@@ -5,7 +5,7 @@ plugins {
 
 group = "${project.property("maven_group")}"
 
-subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
+//subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
 tasks.register('allJar', Jar) {
     duplicatesStrategy = DuplicatesStrategy.WARN

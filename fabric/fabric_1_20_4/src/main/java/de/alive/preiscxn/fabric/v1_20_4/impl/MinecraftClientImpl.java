@@ -4,6 +4,7 @@ import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.interfaces.IInventory;
 import de.alive.preiscxn.api.interfaces.IMinecraftClient;
 import de.alive.preiscxn.api.interfaces.IScreenHandler;
+import de.alive.preiscxn.api.utils.UUIDHasher;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Style;
@@ -33,12 +34,7 @@ public final class MinecraftClientImpl implements IMinecraftClient {
 
     @Override
     public String getPlayerUuidAsString() {
-        return minecraftClient.player == null ? "" : minecraftClient.player.getUuidAsString();
-    }
-
-    @Override
-    public String getPlayerNameString() {
-        return minecraftClient.player == null ? "" : minecraftClient.player.getName().getString();
+        return minecraftClient.player == null ? "" : UUIDHasher.hash(minecraftClient.player.getUuid()).toString();
     }
 
     @Override
