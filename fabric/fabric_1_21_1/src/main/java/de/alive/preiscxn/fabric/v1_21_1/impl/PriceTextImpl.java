@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_21.impl;
+package de.alive.preiscxn.fabric.v1_21_1.impl;
 
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceText;

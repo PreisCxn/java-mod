@@ -1,4 +1,4 @@
-package de.alive.preiscxn.fabric.v1_20_6.mixins;
+package de.alive.preiscxn.fabric.v1_21_1.mixins;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,14 +18,14 @@ import de.alive.preiscxn.api.networking.IServerChecker;
 import de.alive.preiscxn.api.utils.TimeUtil;
 import de.alive.preiscxn.impl.keybinds.OpenBrowserKeybindExecutor;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipType;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentType;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import reactor.util.function.Tuple2;
@@ -117,6 +116,8 @@ public abstract class ItemStackMixin implements IItemStack {
         cir.getReturnValue().forEach(text -> lore.add(text.getString()));
         int amount = this.cxnItemStack.getAdvancedAmount(serverChecker, pcxnPriceText, lore);
 
+
+
         list.add((Text) PriceCxn.getMod().space());
         PriceCxnItemStack.ViewMode viewMode = PriceCxn.getMod().getViewMode();
 
@@ -155,7 +156,6 @@ public abstract class ItemStackMixin implements IItemStack {
         }
         if (!this.cxnItemStack.getPcxnPrice().isEmpty()) {
             addedData = true;
-
             IKeyBinding keyBinding = PriceCxn.getMod().getKeyBinding(OpenBrowserKeybindExecutor.class);
             if (this.cxnItemStack.getPcxnPrice().has("item_info_url") && !keyBinding.isUnbound()) {
                 MutableText text = Text.translatable("cxn_listener.display_prices.view_in_browser",
@@ -308,7 +308,7 @@ public abstract class ItemStackMixin implements IItemStack {
 
         JsonObject json = new JsonObject();
 
-        for (DataComponentType<?> key : componentMap.getTypes()) {
+        for (ComponentType<?> key : componentMap.getTypes()) {
             Object component = componentMap.get(key);
             switch (component) {
                 case null -> {

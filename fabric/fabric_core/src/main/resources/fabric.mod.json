@@ -34,6 +34,7 @@
 		"1.20.4-Fabric-PriceCxn.mixins.json",
 		"1.20.5-Fabric-PriceCxn.mixins.json",
 		"1.20.6-Fabric-PriceCxn.mixins.json",
-		"1.21-Fabric-PriceCxn.mixins.json"
+		"1.21-Fabric-PriceCxn.mixins.json",
+		"1.21.1-Fabric-PriceCxn.mixins.json"
 	]
 }
