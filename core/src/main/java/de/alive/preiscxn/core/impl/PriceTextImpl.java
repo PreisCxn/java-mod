@@ -3,6 +3,7 @@ package de.alive.preiscxn.core.impl;
 import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.cytooxien.PriceText;
 import net.labymod.api.client.component.Component;
+import net.labymod.api.client.component.TextComponent;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.Style;
 import net.labymod.api.client.component.format.TextDecoration;
@@ -48,10 +49,6 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
         return this;
     }
 
-    public @NotNull PriceTextImpl withPriceMultiplier(int priceMultiplier) {
-        return withPriceMultiplier((double) priceMultiplier);
-    }
-
     public @NotNull PriceTextImpl withPriceAdder(double priceAdder) {
         this.priceAdder = priceAdder;
         return this;
@@ -75,20 +72,23 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
         if (isSearching != SearchingState.FINISHED) return getSearchingText();
         PriceCxn.getMod().getLogger().debug("preise!!! ");
         PriceCxn.getMod().getLogger().debug(String.valueOf(this.priceAdder));
+
         return getLowerPriceText()
-                .flatMap(text -> getUpperPriceText()
-                        .map(mutableText -> (Component)(Component.text(identifierText.isEmpty() ? "" : identifierText + " ")
-                                .color(NamedTextColor.GRAY)
-                                .append(text)
-                                .append(Component.text(" - "))
-                                .color(NamedTextColor.GRAY)
-                                .append(mutableText)
-                                .append(COIN_TEXT))).or(() ->
-                                Optional.ofNullable(
-                                        Component.text(identifierText.isEmpty() ? "" : identifierText + " ")
-                                        .color(NamedTextColor.GRAY)
-                                        .append(text)
-                                        .append(COIN_TEXT))))
+                .flatMap(text -> {
+                    Optional<TextComponent> append = Optional.ofNullable(
+                            Component.text(identifierText.isEmpty() ? "" : identifierText + " ")
+                                    .color(NamedTextColor.GRAY)
+                                    .append(text)
+                                    .append(COIN_TEXT));
+
+                    return getUpperPriceText().map(mutableText -> (Component) (Component.text(identifierText.isEmpty() ? "" : identifierText + " ")
+                            .color(NamedTextColor.GRAY)
+                            .append(text)
+                            .append(Component.text(" - "))
+                            .color(NamedTextColor.GRAY)
+                            .append(mutableText)
+                            .append(COIN_TEXT))).or(() -> append);
+                })
                 .orElse(getSearchingText());
     }
 
@@ -129,10 +129,7 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
 
     private @NotNull Optional<Component> getPriceText(double price) {
         if (price == 0) return Optional.empty();
-        return Optional
-                .of(Component.text(
-                                convertPrice(price * this.priceMultiplier + this.priceAdder))
-                        .style(PRICE_STYLE));
+        return Optional.of(Component.text(convertPrice(price * this.priceMultiplier + this.priceAdder)).style(PRICE_STYLE));
     }
 
     private @NotNull Optional<Component> getLowerPriceText() {

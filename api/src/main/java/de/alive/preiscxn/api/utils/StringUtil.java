@@ -32,11 +32,11 @@ public final class StringUtil {
         return nurZahlen.toString();
     }
 
-    public static String convertPrice(double time) {
+    public static String convertPrice(double price) {
         Locale locale = Locale.GERMAN;
 
         DecimalFormat decimalFormat = (DecimalFormat) DecimalFormat.getInstance(locale);
-        if (time >= 100000) {
+        if (price >= 100) {
             decimalFormat.setMaximumFractionDigits(0);
             decimalFormat.setMinimumFractionDigits(0);
         } else {
@@ -48,7 +48,7 @@ public final class StringUtil {
         symbols.setDecimalSeparator(',');
         decimalFormat.setDecimalFormatSymbols(symbols);
 
-        return decimalFormat.format(time);
+        return decimalFormat.format(price);
     }
 
     /**

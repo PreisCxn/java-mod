@@ -112,8 +112,7 @@ public abstract class ItemStackMixin implements IItemStack {
                     .withPrices(this.cxnItemStack
                             .getPcxnPrice()
                             .getLowerPrice(),
-                            this.cxnItemStack.getPcxnPrice()
-                                    .getUpperPrice())
+                            this.cxnItemStack.getPcxnPrice().getUpperPrice())
                     .withPriceMultiplier(PriceCxn.getMod().getViewMode() == PriceCxnItemStack.ViewMode.SINGLE ? 1 : amount)
                     .getText());
         }

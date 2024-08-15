@@ -50,10 +50,6 @@ public class PriceTextImpl implements PriceText<PriceTextImpl> {
         return this;
     }
 
-    public @NotNull PriceTextImpl withPriceMultiplier(int priceMultiplier) {
-        return withPriceMultiplier((double) priceMultiplier);
-    }
-
     public @NotNull PriceTextImpl withPriceAdder(double priceAdder) {
         this.priceAdder = priceAdder;
         return this;

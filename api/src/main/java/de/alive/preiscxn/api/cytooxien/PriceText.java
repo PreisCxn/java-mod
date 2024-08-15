@@ -11,7 +11,9 @@ public interface PriceText <T extends PriceText<T>> {
 
     @NotNull T withPriceMultiplier(double priceMultiplier);
 
-    @NotNull T withPriceMultiplier(int priceMultiplier) ;
+    default @NotNull T withPriceMultiplier(int priceMultiplier){
+        return withPriceMultiplier((double) priceMultiplier);
+    }
 
     @NotNull T withPriceAdder(double priceAdder);
 
