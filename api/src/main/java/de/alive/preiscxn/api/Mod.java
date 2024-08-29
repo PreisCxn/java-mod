@@ -16,11 +16,13 @@ import de.alive.preiscxn.api.interfaces.VersionedTabGui;
 import de.alive.preiscxn.api.keybinds.KeybindExecutor;
 import de.alive.preiscxn.api.module.ModuleLoader;
 import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.DataHandler;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -66,7 +68,7 @@ public interface Mod {
     void nextViewMode();
     ICxnConnectionManager getConnectionManager();
     ILogger getLogger();
-
+    List<DataHandler> getDataHandlers();
     IGameHud getGameHud();
     VersionedTabGui getVersionedTabGui();
 

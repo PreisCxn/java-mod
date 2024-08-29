@@ -20,6 +20,7 @@ import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
 import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.DataHandler;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.core.events.ConfigChangeListener;
@@ -69,7 +70,7 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
     private final ModuleLoader projectLoader;
-
+    private final List<DataHandler> dataHandlers = new ArrayList<>();
     private final CxnListener cxnListener;
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
@@ -365,6 +366,11 @@ public class PriceCxnAddon extends LabyAddon<PriceCxnConfiguration> implements M
     @Override
     public ILogger getLogger() {
         return this.logger;
+    }
+
+    @Override
+    public List<DataHandler> getDataHandlers() {
+        return dataHandlers;
     }
 
     @Override

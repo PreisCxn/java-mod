@@ -2,19 +2,20 @@ package de.alive.preiscxn.api.networking;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
+import de.alive.preiscxn.api.PriceCxn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import reactor.util.function.Tuple2;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class Data {
     private final String id;
     private final List<String> backupData;
-
-    private @Nullable DataHandler dataHandler = null;
-
     private final @Nullable Function<JsonElement, JsonElement> processData;
     private final @Nullable Function<Tuple2<JsonElement, JsonElement>, Boolean> equalData;
 
@@ -44,13 +45,7 @@ public class Data {
     }
 
     public List<String> getData() {
-        if (dataHandler == null || dataHandler.getData() == null || !dataHandler.getData().containsKey(id))
-            return backupData;
-        else return dataHandler.getData().get(id);
-    }
-
-    public void setDataHandler(@Nullable DataHandler dataHandler) {
-        this.dataHandler = dataHandler;
+        return PriceCxn.getMod().getDataHandlers().stream().map(DataHandler::getData).filter(Objects::nonNull).map(dataHandler -> dataHandler.get(id)).findFirst().orElse(null);
     }
 
     public @Nullable Function<JsonElement, JsonElement> getProcessData() {

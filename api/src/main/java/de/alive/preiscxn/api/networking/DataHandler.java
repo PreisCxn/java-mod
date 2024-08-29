@@ -46,29 +46,17 @@ public class DataHandler {
                        @NotNull String uri,
                        @Nullable List<String> columnNames,
                        @Nullable String keyColumnName,
-                       int refreshInterval,
-                       @Nullable DataAccess... dataAccess) {
+                       int refreshInterval) {
+        PriceCxn.getMod().getDataHandlers().add(this);
         this.uri = uri;
         this.serverChecker = serverChecker;
         this.refreshInterval = refreshInterval;
         this.columnNames = columnNames;
         this.keyColumnName = keyColumnName;
-        if (dataAccess != null) {
-            for (DataAccess access : dataAccess)
-                if (access != null) access.getData().setDataHandler(this);
-        }
-    }
-
-    public DataHandler(@NotNull IServerChecker serverChecker,
-                       @NotNull String uri,
-                       @Nullable List<String> columnNames,
-                       @Nullable String keyColumnName,
-                       int refreshInterval) {
-        this(serverChecker, uri, columnNames, keyColumnName, refreshInterval, (DataAccess) null);
     }
 
     public DataHandler(@NotNull IServerChecker serverChecker, @NotNull String uri, int refreshInterval) {
-        this(serverChecker, uri, null, null, refreshInterval, (DataAccess) null);
+        this(serverChecker, uri, null, null, refreshInterval);
     }
 
     /**
@@ -190,10 +178,6 @@ public class DataHandler {
 
     public @Nullable JsonObject getDataObject() {
         return dataObject;
-    }
-
-    public void setDataAccess(@NotNull DataAccess dataAccess) {
-        dataAccess.getData().setDataHandler(this);
     }
 
     public void setUri(String uri) {

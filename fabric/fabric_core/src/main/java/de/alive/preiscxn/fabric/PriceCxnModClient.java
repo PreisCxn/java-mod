@@ -21,6 +21,7 @@ import de.alive.preiscxn.api.module.Module;
 import de.alive.preiscxn.api.module.ModuleLoader;
 import de.alive.preiscxn.api.module.PriceCxnModule;
 import de.alive.preiscxn.api.networking.DataAccess;
+import de.alive.preiscxn.api.networking.DataHandler;
 import de.alive.preiscxn.api.networking.Http;
 import de.alive.preiscxn.api.networking.cdn.CdnFileHandler;
 import de.alive.preiscxn.fabric.impl.LoggerImpl;
@@ -54,7 +55,9 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,7 +72,7 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     private final Map<Class<? extends KeybindExecutor>, IKeyBinding> classKeyBindingMap = new HashMap<>();
     private final Map<IKeyBinding, KeybindExecutor> keyBindingKeybindExecutorMap = new HashMap<>();
     private final ModuleLoader projectLoader;
-
+    private final List<DataHandler> dataHandlers = new ArrayList<>();
     private final CxnListener cxnListener;
     private final CdnFileHandler cdnFileHandler;
     private final Http http;
@@ -406,6 +409,11 @@ public class PriceCxnModClient implements ClientModInitializer, Mod {
     @Override
     public ILogger getLogger() {
         return logger;
+    }
+
+    @Override
+    public List<DataHandler> getDataHandlers() {
+        return dataHandlers;
     }
 
     @Override

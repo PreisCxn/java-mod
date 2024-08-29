@@ -53,20 +53,14 @@ public class CxnDataHandler implements ICxnDataHandler {
     public @NotNull Mono<Void> refreshItemData(String dataKey, boolean isNook) {
         if (!this.data.containsKey(dataKey) || this.data.get(dataKey).getDataObject() == null) {
 
-            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK)) {
+            if (this.themeChecker.getMode().equals(Modes.SKYBLOCK) || this.themeChecker.getMode().equals(Modes.CITYBUILD)) {
                 data.put(dataKey, new DataHandler(
                         serverChecker,
-                        "/datahandler/items/skyblock/true/"
+                        (this.themeChecker.getMode().equals(Modes.CITYBUILD) ? "/datahandler/items/citybuild/true/" : "/datahandler/items/skyblock/true/")
                         + (isNook ? "true" : "false"),
                         DataHandler.ITEM_REFRESH_INTERVAL));
-            } else if (this.themeChecker.getMode().equals(Modes.CITYBUILD)) {
-                data.put(dataKey,
-                        new DataHandler(
-                                serverChecker,
-                                "/datahandler/items/citybuild/true/"
-                                + (isNook ? "true" : "false"),
-                                DataHandler.ITEM_REFRESH_INTERVAL));
-            } else return Mono.empty();
+            } else
+                return Mono.empty();
 
         } else {
             JsonObject jsonObject = data.get(dataKey).getDataObject();
@@ -156,8 +150,7 @@ public class CxnDataHandler implements ICxnDataHandler {
                         "/settings/translations",
                         langList,
                         "translation_key",
-                        DataHandler.TRANSLATION_REFRESH_INTERVAL,
-                        dataList.toArray(new DataAccess[0])
+                        DataHandler.TRANSLATION_REFRESH_INTERVAL
                 ));
     }
 }

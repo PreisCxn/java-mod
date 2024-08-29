@@ -2,6 +2,7 @@ package de.alive.preiscxn.listener;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import de.alive.preiscxn.api.PriceCxn;
 import de.alive.preiscxn.api.networking.Data;
 import de.alive.preiscxn.api.networking.DataAccess;
 import de.alive.preiscxn.api.utils.StringUtil;
